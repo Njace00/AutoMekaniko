@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>OBD-II Dashboard</title>
+  <style>
+    body { font-family: monospace; background: #111; color: #0f0; padding: 20px; }
+    button { background: #0f0; color: #111; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 6px; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    #status { margin: 12px 0; font-size: 13px; color: #888; }
+    #dashboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; }
+    .card { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 20px; text-align: center; }
+    .card .label { font-size: 12px; color: #666; margin-bottom: 8px; }
+    .card .value { font-size: 36px; font-weight: bold; color: #0f0; }
+    .card .unit { font-size: 13px; color: #555; margin-top: 4px; }
+    pre { background: #1a1a1a; border: 1px solid #222; padding: 12px; border-radius: 8px; font-size: 12px; max-height: 200px; overflow-y: auto; margin-top: 20px; color: #aaa; }
+  </style>
+</head>
+<body>
+
+<button id="connectBtn">Connect OBD</button>
+<div id="status">Not connected</div>
+
+<div id="dashboard">
+  <div class="card">
+    <div class="label">RPM</div>
+    <div class="value" id="rpm">—</div>
+    <div class="unit">rev/min</div>
+  </div>
+  <div class="card">
+    <div class="label">Speed</div>
+    <div class="value" id="speed">—</div>
+    <div class="unit">km/h</div>
+  </div>
+  <div class="card">
+    <div class="label">Coolant Temp</div>
+    <div class="value" id="temp">—</div>
+    <div class="unit">°C</div>
+  </div>
+</div>
+
+<pre id="log"></pre>
+
+<script>
+  const WS_URL = "ws://localhost:8765";
+
+  const log = (msg) => {
+    const el = document.getElementById("log");
+    el.textContent += msg + "\n";
+    el.scrollTop = el.scrollHeight;
+  };
+
+  const setStatus = (msg) => {
+    document.getElementById("status").textContent = msg;
+  };
+
+  const delay = (ms) => new Promise(r => setTimeout(r, ms));
+
+  let ws;
+
+  // ===== MESSAGE QUEUE =====
+  let messageQueue = [];
+  let waitingForMessage = null;
+
+  function onMessage(data) {
+    const cleaned = data.replace(/[\r\n>]/g, " ").trim();
+    log("<< " + cleaned);
+    if (waitingForMessage) {
+      const resolve = waitingForMessage;
+      waitingForMessage = null;
+      resolve(cleaned);
+    } else {
+      messageQueue.push(cleaned);
+    }
+  }
+
+  function waitForResponse(timeoutMs = 8000) {
+    return new Promise((resolve) => {
+      if (messageQueue.length > 0) {
+        resolve(messageQueue.shift());
+        return;
+      }
+      waitingForMessage = resolve;
+      setTimeout(() => {
+        if (waitingForMessage === resolve) {
+          waitingForMessage = null;
+          log("⚠️ Timeout");
+          resolve("TIMEOUT");
+        }
+      }, timeoutMs);
+    });
+  }
+
+  async function send(cmd) {
+    log("> " + cmd);
+    messageQueue = [];
+    ws.send(cmd);
+    const response = await waitForResponse();
+    return response;
+  }
+
+  document.getElementById("connectBtn").onclick = async () => {
+    document.getElementById("connectBtn").disabled = true;
+    setStatus("Connecting to bridge...");
+
+    try {
+      await connectWS();
+      setStatus("✅ Connected — initializing ELM327...");
+      log("✅ WebSocket bridge connected");
+
+      // ===== INIT =====
+      await send("ATZ");      await delay(2000);
+      await send("ATE0");     await delay(500);
+      await send("ATL0");     await delay(500);
+      await send("ATS0");     await delay(500);
+      await send("ATH1");     await delay(500);
+      await send("ATAT2");    await delay(500);
+      await send("ATST FF");  await delay(500);
+      await send("ATSP0");    await delay(500);
+      await delay(1000);
+
+      // ===== CHECK SUPPORTED PIDs =====
+      log("🔍 Checking supported PIDs...");
+      const supported = await send("0100");
+      log("Supported: " + supported);
+      await delay(1000);
+
+      setStatus("✅ ELM327 ready — polling live data...");
+      log("📡 Starting live polling...");
+
+      pollLoop();
+
+    } catch (err) {
+      log("❌ Error: " + err.message);
+      setStatus("❌ " + err.message);
+      document.getElementById("connectBtn").disabled = false;
+    }
+  };
+
+  function connectWS() {
+    return new Promise((resolve, reject) => {
+      ws = new WebSocket(WS_URL);
+      ws.onopen = () => resolve();
+      ws.onerror = () => reject(new Error("Could not connect to bridge. Is bridge.py running?"));
+      ws.onmessage = (e) => onMessage(e.data);
+      ws.onclose = () => {
+        setStatus("⚠️ Bridge disconnected");
+        log("⚠️ WebSocket closed");
+      };
+    });
+  }
+
+  async function pollLoop() {
+    while (true) {
+      try {
+        const rpmRaw = await send("010C");
+        const rpmVal = parseRPM(rpmRaw);
+        if (rpmVal !== null) document.getElementById("rpm").textContent = rpmVal;
+
+        const speedRaw = await send("010D");
+        const speedVal = parseSpeed(speedRaw);
+        if (speedVal !== null) document.getElementById("speed").textContent = speedVal;
+
+        const tempRaw = await send("0105");
+        const tempVal = parseTemp(tempRaw);
+        if (tempVal !== null) document.getElementById("temp").textContent = tempVal;
+
+        await delay(300);
+
+      } catch (err) {
+        log("⚠️ Poll error: " + err.message);
+        await delay(1000);
+      }
+    }
+  }
+
+  // ===== FIXED PARSERS =====
+
+  function getBytes(raw) {
+    // Remove spaces and control chars, uppercase
+    let cleaned = raw.replace(/\s+/g, "").toUpperCase();
+
+    // Strip 7E8 / 7E9 CAN header (3 chars) before splitting into bytes
+    if (cleaned.startsWith("7E8") || cleaned.startsWith("7E9")) {
+      cleaned = cleaned.substring(3);
+    }
+
+    const bytes = [];
+    for (let i = 0; i < cleaned.length - 1; i += 2) {
+      const b = cleaned.substring(i, i + 2);
+      if (/^[0-9A-F]{2}$/.test(b)) bytes.push(b);
+    }
+    return bytes;
+  }
+
+  function parseRPM(raw) {
+    if (!raw || raw.includes("NO DATA") || raw.includes("TIMEOUT")) return null;
+    const b = getBytes(raw);
+    for (let i = 0; i < b.length - 2; i++) {
+      if (b[i] === "41" && b[i+1] === "0C") {
+        const A = parseInt(b[i+2], 16);
+        const B = parseInt(b[i+3], 16);
+        return ((A * 256 + B) / 4).toFixed(0);
+      }
+    }
+    return null;
+  }
+
+  function parseSpeed(raw) {
+    if (!raw || raw.includes("NO DATA") || raw.includes("TIMEOUT")) return null;
+    const b = getBytes(raw);
+    for (let i = 0; i < b.length - 1; i++) {
+      if (b[i] === "41" && b[i+1] === "0D") {
+        return parseInt(b[i+2], 16);
+      }
+    }
+    return null;
+  }
+
+  function parseTemp(raw) {
+    if (!raw || raw.includes("NO DATA") || raw.includes("TIMEOUT")) return null;
+    const b = getBytes(raw);
+    for (let i = 0; i < b.length - 1; i++) {
+      if (b[i] === "41" && b[i+1] === "05") {
+        return parseInt(b[i+2], 16) - 40;
+      }
+    }
+    return null;
+  }
+</script>
+
+</body>
+</html>
