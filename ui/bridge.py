@@ -3,7 +3,7 @@ import asyncio
 import serial
 import websockets
 
-COM_PORT = "COM8"  # change if needed
+COM_PORT = "COM11"  # change if needed
 BAUD     = 9600
 
 async def handler(websocket):
