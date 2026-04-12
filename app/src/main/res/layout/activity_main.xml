@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0a0a0a">
+
+    <!-- TOP BAR -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="#232222"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_margin="0dp">
+
+        <TextView
+            android:id="@+id/burger"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:text="☰"
+            android:textSize="25sp"
+            android:textColor="#FFD700"
+            android:layout_margin="20sp"
+            android:gravity="center_vertical|start"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/title"/>
+
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_margin="20dp"
+            android:gravity="center_vertical|end"
+            android:text="AutoMekaniko"
+            android:textColor="#FFD700"
+            android:textSize="20sp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/burger"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+
+    <!-- BOTTOM BAR -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="#1a1a1a"
+        android:elevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#33FFD700"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/speedcon"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/rpmcon">
+
+            <TextView
+                android:id="@+id/speedVal"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:text="20"
+                android:textColor="#ffffff"
+                android:gravity="center"
+                android:textSize="28sp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/speed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <TextView
+                android:id="@+id/speed"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:text="SPEED"
+                android:textColor="#FFD700"
+                android:gravity="center"
+                android:textSize="12sp"
+                app:layout_constraintTop_toBottomOf="@id/speedVal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/rpmcon"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toEndOf="@id/speedcon"
+            app:layout_constraintEnd_toStartOf="@id/coolantcon"
+            >
+
+            <TextView
+                android:id="@+id/rpmVal"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:text="1200"
+                android:textColor="#ffffff"
+                android:gravity="center"
+                android:textSize="28sp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/rpm"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <TextView
+                android:id="@+id/rpm"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:text="RPM"
+                android:textColor="#FFD700"
+                android:gravity="center"
+                android:textSize="12sp"
+                app:layout_constraintTop_toBottomOf="@id/rpmVal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/coolantcon"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toEndOf="@id/rpmcon"
+            app:layout_constraintEnd_toStartOf="@id/throttlecon">
+
+            <TextView
+                android:id="@+id/coolantVal"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:text="90"
+                android:textColor="#ffffff"
+                android:gravity="center"
+                android:textSize="28sp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/coolant"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <TextView
+                android:id="@+id/coolant"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:text="COOLANT C"
+                android:textColor="#FFD700"
+                android:gravity="center"
+                android:textSize="12sp"
+                app:layout_constraintTop_toBottomOf="@id/coolantVal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/throttlecon"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toEndOf="@id/coolantcon"
+            app:layout_constraintEnd_toStartOf="@id/loadcon">
+
+            <TextView
+                android:id="@+id/throttleVal"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:text="80%"
+                android:textColor="#ffffff"
+                android:gravity="center"
+                android:textSize="28sp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/throttle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <TextView
+                android:id="@+id/throttle"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:text="THROTTLE %"
+                android:textColor="#FFD700"
+                android:gravity="center"
+                android:textSize="12sp"
+                app:layout_constraintTop_toBottomOf="@id/throttleVal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/loadcon"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toEndOf="@id/throttlecon"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:id="@+id/loadVal"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:text="90%"
+                android:textColor="#ffffff"
+                android:gravity="center"
+                android:textSize="28sp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/load"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <TextView
+                android:id="@+id/load"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:text="LOAD %"
+                android:textColor="#FFD700"
+                android:gravity="center"
+                android:textSize="12sp"
+                app:layout_constraintTop_toBottomOf="@id/loadVal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
