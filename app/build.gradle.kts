@@ -4,9 +4,7 @@ plugins {
 
 android {
     namespace = "com.example.automekaniko"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.automekaniko"
@@ -39,6 +37,13 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+
+    // Coroutines support for lifecycle
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+
+    // SceneView — 3D model viewer
+    implementation("io.github.sceneview:sceneview:2.3.0")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

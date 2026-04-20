@@ -2,22 +2,22 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#0a0a0a">
 
     <!-- TOP BAR -->
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:background="#232222"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_margin="0dp">
+        app:layout_constraintTop_toTopOf="parent">
 
+        <!-- Burger menu -->
         <TextView
             android:id="@+id/burger"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:text="☰"
             android:textSize="25sp"
@@ -26,34 +26,51 @@
             android:gravity="center_vertical|start"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/title"/>
+            app:layout_constraintStart_toStartOf="parent"/>
 
-
+        <!-- App title -->
         <TextView
             android:id="@+id/title"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:layout_margin="20dp"
-            android:gravity="center_vertical|end"
+            android:layout_marginStart="8dp"
+            android:gravity="center_vertical"
             android:text="AutoMekaniko"
             android:textColor="#FFD700"
             android:textSize="20sp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/burger"
+            app:layout_constraintStart_toEndOf="@id/burger"/>
+
+        <!-- Model selector spinner -->
+        <Spinner
+            android:id="@+id/modelSpinner"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/spinner_border"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/title"
             app:layout_constraintEnd_toEndOf="parent"/>
-
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-
-
+    <!-- 3D SCENE VIEW -->
+    <io.github.sceneview.SceneView
+        android:id="@+id/sceneView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/topBar"
+        app:layout_constraintBottom_toTopOf="@id/bottomBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- BOTTOM BAR -->
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottomBar"
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:background="#1a1a1a"
@@ -66,6 +83,7 @@
             android:background="#33FFD700"
             app:layout_constraintTop_toTopOf="parent"/>
 
+        <!-- SPEED -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/speedcon"
             android:layout_width="0dp"
@@ -77,7 +95,7 @@
                 android:id="@+id/speedVal"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:text="20"
+                android:text="—"
                 android:textColor="#ffffff"
                 android:gravity="center"
                 android:textSize="28sp"
@@ -98,23 +116,21 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-
+        <!-- RPM -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/rpmcon"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             app:layout_constraintStart_toEndOf="@id/speedcon"
-            app:layout_constraintEnd_toStartOf="@id/coolantcon"
-            >
+            app:layout_constraintEnd_toStartOf="@id/coolantcon">
 
             <TextView
                 android:id="@+id/rpmVal"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:text="1200"
+                android:text="—"
                 android:textColor="#ffffff"
                 android:gravity="center"
                 android:textSize="28sp"
@@ -135,10 +151,9 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-
+        <!-- COOLANT -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/coolantcon"
             android:layout_width="0dp"
@@ -150,7 +165,7 @@
                 android:id="@+id/coolantVal"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:text="90"
+                android:text="—"
                 android:textColor="#ffffff"
                 android:gravity="center"
                 android:textSize="28sp"
@@ -163,7 +178,7 @@
                 android:id="@+id/coolant"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:text="COOLANT C"
+                android:text="COOLANT °C"
                 android:textColor="#FFD700"
                 android:gravity="center"
                 android:textSize="12sp"
@@ -171,10 +186,9 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-
+        <!-- THROTTLE -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/throttlecon"
             android:layout_width="0dp"
@@ -186,7 +200,7 @@
                 android:id="@+id/throttleVal"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:text="80%"
+                android:text="—"
                 android:textColor="#ffffff"
                 android:gravity="center"
                 android:textSize="28sp"
@@ -207,10 +221,9 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-
+        <!-- LOAD -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/loadcon"
             android:layout_width="0dp"
@@ -222,7 +235,7 @@
                 android:id="@+id/loadVal"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:text="90%"
+                android:text="—"
                 android:textColor="#ffffff"
                 android:gravity="center"
                 android:textSize="28sp"
@@ -243,10 +256,8 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

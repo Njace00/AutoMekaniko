@@ -1,59 +1,96 @@
-package com.example.automakaniko
+package com.example.automekaniko
 
 import android.os.Bundle
-import android.widget.Button
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import io.github.sceneview.SceneView
+import io.github.sceneview.loaders.ModelLoader
+import io.github.sceneview.node.ModelNode
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var rpm: TextView
-    private lateinit var speed: TextView
-    private lateinit var temp: TextView
-    private lateinit var throttle: TextView
-    private lateinit var load: TextView
-    private lateinit var status: TextView
-    private lateinit var connectBtn: Button
+    private lateinit var sceneView: SceneView
+    private lateinit var modelLoader: ModelLoader
+    private lateinit var modelSpinner: Spinner
+
+    private var currentModelNode: ModelNode? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Bind views
-        rpm = findViewById(R.id.rpm)
-        speed = findViewById(R.id.speed)
-        temp = findViewById(R.id.temp)
-        throttle = findViewById(R.id.throttle)
-        load = findViewById(R.id.load)
-        status = findViewById(R.id.statusCard)
-        connectBtn = findViewById(R.id.connectBtn)
+        sceneView = findViewById(R.id.sceneView)
+        modelSpinner = findViewById(R.id.modelSpinner)
+        modelLoader = ModelLoader(sceneView.engine, this)
 
-        // Fake initial values
-        setStaticData()
+        setupModelSelector()
+    }
 
-        // Button click simulation
-        connectBtn.setOnClickListener {
-            simulateConnection()
+    private fun setupModelSelector() {
+        // Dynamically list all .glb files from the assets folder
+        val models = assets.list("")
+            ?.filter { it.endsWith(".glb") }
+            ?.sorted()
+            ?: emptyList()
+
+        if (models.isEmpty()) {
+            // No models found — show a placeholder
+            val emptyAdapter = ArrayAdapter(
+                this,
+                android.R.layout.simple_spinner_item,
+                listOf("No models found")
+            )
+            modelSpinner.adapter = emptyAdapter
+            return
+        }
+
+        val adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            models
+        ).also { it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+
+        modelSpinner.adapter = adapter
+
+        modelSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>, view: View?, position: Int, id: Long
+            ) {
+                // Style the selected item text gold
+                (view as? TextView)?.setTextColor(0xFFFFD700.toInt())
+                loadModel(models[position])
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {}
         }
     }
 
-    private fun setStaticData() {
-        rpm.text = "850"
-        speed.text = "0"
-        temp.text = "72"
-        throttle.text = "12"
-        load.text = "18"
-        status.text = "Disconnected"
-    }
+    private fun loadModel(fileName: String) {
+        lifecycleScope.launch {
+            // Remove previous model if any
+            currentModelNode?.let {
+                sceneView.removeChildNode(it)
+                it.destroy()
+            }
 
-    private fun simulateConnection() {
-        status.text = "Connected to OBD"
+            val modelInstance = modelLoader.createModelInstance(
+                assetFileLocation = fileName
+            )
+            val modelNode = ModelNode(
+                modelInstance = modelInstance,
+                scaleToUnits = 1.5f
+            ).apply {
+                isEditable = true
+            }
 
-        // Simulated live values
-        rpm.text = "2150"
-        speed.text = "48"
-        temp.text = "90"
-        throttle.text = "35"
-        load.text = "52"
+            sceneView.addChildNode(modelNode)
+            currentModelNode = modelNode
+        }
     }
 }
