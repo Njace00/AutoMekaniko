@@ -43,6 +43,7 @@ dependencies {
 
     // SceneView — 3D model viewer
     implementation("io.github.sceneview:sceneview:2.3.0")
+    //implementation("io.github.sceneview:sceneview:4.0.9")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
