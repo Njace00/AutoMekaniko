@@ -51,56 +51,79 @@ class MainActivity : AppCompatActivity() {
     private var cameraAnimJob: Job? = null
     private var cameraInfoJob: Job? = null
 
-    /** Current camera pose (HUD + slide animation start point). */
     private var currentCameraEye = Vec3(0f, 0f, 0f)
-    /** Used for HUD “target=” and spherical-ish yaw/pitch readout vs look point. */
     private var currentOrbitTarget = Vec3(0f, 0.5f, 0f)
 
-    // ── Startup camera (edit freely) ──
-    // Example: spherical (target 0.5 m up origin, distance 1.30, yaw 180°, pitch 20°) → approximate eye below.
     private val startEye = Vec3(0f, 0.945f, -1.22f)
     private val startLookAt = Vec3(0f, 0.5f, 0f)
 
     private var savedManipulator: CameraGestureDetector.CameraManipulator? = null
     private var manipulatorCaptured = false
 
-    /**
-     * Per-slide poses. Tune `eye` / `lookAt` from your HUD (FREE mode),
-     * or approximate in Blender (“camera location” + “look at” empty).
-     *
-     * Below: rough conversion from your previous distance/yaw/pitch slides.
-     */
+    // Keep hood closed by forcing this clip to frame 0.
+    private val hoodAnimationIndex = 0
+
     private val slides = listOf(
         CameraSlide(
             title = "Vehicle Overview",
-            description = "This is the Preview of the Vehicle.",
-            eye = Vec3(-0.50f, 0.44f, -1.46f),
+            description = "This is the Preview of the Vehicle...",
+            eye = Vec3(-1.57f, 0.77f, -1.34f),
             lookAt = Vec3(0.00f, 0.10f, 0.00f)
         ),
         CameraSlide(
-            title = "B.l.o.w.b.a.g.e.t.s",
-            description = "Battery",
-            eye = Vec3(-0.28f, 0.40f, -0.80f),
+            title = "Vehicle Overview2",
+            description = "This is the Preview of the Vehicle...",
+            eye = Vec3(-1.57f, 0.77f, -1.34f),
             lookAt = Vec3(0.00f, 0.10f, 0.00f)
-
         ),
         CameraSlide(
-            title = "b.L.o.w.b.a.g.e.t.s",
-            description = "Lights:",
-            eye = Vec3(-0.15f, 0.29f, -1.28f),
-            //lookAt = Vec3(1.20f, 0.55f, 0.90f)
+            title = "Battery",
+            description = "Check Battery...",
+            eye = Vec3(-0.15f, 0.37f, -0.74f),
             lookAt = Vec3(0.00f, 0.10f, 0.00f)
-
-
         ),
         CameraSlide(
-            title = "b.l.O.w.b.a.g.e.t.s",
-            description = "Oil, Oil Level",
-            eye = Vec3(-0.10f, 0.6f, -.90f),
-            lookAt = Vec3(0.00f, 0.10f, 0.00f)
+            title = "Lights",
+            description = "Check all Lights:...",
+            eye = Vec3(-0.01f, 0.55f, -1.25f),
+            lookAt = Vec3(-0.01f, 0.10f, 0.00f)
+        ),
+        CameraSlide(
+            title = "Oil",
+            description = "Chech your oil, and oil level..",
+            eye = Vec3(0.07f, 0.37f, -0.74f),
+            lookAt = Vec3(0.00f, -0.3f, 0.00f)
+        ),
+        CameraSlide(
+            title = "Water",
+            description = "Check Water Radiator Level...",
+            eye = Vec3(-0.01f, 0.37f, -0.69f),
+            lookAt = Vec3(0.00f, -0.6f, 0.00f)
+        ),
+
+        CameraSlide(
+            title = "Brake",
+            description = "Check Brake...",
+            eye = Vec3(-0.7f, 0.15f, -1.2f),
+            lookAt = Vec3(0.00f, 0f, 0.00f)
+        ),
+
+        CameraSlide(
+            title = "Tire Air Pressure",
+            description = "Check tire...",
+            eye = Vec3(0.7f, 0.15f, -1.2f),
+            lookAt = Vec3(0.00f, 0f, 0.00f)
+        ),
+
+        CameraSlide(
+            title = "Engine",
+            description = "Inspect for Unusual Engine Behaviors and Sounds",
+            eye = Vec3(-0.03f, 0.50f, -0.770f),
+            lookAt = Vec3(0.10f, -0.20f, 0.00f)
+        ),
+
 
         )
-    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -117,6 +140,13 @@ class MainActivity : AppCompatActivity() {
         lockOverlay = findViewById(R.id.lockOverlay)
 
         modelLoader = ModelLoader(sceneView.engine, this)
+
+        // Force hood closed every render frame.
+        sceneView.onFrame = {
+            enforceHoodPoseBySlide()
+        }
+
+
 
         captureManipulatorOnce()
         setupModelSelector()
@@ -169,17 +199,21 @@ class MainActivity : AppCompatActivity() {
     private fun setupControls() {
         btnPrev.setOnClickListener {
             if (!isCameraLocked) return@setOnClickListener
+            val to = (currentSlideIndex - 1).coerceAtLeast(0)
+
             sceneView.cameraManipulator = null
-            currentSlideIndex = (currentSlideIndex - 1).coerceAtLeast(0)
-            goToSlide(currentSlideIndex, animated = true)
+            currentSlideIndex = to
+            goToSlide(to, animated = true)
             updateUiState()
         }
 
         btnNext.setOnClickListener {
             if (!isCameraLocked) return@setOnClickListener
+            val to = (currentSlideIndex + 1).coerceAtMost(slides.lastIndex)
+
             sceneView.cameraManipulator = null
-            currentSlideIndex = (currentSlideIndex + 1).coerceAtMost(slides.lastIndex)
-            goToSlide(currentSlideIndex, animated = true)
+            currentSlideIndex = to
+            goToSlide(to, animated = true)
             updateUiState()
         }
 
@@ -194,9 +228,7 @@ class MainActivity : AppCompatActivity() {
         isCameraLocked = locked
 
         if (locked) {
-            if (savedManipulator == null) {
-                savedManipulator = sceneView.cameraManipulator
-            }
+            if (savedManipulator == null) savedManipulator = sceneView.cameraManipulator
             sceneView.cameraManipulator = null
             lockOverlay.visibility = View.VISIBLE
             currentModelNode?.isEditable = false
@@ -232,6 +264,14 @@ class MainActivity : AppCompatActivity() {
                 isEditable = !isCameraLocked
             }
 
+            // Initialize all clips to frame 0 once.
+            modelNode.modelInstance.animator?.let { animator ->
+                repeat(animator.animationCount) { i ->
+                    animator.applyAnimation(i, 0f)
+                }
+                animator.updateBoneMatrices()
+            }
+
             sceneView.addChildNode(modelNode)
             currentModelNode = modelNode
 
@@ -246,7 +286,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun applyCustomStartCamera() {
         setCamera(startEye, startLookAt)
-
         lifecycleScope.launch {
             delay(32L)
             setCamera(startEye, startLookAt)
@@ -271,10 +310,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun enforceHoodPoseBySlide() {
+
+        val modelNode = currentModelNode ?: return
+        val animator = modelNode.modelInstance.animator ?: return
+        val duration = animator.getAnimationDuration(hoodAnimationIndex)
+        val end = (duration - 0.001f).coerceAtLeast(0f)
+        val t = if (currentSlideIndex >= 1) end else 0f
+        animator.applyAnimation(hoodAnimationIndex, t)
+        animator.updateBoneMatrices()
+
+    }
+
+
+
     private fun setCamera(cameraPos: Vec3, lookTarget: Vec3) {
         currentCameraEye = cameraPos
         currentOrbitTarget = lookTarget
-
         sceneView.cameraNode.position = Position(cameraPos.x, cameraPos.y, cameraPos.z)
         sceneView.cameraNode.lookAt(Position(lookTarget.x, lookTarget.y, lookTarget.z))
     }
@@ -320,12 +372,9 @@ class MainActivity : AppCompatActivity() {
             while (true) {
                 val p = sceneView.cameraNode.position
                 val cam = Vec3(p.x, p.y, p.z)
-                if (!isCameraLocked) {
-                    currentCameraEye = cam
-                }
+                if (!isCameraLocked) currentCameraEye = cam
 
                 val target = currentOrbitTarget
-
                 val dx = cam.x - target.x
                 val dy = cam.y - target.y
                 val dz = cam.z - target.z
