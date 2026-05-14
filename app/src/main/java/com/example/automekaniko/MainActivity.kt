@@ -85,7 +85,12 @@ class MainActivity : AppCompatActivity() {
     // ─────────────────────────────────────────────────────────────────────────
     //  Permission launcher
     // ─────────────────────────────────────────────────────────────────────────
-
+    private val permLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { grants ->
+        if (grants.all { it.value }) startBleScan()
+        else toast("Bluetooth permissions are required to connect to OBD adapter")
+    }
 
     // ─────────────────────────────────────────────────────────────────────────
     //  Lifecycle
@@ -231,18 +236,32 @@ class MainActivity : AppCompatActivity() {
 
     private fun requestPermissionsAndScan() {
         val needed = mutableListOf<String>()
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+
             if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN))
                 needed += Manifest.permission.BLUETOOTH_SCAN
+
             if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT))
                 needed += Manifest.permission.BLUETOOTH_CONNECT
+
         } else {
+
             if (!hasPermission(Manifest.permission.BLUETOOTH))
                 needed += Manifest.permission.BLUETOOTH
+
             if (!hasPermission(Manifest.permission.ACCESS_FINE_LOCATION))
                 needed += Manifest.permission.ACCESS_FINE_LOCATION
+
+            if (!hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION))
+                needed += Manifest.permission.ACCESS_COARSE_LOCATION
         }
 
+        if (needed.isEmpty()) {
+            startBleScan()
+        } else {
+            permLauncher.launch(needed.toTypedArray())
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────
