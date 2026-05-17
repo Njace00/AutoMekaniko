@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0a0a0a">
+
+    <!-- TOP BAR -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="#232222"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/burger"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_margin="20sp"
+            android:gravity="center_vertical|start"
+            android:text="☰"
+            android:textColor="#e02020"
+            android:textSize="25sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:gravity="center_vertical"
+            android:text="AutoMekaniko"
+            android:textColor="#e02020"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/burger"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <LinearLayout
+            android:id="@+id/tabGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginEnd="12dp"
+            android:orientation="horizontal"
+            android:clipChildren="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <TextView
+                android:id="@+id/tab3D"
+                android:layout_width="80dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="3D View"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="#000000" />
+
+            <TextView
+                android:id="@+id/tabOBD"
+                android:layout_width="80dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="OBD Data"
+                android:textSize="12sp"
+                android:textColor="#e02020"
+                />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Model selector spinner -->
+    <Spinner
+        android:id="@+id/modelSpinner"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_margin="12dp"
+        android:background="@drawable/spinner_border"
+        app:layout_constraintTop_toBottomOf="@id/topBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- 3D Scene -->
+    <io.github.sceneview.SceneView
+        android:id="@+id/sceneView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/modelSpinner"
+        app:layout_constraintBottom_toTopOf="@id/slidePanel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Lock overlay (touch blocker when camera is locked) -->
+    <View
+        android:id="@+id/lockOverlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="@android:color/transparent"
+        android:visibility="visible"
+        app:layout_constraintTop_toTopOf="@id/sceneView"
+        app:layout_constraintBottom_toBottomOf="@id/sceneView"
+        app:layout_constraintStart_toStartOf="@id/sceneView"
+        app:layout_constraintEnd_toEndOf="@id/sceneView"/>
+
+    <!--
+        CHECKLIST OVERLAY
+        Sits on top of the SceneView, anchored to its top-left corner.
+        Semi-transparent dark card so the 3D scene stays visible behind it.
+        Content is swapped dynamically in goToSlide() via checklistContainer.
+    -->
+    <LinearLayout
+        android:id="@+id/checklistOverlay"
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:orientation="vertical"
+        android:background="#CC111111"
+        android:padding="10dp"
+        app:layout_constraintTop_toTopOf="@id/sceneView"
+        app:layout_constraintStart_toStartOf="@id/sceneView">
+
+        <!-- Slide title repeated here so it's readable without looking down -->
+        <TextView
+            android:id="@+id/overlayTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Vehicle Overview"
+            android:textColor="#e02020"
+            android:textStyle="bold"
+            android:textSize="13sp"
+            android:layout_marginBottom="6dp"/>
+
+        <!-- Steps are added here programmatically in goToSlide() -->
+        <LinearLayout
+            android:id="@+id/checklistContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"/>
+
+    </LinearLayout>
+
+    <!-- Slide panel -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/slidePanel"
+        android:layout_width="0dp"
+        android:layout_height="120dp"
+        android:background="#AA111111"
+        android:padding="8dp"
+        app:layout_constraintBottom_toTopOf="@id/bottomBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <Button
+            android:id="@+id/btnPrev"
+            android:layout_width="86dp"
+            android:layout_height="38dp"
+            android:text="Prev"
+            android:textAllCaps="false"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <Button
+            android:id="@+id/btnNext"
+            android:layout_width="86dp"
+            android:layout_height="38dp"
+            android:text="Next"
+            android:textAllCaps="false"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <Button
+            android:id="@+id/btnCameraLock"
+            android:layout_width="120dp"
+            android:layout_height="34dp"
+            android:text="Camera: LOCK"
+            android:textAllCaps="false"
+            android:textSize="11sp"
+            app:layout_constraintTop_toBottomOf="@id/btnNext"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <TextView
+            android:id="@+id/slideTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Slide 1"
+            android:textColor="#e02020"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/btnPrev"
+            app:layout_constraintEnd_toStartOf="@id/btnNext"/>
+
+        <TextView
+            android:id="@+id/slideDesc"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Description"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:maxLines="2"
+            app:layout_constraintTop_toBottomOf="@id/slideTitle"
+            app:layout_constraintStart_toStartOf="@id/slideTitle"
+            app:layout_constraintEnd_toEndOf="@id/slideTitle"/>
+
+        <TextView
+            android:id="@+id/tvCameraInfo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textColor="#C8FFD700"
+            android:textSize="11sp"
+            android:maxLines="2"
+            app:layout_constraintTop_toBottomOf="@id/slideDesc"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnCameraLock"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- BOTTOM BAR -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottomBar"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="#1a1a1a"
+        android:elevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <TextView
+            android:id="@+id/hometxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Home"
+            android:textColor="@android:color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/livetxt"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <TextView
+            android:id="@+id/livetxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Live Data"
+            android:textColor="@android:color/white"
+            app:layout_constraintStart_toEndOf="@id/hometxt"
+            app:layout_constraintEnd_toStartOf="@id/connecttxt"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <TextView
+            android:id="@+id/connecttxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Connect"
+            android:textColor="@android:color/white"
+            app:layout_constraintStart_toEndOf="@id/livetxt"
+            app:layout_constraintEnd_toStartOf="@id/settingtxt"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <TextView
+            android:id="@+id/settingtxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Settings"
+            android:textColor="@android:color/white"
+            app:layout_constraintStart_toEndOf="@id/connecttxt"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

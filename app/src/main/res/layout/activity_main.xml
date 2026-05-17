@@ -20,7 +20,7 @@
             android:layout_height="0dp"
             android:text="☰"
             android:textSize="25sp"
-            android:textColor="#FFD700"
+            android:textColor="#e02020"
             android:layout_margin="20sp"
             android:gravity="center_vertical|start"
             app:layout_constraintTop_toTopOf="parent"
@@ -34,7 +34,7 @@
             android:layout_marginStart="8dp"
             android:gravity="center_vertical"
             android:text="AutoMekaniko"
-            android:textColor="#FFD700"
+            android:textColor="#e02020"
             android:textSize="20sp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -52,6 +52,8 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">
 
+
+
             <!-- 3D View tab -->
             <TextView
                 android:id="@+id/tab3D"
@@ -60,7 +62,7 @@
                 android:gravity="center"
                 android:text="3D View"
                 android:textSize="12sp"
-                android:textColor="#FFD700"
+                android:textColor="#e02020"
                 android:background="@android:color/transparent"/>
 
             <!-- OBD Data tab — ACTIVE on this screen -->
@@ -72,7 +74,7 @@
                 android:text="OBD Data"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                android:textColor="#000000"
+                android:textColor="#ffffff"
                 />
 
         </LinearLayout>
@@ -80,105 +82,45 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- SCROLLABLE OBD-II DATA AREA -->
-    <ScrollView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/scrollContent"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:paddingBottom="8dp"
         app:layout_constraintTop_toBottomOf="@id/topBar"
-        app:layout_constraintBottom_toTopOf="@id/connectRow">
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="12dp"
-            android:clipToPadding="false">
-
-
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="LIVE OBD-II SENSORS" android:textColor="#FFD700" android:textSize="11sp" android:letterSpacing="0.12" android:layout_marginBottom="8dp"/>
-
-            <GridLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:columnCount="2" android:rowCount="3" android:useDefaultMargins="false" android:layout_marginBottom="12dp">
-                <include android:id="@+id/cardMaf"       layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                <include android:id="@+id/cardIat"       layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                <include android:id="@+id/cardO2s1"      layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                <include android:id="@+id/cardO2s2"      layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                <include android:id="@+id/cardMap"       layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                <include android:id="@+id/cardFuelLevel" layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-            </GridLayout>
-
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="FUEL TRIM &amp; TIMING" android:textColor="#FFD700" android:textSize="11sp" android:letterSpacing="0.12" android:layout_marginBottom="8dp"/>
-
-            <GridLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:columnCount="2" android:rowCount="2" android:useDefaultMargins="false" android:layout_marginBottom="12dp">
-                <include android:id="@+id/cardStft"   layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                <include android:id="@+id/cardLtft"   layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                <include android:id="@+id/cardTiming" layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                <include android:id="@+id/cardBaro"   layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-            </GridLayout>
-
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="CATALYST &amp; ELECTRICAL" android:textColor="#FFD700" android:textSize="11sp" android:letterSpacing="0.12" android:layout_marginBottom="8dp"/>
-
-            <GridLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:columnCount="2" android:rowCount="2" android:useDefaultMargins="false" android:layout_marginBottom="12dp">
-                <include android:id="@+id/cardCat1"       layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                <include android:id="@+id/cardCat2"       layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                <include android:id="@+id/cardModVoltage" layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                <include android:id="@+id/cardFuelRate"   layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-            </GridLayout>
-
-        </LinearLayout>
-    </ScrollView>
-
-    <!-- CONNECT ROW -->
-    <LinearLayout
-        android:id="@+id/connectRow"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:orientation="horizontal"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="8dp"
-        android:background="#1a1a1a"
-        android:elevation="4dp"
         app:layout_constraintBottom_toTopOf="@id/bottomBar">
 
-
-        <TextView
-            android:id="@+id/tvBleStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="● DISCONNECTED"
-            android:textColor="#FFFF5555"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:paddingEnd="10dp" />
-
-
-        <TextView
-            android:id="@+id/tvStatusMsg"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:text="Tap Connect to scan for ELM327 adapter"
-            android:textColor="#aaaaaa"
-            android:textSize="11sp"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:paddingEnd="12dp"/>
+        <!-- TEMPORARY BUTTONS-->
 
         <Button
-            android:id="@+id/btnConnect"
-            android:layout_width="120dp"
-            android:layout_height="match_parent"
-            android:text="CONNECT"
-            android:textColor="#000000"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:backgroundTint="#FFD700"
-            android:stateListAnimator="@null"/>
+            android:id="@+id/viewbtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#e02020"
+            android:text="3D view"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/livebtn"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    </LinearLayout>
+        <Button
+            android:id="@+id/livebtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#e02020"
+            android:text="Live Data"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/viewbtn"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+    <!-- CONNECT ROW -->
 
     <!-- BOTTOM BAR -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -189,32 +131,49 @@
         android:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#33FFD700" app:layout_constraintTop_toTopOf="parent"/>
+        <TextView
+            android:id="@+id/hometxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Home"
+            android:textColor="@android:color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/livetxt"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/speedcon" android:layout_width="0dp" android:layout_height="match_parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toStartOf="@id/rpmcon">
-            <TextView android:id="@+id/speedVal" android:layout_width="0dp" android:layout_height="0dp" android:text="—" android:textColor="#ffffff" android:gravity="center" android:textSize="24sp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toTopOf="@id/speed" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"/>
-            <TextView android:id="@+id/speed" android:layout_width="0dp" android:layout_height="0dp" android:text="km/h" android:textColor="#FFD700" android:gravity="center" android:textSize="10sp" app:layout_constraintTop_toBottomOf="@id/speedVal" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"/>
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/livetxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Live Data"
+            android:textColor="@android:color/white"
+            app:layout_constraintStart_toEndOf="@id/hometxt"
+            app:layout_constraintEnd_toStartOf="@id/connecttxt"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/rpmcon" android:layout_width="0dp" android:layout_height="match_parent" app:layout_constraintStart_toEndOf="@id/speedcon" app:layout_constraintEnd_toStartOf="@id/coolantcon">
-            <TextView android:id="@+id/rpmVal" android:layout_width="0dp" android:layout_height="0dp" android:text="—" android:textColor="#ffffff" android:gravity="center" android:textSize="24sp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toTopOf="@id/rpm" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"/>
-            <TextView android:id="@+id/rpm" android:layout_width="0dp" android:layout_height="0dp" android:text="RPM" android:textColor="#FFD700" android:gravity="center" android:textSize="10sp" app:layout_constraintTop_toBottomOf="@id/rpmVal" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"/>
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/connecttxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Connect"
+            android:textColor="@android:color/white"
+            app:layout_constraintStart_toEndOf="@id/livetxt"
+            app:layout_constraintEnd_toStartOf="@id/settingtxt"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/coolantcon" android:layout_width="0dp" android:layout_height="match_parent" app:layout_constraintStart_toEndOf="@id/rpmcon" app:layout_constraintEnd_toStartOf="@id/throttlecon">
-            <TextView android:id="@+id/coolantVal" android:layout_width="0dp" android:layout_height="0dp" android:text="—" android:textColor="#ffffff" android:gravity="center" android:textSize="24sp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toTopOf="@id/coolant" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"/>
-            <TextView android:id="@+id/coolant" android:layout_width="0dp" android:layout_height="0dp" android:text="COOLANT °C" android:textColor="#FFD700" android:gravity="center" android:textSize="10sp" app:layout_constraintTop_toBottomOf="@id/coolantVal" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"/>
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/throttlecon" android:layout_width="0dp" android:layout_height="match_parent" app:layout_constraintStart_toEndOf="@id/coolantcon" app:layout_constraintEnd_toStartOf="@id/loadcon">
-            <TextView android:id="@+id/throttleVal" android:layout_width="0dp" android:layout_height="0dp" android:text="—" android:textColor="#ffffff" android:gravity="center" android:textSize="24sp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toTopOf="@id/throttle" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"/>
-            <TextView android:id="@+id/throttle" android:layout_width="0dp" android:layout_height="0dp" android:text="THROTTLE %" android:textColor="#FFD700" android:gravity="center" android:textSize="10sp" app:layout_constraintTop_toBottomOf="@id/throttleVal" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"/>
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/loadcon" android:layout_width="0dp" android:layout_height="match_parent" app:layout_constraintStart_toEndOf="@id/throttlecon" app:layout_constraintEnd_toEndOf="parent">
-            <TextView android:id="@+id/loadVal" android:layout_width="0dp" android:layout_height="0dp" android:text="—" android:textColor="#ffffff" android:gravity="center" android:textSize="24sp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toTopOf="@id/load" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"/>
-            <TextView android:id="@+id/load" android:layout_width="0dp" android:layout_height="0dp" android:text="LOAD %" android:textColor="#FFD700" android:gravity="center" android:textSize="10sp" app:layout_constraintTop_toBottomOf="@id/loadVal" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"/>
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/settingtxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Settings"
+            android:textColor="@android:color/white"
+            app:layout_constraintStart_toEndOf="@id/connecttxt"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

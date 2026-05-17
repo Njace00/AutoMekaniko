@@ -31,6 +31,25 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".MAINTAINANCEActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".OBDActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".GuidesActivity"
+            android:exported="false" />
+        <activity
+
+            android:name=".DtcActivity"
+
+            android:exported="false" />
+
+
+
     </application>
 
 </manifest>
