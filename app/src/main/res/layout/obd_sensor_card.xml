@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/layout/obd_sensor_card.xml
+     A single reusable sensor tile for the OBD-II grid.
+     The host Activity sets label, value, and unit via view-binding on the included ID. -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="10dp"
+    android:background="@drawable/obd_card_bg"
+    android:minHeight="68dp">
+
+    <TextView
+        android:id="@+id/cardLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="LABEL"
+        android:textColor="#8fb4cb"
+        android:textSize="9sp"
+        android:letterSpacing="0.08"
+        android:textAllCaps="true"/>
+
+    <TextView
+        android:id="@+id/cardValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="—"
+        android:textColor="#e3f5ff"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginTop="2dp"/>
+
+    <TextView
+        android:id="@+id/cardUnit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="unit"
+        android:textColor="#6e95ad"
+        android:textSize="9sp"
+        android:letterSpacing="0.04"
+        android:layout_marginTop="1dp"/>
+
+</LinearLayout>
