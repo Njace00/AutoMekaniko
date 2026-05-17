@@ -49,8 +49,8 @@ class OBDActivity : AppCompatActivity() {
     private lateinit var tvBleStatus:  TextView
     private lateinit var tvStatusMsg:  TextView
     private lateinit var btnConnect:   Button
-    private lateinit var tab3D:        TextView
-    private lateinit var tabOBD:       TextView
+    //private lateinit var tab3D:        TextView
+    //private lateinit var tabOBD:       TextView
 
     private lateinit var speedVal:    TextView
     private lateinit var rpmVal:      TextView
@@ -131,8 +131,8 @@ class OBDActivity : AppCompatActivity() {
         tvBleStatus  = findViewById(R.id.tvBleStatus)
         tvStatusMsg  = findViewById(R.id.tvStatusMsg)
         btnConnect   = findViewById(R.id.btnConnect)
-        tab3D        = findViewById(R.id.tab3D)
-        tabOBD       = findViewById(R.id.tabOBD)
+        //tab3D        = findViewById(R.id.tab3D)
+        //tabOBD       = findViewById(R.id.tabOBD)
         //speedVal     = findViewById(R.id.speedVal)
        // rpmVal       = findViewById(R.id.rpmVal)
        // coolantVal   = findViewById(R.id.coolantVal)

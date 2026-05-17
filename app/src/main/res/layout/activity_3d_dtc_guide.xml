@@ -302,31 +302,7 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="@id/tvDtcCode"/>
 
-                    <View
-                        android:id="@+id/severityDot"
-                        android:layout_width="6dp"
-                        android:layout_height="6dp"
-                        android:layout_marginStart="10dp"
-                        android:background="#e07020"
-                        app:layout_constraintStart_toEndOf="@id/tvDtcCode"
-                        app:layout_constraintTop_toTopOf="@id/tvSeverity"
-                        app:layout_constraintBottom_toBottomOf="@id/tvSeverity"/>
 
-                    <TextView
-                        android:id="@+id/tvSeverity"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:layout_marginTop="4dp"
-                        android:background="#2a1500"
-                        android:paddingHorizontal="7dp"
-                        android:paddingVertical="3dp"
-                        android:text="Medium severity"
-                        android:textColor="#e07020"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        app:layout_constraintStart_toEndOf="@id/severityDot"
-                        app:layout_constraintTop_toBottomOf="@id/tvDtcName"/>
 
                     <View
                         android:id="@+id/divider"
@@ -336,7 +312,7 @@
                         android:background="#2e2e2e"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tvSeverity"/>
+                        app:layout_constraintTop_toBottomOf="@id/tvDtcName"/>
 
                     <TextView
                         android:id="@+id/tvDtcDesc"

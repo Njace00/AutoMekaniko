@@ -46,8 +46,8 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     private lateinit var lockOverlay: View
 
     // ── Tab views ─────────────────────────────────────────────────────────────
-    private lateinit var tab3D:  TextView
-    private lateinit var tabOBD: TextView
+    //private lateinit var tab3D:  TextView
+    //private lateinit var tabOBD: TextView
 
     // ── Checklist overlay ─────────────────────────────────────────────────────
     private lateinit var overlayTitle:       TextView
@@ -198,8 +198,8 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         lockOverlay  = findViewById(R.id.lockOverlay)
 
         // ── Tab references ────────────────────────────────────────────────────
-        tab3D  = findViewById(R.id.tab3D)
-        tabOBD = findViewById(R.id.tabOBD)
+        //tab3D  = findViewById(R.id.tab3D)
+        //tabOBD = findViewById(R.id.tabOBD)
 
         // ── Checklist overlay ─────────────────────────────────────────────────
         overlayTitle       = findViewById(R.id.overlayTitle)

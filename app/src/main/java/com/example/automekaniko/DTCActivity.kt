@@ -42,7 +42,7 @@ class DtcActivity : AppCompatActivity() {
         val code: String,
         val name: String,
         val description: String,
-        val severity: String,
+        //val severity: String,
         val parts: List<String>,
         val glbFile: String,
         val slides: List<CameraSlide>
@@ -60,7 +60,7 @@ class DtcActivity : AppCompatActivity() {
             name        = "Cylinder 1 Misfire Detected",
             description = "A misfire in cylinder 1 means the fuel-air mixture is not igniting " +
                     "correctly. Common causes: faulty spark plug, ignition coil, or injector.",
-            severity    = "Medium severity",
+            //severity    = "Medium severity",
             parts       = listOf("Spark plug", "Ignition coil", "Fuel injector", "Coil boot"),
             glbFile     = "vios engine-tutor(P0301)misfire.glb",
             slides      = listOf(
@@ -165,7 +165,7 @@ class DtcActivity : AppCompatActivity() {
     private lateinit var infoCard:       CardView
     private lateinit var tvDtcCode:      TextView
     private lateinit var tvDtcName:      TextView
-    private lateinit var tvSeverity:     TextView
+    //private lateinit var tvSeverity:     TextView
     private lateinit var tvDtcDesc:      TextView
     private lateinit var partsSection:   LinearLayout
     private lateinit var partsContainer: LinearLayout
@@ -217,7 +217,7 @@ class DtcActivity : AppCompatActivity() {
         infoCard       = findViewById(R.id.infoCard)
         tvDtcCode      = findViewById(R.id.tvDtcCode)
         tvDtcName      = findViewById(R.id.tvDtcName)
-        tvSeverity     = findViewById(R.id.tvSeverity)
+        //tvSeverity     = findViewById(R.id.tvSeverity)
         tvDtcDesc      = findViewById(R.id.tvDtcDesc)
         partsSection   = findViewById(R.id.partsSection)
         partsContainer = findViewById(R.id.partsContainer)
@@ -272,7 +272,7 @@ class DtcActivity : AppCompatActivity() {
         tvDtcCode.text  = entry.code
         tvDtcName.text  = entry.name
         tvDtcDesc.text  = entry.description
-        tvSeverity.text = entry.severity
+        //tvSeverity.text = entry.severity
 
         partsContainer.removeAllViews()
         entry.parts.forEach { part ->

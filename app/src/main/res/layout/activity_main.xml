@@ -50,34 +50,7 @@
             android:clipChildren="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
-
-
-
-            <!-- 3D View tab -->
-            <TextView
-                android:id="@+id/tab3D"
-                android:layout_width="80dp"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="3D View"
-                android:textSize="12sp"
-                android:textColor="#e02020"
-                android:background="@android:color/transparent"/>
-
-            <!-- OBD Data tab — ACTIVE on this screen -->
-            <TextView
-                android:id="@+id/tabOBD"
-                android:layout_width="80dp"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="OBD Data"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textColor="#ffffff"
-                />
-
-        </LinearLayout>
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

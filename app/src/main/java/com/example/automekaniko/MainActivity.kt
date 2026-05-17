@@ -13,8 +13,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         // Top-bar tabs
-        val tab3D  = findViewById<TextView>(R.id.tab3D)
-        val tabOBD = findViewById<TextView>(R.id.tabOBD)
+        //val tab3D  = findViewById<TextView>(R.id.tab3D)
+        //val tabOBD = findViewById<TextView>(R.id.tabOBD)
 
         // Centre buttons
         val viewBtn = findViewById<Button>(R.id.viewbtn)
@@ -29,8 +29,8 @@ class MainActivity : AppCompatActivity() {
         // ── Tab bar ───────────────────────────────────────────────────────────
         // MainActivity is the "home" screen; neither tab is active here.
         // Tap either tab to jump straight to that screen.
-        tab3D.setOnClickListener  { go(GuidesActivity::class.java) }
-        tabOBD.setOnClickListener { go(OBDActivity::class.java) }
+        //tab3D.setOnClickListener  { go(GuidesActivity::class.java) }
+        //tabOBD.setOnClickListener { go(OBDActivity::class.java) }
 
         // ── Centre buttons ────────────────────────────────────────────────────
         // "3D View" button → Guides screen first, then user picks DTC or Maintenance
