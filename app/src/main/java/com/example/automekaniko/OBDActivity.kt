@@ -49,8 +49,6 @@ class OBDActivity : AppCompatActivity() {
     private lateinit var tvBleStatus:  TextView
     private lateinit var tvStatusMsg:  TextView
     private lateinit var btnConnect:   Button
-    //private lateinit var tab3D:        TextView
-    //private lateinit var tabOBD:       TextView
 
     private lateinit var speedVal:    TextView
     private lateinit var rpmVal:      TextView
@@ -89,6 +87,9 @@ class OBDActivity : AppCompatActivity() {
 
     private val unsupportedPids = mutableSetOf<String>()
 
+    // Tracks how many core cycles have run — extended sensors fire every 3rd
+    private var extendedCycle = 0
+
     private val permLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { grants ->
@@ -123,21 +124,15 @@ class OBDActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-
-
-
-
     private fun bindViews() {
         tvBleStatus  = findViewById(R.id.tvBleStatus)
         tvStatusMsg  = findViewById(R.id.tvStatusMsg)
         btnConnect   = findViewById(R.id.btnConnect)
-        //tab3D        = findViewById(R.id.tab3D)
-        //tabOBD       = findViewById(R.id.tabOBD)
-        //speedVal     = findViewById(R.id.speedVal)
-       // rpmVal       = findViewById(R.id.rpmVal)
-       // coolantVal   = findViewById(R.id.coolantVal)
-       // throttleVal  = findViewById(R.id.throttleVal)
-       // loadVal      = findViewById(R.id.loadVal)
+        speedVal    = cardValue(R.id.cardSpeed)
+        rpmVal      = cardValue(R.id.cardRpm)
+        coolantVal  = cardValue(R.id.cardCoolant)
+        throttleVal = cardValue(R.id.cardThrottle)
+        loadVal     = cardValue(R.id.cardLoad)
         vMaf        = cardValue(R.id.cardMaf);        vIat       = cardValue(R.id.cardIat)
         vO2s1       = cardValue(R.id.cardO2s1);       vO2s2      = cardValue(R.id.cardO2s2)
         vMap        = cardValue(R.id.cardMap);         vFuelLevel = cardValue(R.id.cardFuelLevel)
@@ -154,6 +149,11 @@ class OBDActivity : AppCompatActivity() {
     private fun setupCardLabels() {
         data class Meta(val id: Int, val l: String, val u: String)
         listOf(
+            Meta(R.id.cardRpm,        "RPM",             "rpm"),
+            Meta(R.id.cardSpeed,      "Speed",           "km/h"),
+            Meta(R.id.cardCoolant,    "Coolant Temp",    "°C"),
+            Meta(R.id.cardThrottle,   "Throttle",        "%"),
+            Meta(R.id.cardLoad,       "Engine Load",     "%"),
             Meta(R.id.cardMaf,        "Mass Air Flow",   "g/s"),
             Meta(R.id.cardIat,        "Intake Air Temp", "°C"),
             Meta(R.id.cardO2s1,       "O2 Sensor 1",     "V"),
@@ -345,7 +345,7 @@ class OBDActivity : AppCompatActivity() {
         } catch (e: Exception) { Log.e(TAG, "sendRaw: ${e.message}") }
     }
 
-    private suspend fun send(cmd: String, timeout: Long = 3000): String {
+    private suspend fun send(cmd: String, timeout: Long = 2000): String {
         if (!isConnected) return ""
 
         if (outputStream != null && inputStream != null) {
@@ -361,7 +361,7 @@ class OBDActivity : AppCompatActivity() {
                             sb.append(String(buf, 0, n, Charsets.UTF_8))
                             if (sb.contains(">")) break
                         }
-                    } else delay(10)
+                    } else delay(5) // was 10ms — halved for faster classic polling
                 }
                 sb.toString().trim().also { Log.d(TAG, "CMD=$cmd RSP=${it.take(120)}") }
             } catch (e: Exception) { Log.e(TAG, "send '$cmd': ${e.message}"); "" }
@@ -380,7 +380,8 @@ class OBDActivity : AppCompatActivity() {
     private suspend fun initElm327() {
         runOnUiThread { setStatus("Initializing ELM327…") }
         unsupportedPids.clear()
-        for (cmd in listOf("ATZ", "ATE0", "ATL0", "ATS0", "ATH0", "ATSP0")) {
+        // ATAT1 = adaptive timing: ELM327 auto-shortens wait based on ECU response speed
+        for (cmd in listOf("ATZ", "ATE0", "ATL0", "ATS0", "ATH0", "ATSP0", "ATAT1")) {
             send(cmd, if (cmd == "ATZ") 5000 else 2000)
             delay(300)
         }
@@ -390,9 +391,11 @@ class OBDActivity : AppCompatActivity() {
 
     private fun startPollLoop() {
         pollJob?.cancel()
+        extendedCycle = 0
         pollJob = lifecycleScope.launch(Dispatchers.IO) {
             while (isActive && isConnected && isInitialized) {
                 try {
+                    // Core sensors: polled every cycle for maximum responsiveness
                     val rpm  = parseRPM(send("010C"))
                     val spd  = parseSpeed(send("010D"))
                     val cool = parseTemp(send("0105"), "05")
@@ -407,8 +410,11 @@ class OBDActivity : AppCompatActivity() {
                         load?.let { loadVal.text     = it }
                     }
 
-                    pollExtended()
-                    delay(500)
+                    // Extended sensors: every 3rd core cycle — they change slowly
+                    // and skipping them keeps core sensors snappy
+                    if (extendedCycle++ % 3 == 0) pollExtended()
+
+                    // No artificial delay — round-trips ARE the pacing
                 } catch (e: Exception) {
                     if (e is CancellationException) throw e
                     Log.e(TAG, "Poll error: ${e.message}"); delay(1000)
@@ -418,7 +424,9 @@ class OBDActivity : AppCompatActivity() {
     }
 
     private suspend fun pollExtended() {
-        val extTimeout = 4500L
+        // Reduced from 4500ms: real ECU responses come back in <500ms;
+        // a 1500ms ceiling still handles slow adapters without killing throughput
+        val extTimeout = 1500L
 
         suspend fun q(pid: String): String {
             if (pid !in PID_NEVER_BLACKLIST && pid in unsupportedPids) return ""
@@ -436,19 +444,19 @@ class OBDActivity : AppCompatActivity() {
             return r
         }
 
-        val mafRsp = q("0110")
-        val maf    = parseMaf(mafRsp)
-        val iat    = parseTemp(q("010F"), "0F")
-        val o2s1   = parseO2(q("0114"), "14")
-        val o2s2   = parseO2(q("0115"), "15")
+        val mafRsp   = q("0110")
+        val maf      = parseMaf(mafRsp)
+        val iat      = parseTemp(q("010F"), "0F")
+        val o2s1     = parseO2(q("0114"), "14")
+        val o2s2     = parseO2(q("0115"), "15")
 
-        val loadRsp = q("0104")
-        val baroRsp = q("0133")
-        val mapRsp  = q("010B")
+        val loadRsp  = q("0104")
+        val baroRsp  = q("0133")
+        val mapRsp   = q("010B")
         val fuelRRsp = q("015E")
 
-        val loadPct = parsePerc(loadRsp, "04")?.toDoubleOrNull()
-        val baroKpa = parseBaro(baroRsp)?.toIntOrNull()
+        val loadPct  = parsePerc(loadRsp, "04")?.toDoubleOrNull()
+        val baroKpa  = parseBaro(baroRsp)?.toIntOrNull()
 
         val map   = parseMapAll(mapRsp, baroKpa, loadPct)
         val fuel  = readFuelLevelFull(extTimeout)
@@ -523,17 +531,15 @@ class OBDActivity : AppCompatActivity() {
      * Sunod: alternate CAN headers, manual prefs.
      */
     private suspend fun readFuelLevelFull(extMs: Long): String? {
-        repeat(4) { attempt ->
+        // Reduced from 4 attempts — if ECU doesn't have 012F it won't magically appear
+        repeat(2) { attempt ->
             val raw = send("012F", extMs)
             Log.d(TAG, "012F try$attempt raw=${raw.take(160)}")
             parseFuelLevelExhaustive(raw)?.let { return it }
             if (raw.contains("NO DATA", ignoreCase = true)) return@repeat
-            delay(150L * (attempt + 1))
+            delay(100L * (attempt + 1)) // was 150ms
         }
-        send("012F", 7000).let { raw ->
-            Log.d(TAG, "012F long raw=${raw.take(160)}")
-            parseFuelLevelExhaustive(raw)?.let { return it }
-        }
+        // Removed the 7000ms long retry — it blocked the loop for up to 7 seconds
         tryFuelLevelAlternateHeaders(extMs)?.let { return it }
 
         val manual = fuelManualPct()
@@ -548,7 +554,7 @@ class OBDActivity : AppCompatActivity() {
         for (h in headers) {
             try {
                 send("AT SH $h", 800)
-                delay(150)
+                delay(100) // was 150ms
                 val raw = send("012F", timeoutEach)
                 Log.d(TAG, "012F AT SH $h → ${raw.take(120)}")
                 parseFuelLevelExhaustive(raw)?.let { return it }

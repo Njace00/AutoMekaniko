@@ -64,7 +64,6 @@
         app:layout_constraintTop_toBottomOf="@id/topBar"
         app:layout_constraintBottom_toTopOf="@id/connectRow">
 
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -72,6 +71,16 @@
             android:padding="12dp"
             android:clipToPadding="false">
 
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="CORE ENGINE DATA" android:textColor="#e02020" android:textSize="11sp" android:letterSpacing="0.12" android:layout_marginBottom="8dp"/>
+
+            <GridLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:columnCount="2" android:rowCount="3" android:useDefaultMargins="false" android:layout_marginBottom="12dp">
+                <include android:id="@+id/cardRpm"      layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                <include android:id="@+id/cardSpeed"    layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                <include android:id="@+id/cardCoolant"  layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                <include android:id="@+id/cardThrottle" layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                <include android:id="@+id/cardLoad"     layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+            </GridLayout>
 
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="LIVE OBD-II SENSORS" android:textColor="#e02020" android:textSize="11sp" android:letterSpacing="0.12" android:layout_marginBottom="8dp"/>
 
