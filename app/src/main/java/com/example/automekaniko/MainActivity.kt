@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 
 class MainActivity : AppCompatActivity() {
 
@@ -12,41 +13,47 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Top-bar tabs
-        //val tab3D  = findViewById<TextView>(R.id.tab3D)
-        //val tabOBD = findViewById<TextView>(R.id.tabOBD)
+        // Tab bar
+        val tab3D  = findViewById<TextView>(R.id.tab3D)
+        val tabOBD = findViewById<TextView>(R.id.tabOBD)
 
-        // Centre buttons
+        // Cards (the visible clickable areas)
+        val card3D   = findViewById<CardView>(R.id.card3D)
+        val cardLive = findViewById<CardView>(R.id.cardLive)
+
+        // Hidden buttons kept for backward compat — wire them too just in case
         val viewBtn = findViewById<Button>(R.id.viewbtn)
         val liveBtn = findViewById<Button>(R.id.livebtn)
 
-        // Bottom-nav labels (optional — wire these up however you like later)
+        // Bottom nav
         val homeTxt    = findViewById<TextView>(R.id.hometxt)
         val liveTxt    = findViewById<TextView>(R.id.livetxt)
         val connectTxt = findViewById<TextView>(R.id.connecttxt)
         val settingTxt = findViewById<TextView>(R.id.settingtxt)
 
-        // ── Tab bar ───────────────────────────────────────────────────────────
-        // MainActivity is the "home" screen; neither tab is active here.
-        // Tap either tab to jump straight to that screen.
-        //tab3D.setOnClickListener  { go(GuidesActivity::class.java) }
-        //tabOBD.setOnClickListener { go(OBDActivity::class.java) }
+        // Tab bar
+        tab3D.setOnClickListener  { go(GuidesActivity::class.java) }
+        tabOBD.setOnClickListener { go(OBDActivity::class.java) }
 
-        // ── Centre buttons ────────────────────────────────────────────────────
-        // "3D View" button → Guides screen first, then user picks DTC or Maintenance
+        // Cards
+        card3D.setOnClickListener   { go(GuidesActivity::class.java) }
+        cardLive.setOnClickListener { go(OBDActivity::class.java) }
+
+        // Hidden buttons (fallback)
         viewBtn.setOnClickListener { go(GuidesActivity::class.java) }
         liveBtn.setOnClickListener { go(OBDActivity::class.java) }
 
-        // ── Bottom nav ────────────────────────────────────────────────────────
+        // Bottom nav
         homeTxt.setOnClickListener    { /* already here */ }
         liveTxt.setOnClickListener    { go(OBDActivity::class.java) }
         connectTxt.setOnClickListener { go(OBDActivity::class.java) }
-        settingTxt.setOnClickListener { /* wire settings screen later */ }
+        settingTxt.setOnClickListener { /* future settings */ }
     }
 
-    /** Launches [target] with a fade transition. */
     private fun <T : Any> go(target: Class<T>) {
-        startActivity(Intent(this, target))
+        startActivity(Intent(this, target).apply {
+            flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+        })
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
     }
 }

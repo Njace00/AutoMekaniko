@@ -122,18 +122,97 @@ class DtcActivity : AppCompatActivity() {
                     )
                 )
             )
-        )
+        ),
+
+        // Add more DTC codes here:
+         DtcEntry(
+             code        = "P03xxx",
+             name        = "TESTING",
+             description = "TESTING",
+             parts       = listOf("TEST", "TEST"),
+             glbFile     = "vios engine-tutor(P0301)misfire.glb",
+             slides = listOf(
+                 CameraSlide(
+                     title = "Locate Cylinder 1",
+                     description = "Identify cylinder 1 on the engine bank.",
+                     eye = Vec3(-1.57f, 0.77f, -1.34f),
+                     lookAt = Vec3(0.00f, 0.10f, 0.00f),
+                     steps = listOf(
+                         "Open the hood",
+                         "Locate the engine bank",
+                         "Find cylinder 1 (front-most)"
+                     )
+                 ),
+                 CameraSlide(
+                     title = "Remove Ignition Coil",
+                     description = "Disconnect and remove the ignition coil.",
+                     eye = Vec3(-0.15f, 0.37f, -0.74f),
+                     lookAt = Vec3(0.00f, 0.10f, 0.00f),
+                     steps = listOf(
+                         "Disconnect coil electrical connector",
+                         "Remove the coil bolt (10mm)",
+                         "Pull the coil straight up"
+                     )
+                 ),
+                 CameraSlide(
+                     title = "Remove Spark Plug",
+                     description = "Use a spark plug socket to remove the old plug.",
+                     eye = Vec3(0.07f, 0.37f, -0.74f),
+                     lookAt = Vec3(0.00f, -0.30f, 0.00f),
+                     steps = listOf(
+                         "Attach spark plug socket to extension",
+                         "Turn counter-clockwise to loosen",
+                         "Remove plug carefully"
+                     )
+                 ),
+                 CameraSlide(
+                     title = "Inspect and Replace",
+                     description = "Check gap and install the new spark plug.",
+                     eye = Vec3(-0.03f, 0.50f, -0.77f),
+                     lookAt = Vec3(0.10f, -0.20f, 0.00f),
+                     steps = listOf(
+                         "Check gap on new plug (0.8-1.0mm)",
+                         "Thread in new plug by hand",
+                         "Torque to spec (20-25 Nm)",
+                         "Reinstall coil and connector"
+                     )
+                 ),
+                 CameraSlide(
+                     title = "Clear Code and Test",
+                     description = "Clear the DTC and verify the fix.",
+                     eye = Vec3(-1.57f, 0.77f, -1.34f),
+                     lookAt = Vec3(0.00f, 0.10f, 0.00f),
+                     steps = listOf(
+                         "Use OBD scanner to clear P0301",
+                         "Start engine and let it idle",
+                         "Check for misfire on live data",
+                         "Test drive and rescan"
+                     )
+                 )
+             )
+
+         )
+
+
+
+
+
+
+
+
+
 
         // Add more DTC codes here:
         // DtcEntry(
-        //     code        = "P0420",
-        //     name        = "Catalyst System Efficiency Below Threshold",
-        //     description = "...",
-        //     severity    = "Low severity",
-        //     parts       = listOf("Catalytic converter", "O2 sensor"),
-        //     glbFile     = "your_model.glb",
-        //     slides      = listOf( ... )
+        // code = "P03xxx",
+        // name = "TESTING",
+        // description = "TESTING",
+        // parts = listOf("TEST", "TEST"),
+        // glbFile = "vios engine-tutor(P0301)misfire.glb",
+        // slides = listOf( ... )
         // ),
+
+
 
     )
 
