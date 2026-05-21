@@ -22,246 +22,42 @@ import io.github.sceneview.node.ModelNode
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.asin
-import kotlin.math.atan2
-import kotlin.math.sqrt
 
 class DtcActivity : AppCompatActivity() {
 
-    data class Vec3(val x: Float, val y: Float, val z: Float)
+    // Data comes entirely from DtcGuideRegistry.kt — nothing hardcoded here.
+    private val dtcList = dtcGuides
 
-    data class CameraSlide(
-        val title: String,
-        val description: String,
-        val eye: Vec3,
-        val lookAt: Vec3,
-        val steps: List<String> = emptyList()
-    )
+    // -------------------------------------------------------------------------
+    // Views
+    // -------------------------------------------------------------------------
 
-    data class DtcEntry(
-        val code: String,
-        val name: String,
-        val description: String,
-        //val severity: String,
-        val parts: List<String>,
-        val glbFile: String,
-        val slides: List<CameraSlide>
-    )
-
-    // =========================================================================
-    // DTC CATALOGUE
-    // To add a new code: copy a DtcEntry block, fill in your values,
-    // drop your GLB into assets/, and append the entry to this list.
-    // =========================================================================
-    private val dtcList = listOf(
-
-        DtcEntry(
-            code        = "P0301",
-            name        = "Cylinder 1 Misfire Detected",
-            description = "A misfire in cylinder 1 means the fuel-air mixture is not igniting " +
-                    "correctly. Common causes: faulty spark plug, ignition coil, or injector.",
-            //severity    = "Medium severity",
-            parts       = listOf("Spark plug", "Ignition coil", "Fuel injector", "Coil boot"),
-            glbFile     = "vios engine-tutor(P0301)misfire.glb",
-            slides      = listOf(
-                CameraSlide(
-                    title = "OverView",
-                    description = "Identify cylinder 1 on the engine bank.",
-                    eye = Vec3(-1.57f, 0.77f, -1.34f),
-                    lookAt = Vec3(0.00f, 0.10f, 0.00f),
-                    steps = listOf(
-                        "Open the hood",
-                        "Locate the engine bank",
-                        "Find cylinder 1 (front-most)"
-                    )
-                ),
-                CameraSlide(
-                    title = "Remove Engine Top Cover",
-                    description = "Use a spark plug socket to remove the old plug.",
-                    eye = Vec3(0.04f, 0.39f, -0.84f),
-                    lookAt = Vec3(0.10f, 0.20f, 0.00f),
-                    steps = listOf(
-                        "Attach spark plug socket to extension",
-                        "Turn counter-clockwise to loosen",
-                        "Remove plug carefully"
-                    )
-                ),
-                CameraSlide(
-                    title       = "Remove Ignition Coil",
-                    description = "n/a",
-                    eye    = Vec3(0.04f, 0.33f, -0.7774f),
-                    lookAt = Vec3(0.10f, 0.20f, 0.00f),
-                    steps  = listOf(
-                        "Disconnect coil electrical connector",
-                        "Remove the coil bolt (10mm)",
-                        "Pull the coil straight up"
-                    )
-                ),
-                CameraSlide(
-                    title       = "Remove Spark Plug",
-                    description = "Use a spark plug socket to remove the old plug.",
-                    eye    = Vec3(0.08f,  0.47f, -0.64f),
-                    lookAt = Vec3(0.10f, -0.30f,  0.00f),
-                    steps  = listOf(
-                        "Attach spark plug socket to extension",
-                        "Turn counter-clockwise to loosen",
-                        "Remove plug carefully"
-                    )
-                ),
-                CameraSlide(
-                    title       = "Inspect and Replace",
-                    description = "Check gap and install the new spark plug.",
-                    eye    = Vec3(-0.03f, 0.50f, -0.77f),
-                    lookAt = Vec3(0.30f, -0.20f,  0.00f),
-                    steps  = listOf(
-                        "Check gap on new plug (0.8-1.0mm)",
-                        "Thread in new plug by hand",
-                        "Torque to spec (20-25 Nm)",
-                        "Reinstall coil and connector"
-                    )
-                ),
-                CameraSlide(
-                    title       = "Clear Code and Test",
-                    description = "Clear the DTC and verify the fix.",
-                    eye    = Vec3(-1.57f, 0.77f, -1.34f),
-                    lookAt = Vec3(0.00f,  0.10f,  0.00f),
-                    steps  = listOf(
-                        "Use OBD scanner to clear P0301",
-                        "Start engine and let it idle",
-                        "Check for misfire on live data",
-                        "Test drive and rescan"
-                    )
-                )
-            )
-        ),
-
-        // Add more DTC codes here:
-         DtcEntry(
-             code        = "P03xxx",
-             name        = "TESTING",
-             description = "TESTING",
-             parts       = listOf("TEST", "TEST"),
-             glbFile     = "vios engine-tutor(P0301)misfire.glb",
-             slides = listOf(
-                 CameraSlide(
-                     title = "Remove Spark Plug",
-                     description = "Use a spark plug socket to remove the old plug.",
-                     eye = Vec3(0.07f, 0.37f, -0.74f),
-                     lookAt = Vec3(0.00f, -0.30f, 0.00f),
-                     steps = listOf(
-                         "Attach spark plug socket to extension",
-                         "Turn counter-clockwise to loosen",
-                         "Remove plug carefully"
-                     )
-                 ),
-                 CameraSlide(
-                     title = "Remove Ignition Coil",
-                     description = "Disconnect and remove the ignition coil.",
-                     eye = Vec3(-0.15f, 0.37f, -0.74f),
-                     lookAt = Vec3(0.00f, 0.10f, 0.00f),
-                     steps = listOf(
-                         "Disconnect coil electrical connector",
-                         "Remove the coil bolt (10mm)",
-                         "Pull the coil straight up"
-                     )
-                 ),
-                 CameraSlide(
-                     title = "Remove Spark Plug",
-                     description = "Use a spark plug socket to remove the old plug.",
-                     eye = Vec3(0.07f, 0.37f, -0.74f),
-                     lookAt = Vec3(0.00f, -0.30f, 0.00f),
-                     steps = listOf(
-                         "Attach spark plug socket to extension",
-                         "Turn counter-clockwise to loosen",
-                         "Remove plug carefully"
-                     )
-                 ),
-                 CameraSlide(
-                     title = "Inspect and Replace",
-                     description = "Check gap and install the new spark plug.",
-                     eye = Vec3(6.0f, 0.00f, -0.77f),
-                     lookAt = Vec3(0.00f, 0.0f, 0.00f),
-                     steps = listOf(
-                         "Check gap on new plug (0.8-1.0mm)",
-                         "Thread in new plug by hand",
-                         "Torque to spec (20-25 Nm)",
-                         "Reinstall coil and connector"
-                     )
-                 ),
-                 CameraSlide(
-                     title = "Clear Code and Test",
-                     description = "Clear the DTC and verify the fix.",
-                     eye = Vec3(-0.57f, 0.77f, -1.34f),
-                     lookAt = Vec3(0.30f, 0.10f, 0.00f),
-                     steps = listOf(
-                         "Use OBD scanner to clear P0301",
-                         "Start engine and let it idle",
-                         "Check for misfire on live data",
-                         "Test drive and rescan"
-                     )
-                 )
-             )
-
-         )
-
-
-
-
-
-
-
-
-
-
-        // Add more DTC codes here:
-        // DtcEntry(
-        // code = "P03xxx",
-        // name = "TESTING",
-        // description = "TESTING",
-        // parts = listOf("TEST", "TEST"),
-        // glbFile = "vios engine-tutor(P0301)misfire.glb",
-        // slides = listOf( ... )
-        // ),
-
-
-
-    )
-
-    // =========================================================================
-
-    private lateinit var sceneView:   SceneView
-    private lateinit var modelLoader: ModelLoader
-    private lateinit var dtcSpinner:  Spinner
-    private lateinit var topScroll:   ScrollView
-
-    private lateinit var slidePanel:        ConstraintLayout
-    private lateinit var checklistOverlay:  LinearLayout
-
-    private lateinit var btnPrev:       Button
-    private lateinit var btnNext:       Button
-    //private lateinit var btnCameraLock: Button
-    //private lateinit var tvCameraInfo: TextView
-    private lateinit var slideTitle:    TextView
-    private lateinit var slideDesc:     TextView
-
-    private lateinit var lockOverlay:   View
-
-    //private lateinit var tab3D:  TextView
-    //private lateinit var tabOBD: TextView
-
+    private lateinit var sceneView:          SceneView
+    private lateinit var modelLoader:        ModelLoader
+    private lateinit var dtcSpinner:         Spinner
+    private lateinit var topScroll:          ScrollView
+    private lateinit var slidePanel:         ConstraintLayout
+    private lateinit var checklistOverlay:   LinearLayout
+    private lateinit var btnPrev:            Button
+    private lateinit var btnNext:            Button
+    private lateinit var slideTitle:         TextView
+    private lateinit var slideDesc:          TextView
+    private lateinit var lockOverlay:        View
     private lateinit var overlayTitle:       TextView
     private lateinit var checklistContainer: LinearLayout
+    private lateinit var infoCard:           CardView
+    private lateinit var tvDtcCode:          TextView
+    private lateinit var tvDtcName:          TextView
+    private lateinit var tvDtcDesc:          TextView
+    private lateinit var partsSection:       LinearLayout
+    private lateinit var partsContainer:     LinearLayout
 
-    private lateinit var infoCard:       CardView
-    private lateinit var tvDtcCode:      TextView
-    private lateinit var tvDtcName:      TextView
-    //private lateinit var tvSeverity:     TextView
-    private lateinit var tvDtcDesc:      TextView
-    private lateinit var partsSection:   LinearLayout
-    private lateinit var partsContainer: LinearLayout
+    // -------------------------------------------------------------------------
+    // State
+    // -------------------------------------------------------------------------
 
     private var currentModelNode:  ModelNode? = null
-    private var currentEntry:      DtcEntry?  = null
+    private var currentEntry:      DtcGuide?  = null
     private var currentSlideIndex: Int        = 0
     private var isCameraLocked:    Boolean    = true
 
@@ -290,27 +86,19 @@ class DtcActivity : AppCompatActivity() {
         topScroll        = findViewById(R.id.topScroll)
         slidePanel       = findViewById(R.id.slidePanel)
         checklistOverlay = findViewById(R.id.checklistOverlay)
-
-        btnPrev       = findViewById(R.id.btnPrev)
-        btnNext       = findViewById(R.id.btnNext)
-        //btnCameraLock = findViewById(R.id.btnCameraLock)
-        slideTitle    = findViewById(R.id.slideTitle)
-        slideDesc     = findViewById(R.id.slideDesc)
-        //  = findViewById(R.id.tvCameraInfo)
-        lockOverlay   = findViewById(R.id.lockOverlay)
-        //tab3D         = findViewById(R.id.tab3D)
-        //tabOBD        = findViewById(R.id.tabOBD)
-
-        overlayTitle       = findViewById(R.id.overlayTitle)
+        btnPrev          = findViewById(R.id.btnPrev)
+        btnNext          = findViewById(R.id.btnNext)
+        slideTitle       = findViewById(R.id.slideTitle)
+        slideDesc        = findViewById(R.id.slideDesc)
+        lockOverlay      = findViewById(R.id.lockOverlay)
+        overlayTitle     = findViewById(R.id.overlayTitle)
         checklistContainer = findViewById(R.id.checklistContainer)
-
-        infoCard       = findViewById(R.id.infoCard)
-        tvDtcCode      = findViewById(R.id.tvDtcCode)
-        tvDtcName      = findViewById(R.id.tvDtcName)
-        //tvSeverity     = findViewById(R.id.tvSeverity)
-        tvDtcDesc      = findViewById(R.id.tvDtcDesc)
-        partsSection   = findViewById(R.id.partsSection)
-        partsContainer = findViewById(R.id.partsContainer)
+        infoCard         = findViewById(R.id.infoCard)
+        tvDtcCode        = findViewById(R.id.tvDtcCode)
+        tvDtcName        = findViewById(R.id.tvDtcName)
+        tvDtcDesc        = findViewById(R.id.tvDtcDesc)
+        partsSection     = findViewById(R.id.partsSection)
+        partsContainer   = findViewById(R.id.partsContainer)
 
         modelLoader = ModelLoader(sceneView.engine, this)
 
@@ -327,7 +115,7 @@ class DtcActivity : AppCompatActivity() {
     }
 
     // -------------------------------------------------------------------------
-    // DTC Spinner
+    // Spinner — populated from dtcGuides registry
     // -------------------------------------------------------------------------
 
     private fun setupDtcSpinner() {
@@ -352,17 +140,16 @@ class DtcActivity : AppCompatActivity() {
     }
 
     // -------------------------------------------------------------------------
-    // Load a DTC entry
+    // Load a guide entry — populate info card then load GLB
     // -------------------------------------------------------------------------
 
-    private fun loadDtcEntry(entry: DtcEntry) {
+    private fun loadDtcEntry(entry: DtcGuide) {
         currentEntry      = entry
         currentSlideIndex = 0
 
-        tvDtcCode.text  = entry.code
-        tvDtcName.text  = entry.name
-        tvDtcDesc.text  = entry.description
-        //tvSeverity.text = entry.severity
+        tvDtcCode.text = entry.code
+        tvDtcName.text = entry.name
+        tvDtcDesc.text = entry.description
 
         partsContainer.removeAllViews()
         entry.parts.forEach { part ->
@@ -385,10 +172,10 @@ class DtcActivity : AppCompatActivity() {
     }
 
     // -------------------------------------------------------------------------
-    // Model loading — no GLB animation
+    // Model loading
     // -------------------------------------------------------------------------
 
-    private fun loadModel(fileName: String, slides: List<CameraSlide>) {
+    private fun loadModel(fileName: String, slides: List<DtcSlide>) {
         lifecycleScope.launch {
             currentModelNode?.let {
                 sceneView.removeChildNode(it)
@@ -409,7 +196,7 @@ class DtcActivity : AppCompatActivity() {
             slideTitle.text   = slides[0].title
             slideDesc.text    = slides[0].description
             goToSlide(0, animated = false)
-
+            updateUiState()
         }
     }
 
@@ -426,8 +213,6 @@ class DtcActivity : AppCompatActivity() {
     // -------------------------------------------------------------------------
 
     private fun setupControls() {
-
-
         btnPrev.setOnClickListener {
             if (!isCameraLocked) return@setOnClickListener
             currentEntry ?: return@setOnClickListener
@@ -435,7 +220,7 @@ class DtcActivity : AppCompatActivity() {
             sceneView.cameraManipulator = null
             currentSlideIndex = to
             goToSlide(to, animated = true)
-
+            updateUiState()
         }
 
         btnNext.setOnClickListener {
@@ -445,12 +230,10 @@ class DtcActivity : AppCompatActivity() {
             sceneView.cameraManipulator = null
             currentSlideIndex = to
             goToSlide(to, animated = true)
-
+            updateUiState()
         }
 
-
-
-
+        updateUiState()
     }
 
     private fun setCameraLockState(locked: Boolean) {
@@ -468,10 +251,14 @@ class DtcActivity : AppCompatActivity() {
             val p = sceneView.cameraNode.position
             currentCameraEye = Vec3(p.x, p.y, p.z)
         }
-
+        updateUiState()
     }
 
-
+    private fun updateUiState() {
+        val entry = currentEntry
+        btnPrev.isEnabled = isCameraLocked && currentSlideIndex > 0
+        btnNext.isEnabled = isCameraLocked && entry != null && currentSlideIndex < entry.slides.lastIndex
+    }
 
     // -------------------------------------------------------------------------
     // Slide navigation
@@ -498,10 +285,10 @@ class DtcActivity : AppCompatActivity() {
 
         if (animated) {
             animateCameraPose(
-                startEye  = currentCameraEye,
-                startLook = currentOrbitTarget,
-                endEye    = slide.eye,
-                endLook   = slide.lookAt,
+                startEye   = currentCameraEye,
+                startLook  = currentOrbitTarget,
+                endEye     = slide.eye,
+                endLook    = slide.lookAt,
                 durationMs = 650L
             )
         } else {
@@ -555,8 +342,6 @@ class DtcActivity : AppCompatActivity() {
             setCamera(endEye, endLook)
         }
     }
-
-
 
     private fun lerp(a: Float, b: Float, t: Float) = a + (b - a) * t
 
