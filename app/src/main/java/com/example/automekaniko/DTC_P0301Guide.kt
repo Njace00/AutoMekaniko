@@ -13,7 +13,7 @@ val P0301Guide = DtcGuide(
     description = "A misfire in cylinder 1 means the fuel-air mixture is not igniting " +
             "correctly. Common causes: faulty spark plug, ignition coil, or injector.",
     parts       = listOf("Spark plug", "Ignition coil", "Fuel injector", "Coil boot"),
-    glbFile     = "vios engine-tutor(P0301)misfire.glb",
+    glbFile     = "vios engine-tutor-Wanimation_P0301.glb",
     slides      = listOf(
 
         DtcSlide(
