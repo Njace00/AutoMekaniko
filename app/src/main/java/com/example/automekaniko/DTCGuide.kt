@@ -1,7 +1,8 @@
 package com.example.automekaniko
 
-// Shared data classes — all DTC guide files and DtcActivity use these.
-// Do not put any logic here, just data shapes.
+// Shared data classes for the DTC guide system only.
+// Vec3 here is top-level — MAINTAINANCEActivity and SceneViewActivity
+// have their OWN inner Vec3 scoped inside those classes, so no conflict.
 
 data class Vec3(val x: Float, val y: Float, val z: Float)
 
@@ -10,7 +11,9 @@ data class DtcSlide(
     val description: String,
     val eye: Vec3,
     val lookAt: Vec3,
-    val steps: List<String> = emptyList()
+    val steps: List<String> = emptyList(),
+    val animationStartTime: Float = 0f,
+    val animationTime: Float = 0f
 )
 
 data class DtcGuide(
@@ -19,5 +22,6 @@ data class DtcGuide(
     val description: String,
     val parts: List<String>,
     val glbFile: String,
+    val animationClipStartTimes: List<Float> = emptyList(),
     val slides: List<DtcSlide>
 )

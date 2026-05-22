@@ -1,7 +1,7 @@
 package com.example.automekaniko
 
-import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -10,6 +10,7 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -25,7 +26,6 @@ import kotlinx.coroutines.launch
 
 class DtcActivity : AppCompatActivity() {
 
-    // Data comes entirely from DtcGuideRegistry.kt — nothing hardcoded here.
     private val dtcList = dtcGuides
 
     // -------------------------------------------------------------------------
@@ -62,7 +62,7 @@ class DtcActivity : AppCompatActivity() {
     private var isCameraLocked:    Boolean    = true
 
     private var cameraAnimJob: Job? = null
-    private var cameraInfoJob: Job? = null
+    private var animScrubJob:  Job? = null
 
     private var currentCameraEye   = Vec3(0f, 0f, 0f)
     private var currentOrbitTarget = Vec3(0f, 0.5f, 0f)
@@ -73,6 +73,20 @@ class DtcActivity : AppCompatActivity() {
     private var savedManipulator:    CameraGestureDetector.CameraManipulator? = null
     private var manipulatorCaptured: Boolean = false
 
+    private var currentAnimTime: Float = 0f
+
+    // SceneView's render loop auto-advances the animator every frame.
+    // We freeze the pose by re-stamping lockedAnimTime on every onFrame callback.
+    // During scrubbing this tracks the in-progress value; at rest it holds the
+    // target slide time so the pose stays frozen between slides.
+    private var lockedAnimTime: Float = 0f
+
+    // FIX: When true, onFrame backs off so the scrub coroutine has full control
+    // of the animator. Without this flag, onFrame re-stamps the old lockedAnimTime
+    // on every render frame between coroutine delay() steps, causing the model to
+    // snap back to the previous slide's pose mid-scrub.
+    private var isScrubbing: Boolean = false
+
     // -------------------------------------------------------------------------
     // Lifecycle
     // -------------------------------------------------------------------------
@@ -81,26 +95,40 @@ class DtcActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_3d_dtc_guide)
 
-        sceneView        = findViewById(R.id.sceneView)
-        dtcSpinner       = findViewById(R.id.dtcSpinner)
-        topScroll        = findViewById(R.id.topScroll)
-        slidePanel       = findViewById(R.id.slidePanel)
-        checklistOverlay = findViewById(R.id.checklistOverlay)
-        btnPrev          = findViewById(R.id.btnPrev)
-        btnNext          = findViewById(R.id.btnNext)
-        slideTitle       = findViewById(R.id.slideTitle)
-        slideDesc        = findViewById(R.id.slideDesc)
-        lockOverlay      = findViewById(R.id.lockOverlay)
-        overlayTitle     = findViewById(R.id.overlayTitle)
+        sceneView          = findViewById(R.id.sceneView)
+        dtcSpinner         = findViewById(R.id.dtcSpinner)
+        topScroll          = findViewById(R.id.topScroll)
+        slidePanel         = findViewById(R.id.slidePanel)
+        checklistOverlay   = findViewById(R.id.checklistOverlay)
+        btnPrev            = findViewById(R.id.btnPrev)
+        btnNext            = findViewById(R.id.btnNext)
+        slideTitle         = findViewById(R.id.slideTitle)
+        slideDesc          = findViewById(R.id.slideDesc)
+        lockOverlay        = findViewById(R.id.lockOverlay)
+        overlayTitle       = findViewById(R.id.overlayTitle)
         checklistContainer = findViewById(R.id.checklistContainer)
-        infoCard         = findViewById(R.id.infoCard)
-        tvDtcCode        = findViewById(R.id.tvDtcCode)
-        tvDtcName        = findViewById(R.id.tvDtcName)
-        tvDtcDesc        = findViewById(R.id.tvDtcDesc)
-        partsSection     = findViewById(R.id.partsSection)
-        partsContainer   = findViewById(R.id.partsContainer)
+        infoCard           = findViewById(R.id.infoCard)
+        tvDtcCode          = findViewById(R.id.tvDtcCode)
+        tvDtcName          = findViewById(R.id.tvDtcName)
+        tvDtcDesc          = findViewById(R.id.tvDtcDesc)
+        partsSection       = findViewById(R.id.partsSection)
+        partsContainer     = findViewById(R.id.partsContainer)
 
         modelLoader = ModelLoader(sceneView.engine, this)
+
+        // Re-stamp lockedAnimTime on every frame across ALL tracks so SceneView's
+        // internal render loop cannot advance the animation past our frozen pose.
+        // FIX: Only stamp when NOT scrubbing — during a scrub the coroutine owns
+        // lockedAnimTime and onFrame must not interfere.
+        sceneView.onFrame = { _ ->
+            if (!isScrubbing) {
+                val animator = currentModelNode?.modelInstance?.animator
+                if (animator != null) {
+                    applyAnimationClips(animator, lockedAnimTime)
+                    animator.updateBoneMatrices()
+                }
+            }
+        }
 
         captureManipulatorOnce()
         setupDtcSpinner()
@@ -110,12 +138,12 @@ class DtcActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         cameraAnimJob?.cancel()
-        cameraInfoJob?.cancel()
+        animScrubJob?.cancel()
         super.onDestroy()
     }
 
     // -------------------------------------------------------------------------
-    // Spinner — populated from dtcGuides registry
+    // Spinner
     // -------------------------------------------------------------------------
 
     private fun setupDtcSpinner() {
@@ -140,12 +168,14 @@ class DtcActivity : AppCompatActivity() {
     }
 
     // -------------------------------------------------------------------------
-    // Load a guide entry — populate info card then load GLB
+    // Load entry
     // -------------------------------------------------------------------------
 
     private fun loadDtcEntry(entry: DtcGuide) {
         currentEntry      = entry
         currentSlideIndex = 0
+        currentAnimTime   = 0f
+        lockedAnimTime    = 0f
 
         tvDtcCode.text = entry.code
         tvDtcName.text = entry.name
@@ -164,7 +194,6 @@ class DtcActivity : AppCompatActivity() {
 
         infoCard.visibility         = View.VISIBLE
         partsSection.visibility     = View.VISIBLE
-        topScroll.visibility        = View.VISIBLE
         slidePanel.visibility       = View.VISIBLE
         checklistOverlay.visibility = View.VISIBLE
 
@@ -180,23 +209,46 @@ class DtcActivity : AppCompatActivity() {
             currentModelNode?.let {
                 sceneView.removeChildNode(it)
                 it.destroy()
+                currentModelNode = null
             }
 
-            val instance  = modelLoader.createModelInstance(assetFileLocation = fileName)
-            val modelNode = ModelNode(instance, scaleToUnits = 1.5f).apply {
+            Log.d("DtcActivity", "Loading GLB: $fileName")
+            val instance = try {
+                modelLoader.createModelInstance(assetFileLocation = fileName)
+            } catch (e: Exception) {
+                Log.e("DtcActivity", "Exception loading GLB: $fileName", e)
+                null
+            }
+
+            if (instance == null) {
+                Log.e("DtcActivity", "GLB not found or failed to load: $fileName")
+                Toast.makeText(
+                    this@DtcActivity,
+                    "Could not load model: $fileName\nCheck assets folder.",
+                    Toast.LENGTH_LONG
+                ).show()
+                return@launch
+            }
+
+            val modelNode = ModelNode(
+                modelInstance = instance,
+                autoAnimate = false,
+                scaleToUnits = 1.5f
+            ).apply {
                 isEditable = !isCameraLocked
+                playingAnimations.clear()
             }
 
             sceneView.addChildNode(modelNode)
             currentModelNode = modelNode
 
+            // Lock at time 0 immediately so onFrame holds the first pose
+            lockedAnimTime = 0f
+            applyAnimationTime(0f)
             applyCustomStartCamera()
 
             currentSlideIndex = 0
-            slideTitle.text   = slides[0].title
-            slideDesc.text    = slides[0].description
             goToSlide(0, animated = false)
-            updateUiState()
         }
     }
 
@@ -205,6 +257,81 @@ class DtcActivity : AppCompatActivity() {
         lifecycleScope.launch {
             delay(32L)
             setCamera(startEye, startLookAt)
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Animation — stamp a pose, then lock there
+    // -------------------------------------------------------------------------
+
+    // Stamps the given global time across ALL animation tracks and updates lockedAnimTime
+    // so onFrame continues holding that pose every subsequent frame. Some GLB clips
+    // end earlier than the full tutorial timeline, so clamp each clip individually
+    // to keep completed parts frozen at their last keyed pose.
+    private fun applyAnimationTime(time: Float) {
+        val animator = currentModelNode?.modelInstance?.animator ?: return
+        lockedAnimTime  = time
+        currentAnimTime = time
+        applyAnimationClips(animator, time)
+        animator.updateBoneMatrices()
+    }
+
+    private fun applyAnimationClips(
+        animator: com.google.android.filament.gltfio.Animator,
+        time: Float
+    ) {
+        val clipStartTimes = currentEntry?.animationClipStartTimes.orEmpty()
+        repeat(animator.animationCount) { i ->
+            val clipStartTime = clipStartTimes.getOrNull(i) ?: 0f
+            if (time >= clipStartTime) {
+                animator.applyAnimation(i, clampedAnimationTime(animator, i, time))
+            }
+        }
+    }
+
+    private fun clampedAnimationTime(
+        animator: com.google.android.filament.gltfio.Animator,
+        animationIndex: Int,
+        time: Float
+    ): Float {
+        val duration = animator.getAnimationDuration(animationIndex)
+        return time.coerceIn(0f, duration)
+    }
+
+    // Per-slide scrub:
+    //   1. Set isScrubbing = true so onFrame backs off completely
+    //   2. Instantly JUMP to slideStartTime (no interpolation — skips irrelevant frames)
+    //   3. Smoothly SCRUB from slideStartTime → targetTime
+    //   4. FREEZE at targetTime, then hand control back to onFrame via isScrubbing = false
+    private fun scrubAnimationTo(
+        slideStartTime: Float,
+        targetTime: Float,
+        durationMs: Long = 650L
+    ) {
+        animScrubJob?.cancel()
+        animScrubJob = lifecycleScope.launch {
+
+            // FIX: Disable onFrame stamping so it cannot fight our jump/scrub
+            isScrubbing = true
+
+            // Step 1: instant jump to the slide's start frame
+            applyAnimationTime(slideStartTime)
+
+            // Step 2: smooth scrub from start → target
+            val steps     = 30
+            val stepDelay = (durationMs / steps).coerceAtLeast(1L)
+            repeat(steps) { i ->
+                val t     = (i + 1) / steps.toFloat()
+                val eased = easeInOutCubic(t)
+                applyAnimationTime(lerp(slideStartTime, targetTime, eased))
+                delay(stepDelay)
+            }
+
+            // Step 3: snap to exact target and freeze
+            applyAnimationTime(targetTime)
+
+            // FIX: Hand control back to onFrame — it will now hold this pose every frame
+            isScrubbing = false
         }
     }
 
@@ -220,7 +347,6 @@ class DtcActivity : AppCompatActivity() {
             sceneView.cameraManipulator = null
             currentSlideIndex = to
             goToSlide(to, animated = true)
-            updateUiState()
         }
 
         btnNext.setOnClickListener {
@@ -230,10 +356,7 @@ class DtcActivity : AppCompatActivity() {
             sceneView.cameraManipulator = null
             currentSlideIndex = to
             goToSlide(to, animated = true)
-            updateUiState()
         }
-
-        updateUiState()
     }
 
     private fun setCameraLockState(locked: Boolean) {
@@ -251,13 +374,6 @@ class DtcActivity : AppCompatActivity() {
             val p = sceneView.cameraNode.position
             currentCameraEye = Vec3(p.x, p.y, p.z)
         }
-        updateUiState()
-    }
-
-    private fun updateUiState() {
-        val entry = currentEntry
-        btnPrev.isEnabled = isCameraLocked && currentSlideIndex > 0
-        btnNext.isEnabled = isCameraLocked && entry != null && currentSlideIndex < entry.slides.lastIndex
     }
 
     // -------------------------------------------------------------------------
@@ -291,8 +407,16 @@ class DtcActivity : AppCompatActivity() {
                 endLook    = slide.lookAt,
                 durationMs = 650L
             )
+            // Jump to this slide's start frame, then scrub to its pause frame
+            scrubAnimationTo(
+                slideStartTime = slide.animationStartTime,
+                targetTime     = slide.animationTime,
+                durationMs     = 650L
+            )
         } else {
             setCamera(slide.eye, slide.lookAt)
+            // Non-animated (first load): snap directly to the pause frame
+            applyAnimationTime(slide.animationTime)
         }
     }
 
