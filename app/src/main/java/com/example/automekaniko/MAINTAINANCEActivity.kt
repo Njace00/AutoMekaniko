@@ -23,6 +23,8 @@ import kotlin.math.sqrt
 
 class MAINTAINANCEActivity : AppCompatActivity() {
 
+    private val guideList = maintenanceGuides
+
     data class Vec3(val x: Float, val y: Float, val z: Float)
 
     data class CameraSlide(
@@ -30,7 +32,9 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         val description: String,
         val eye: Vec3,
         val lookAt: Vec3,
-        val steps: List<String> = emptyList()
+        val steps: List<String> = emptyList(),
+        val animationStartTime: Float = 0f,
+        val animationTime: Float = 0f
     )
 
     private lateinit var sceneView: SceneView
@@ -54,11 +58,14 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     private lateinit var checklistContainer: android.widget.LinearLayout
 
     private var currentModelNode: ModelNode? = null
+    private var currentGuide: MaintenanceGuide? = null
+    private var currentSlides: List<CameraSlide> = emptyList()
     private var currentSlideIndex = 0
     private var isCameraLocked = true
 
     private var cameraAnimJob: Job? = null
     private var cameraInfoJob: Job? = null
+    private var animScrubJob: Job? = null
 
     private var currentCameraEye    = Vec3(0f, 0f, 0f)
     private var currentOrbitTarget  = Vec3(0f, 0.5f, 0f)
@@ -69,116 +76,9 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     private var savedManipulator: CameraGestureDetector.CameraManipulator? = null
     private var manipulatorCaptured = false
 
-    private val hoodAnimationIndex = 0
-
-    private val slides = listOf(
-        CameraSlide(
-            title = "Vehicle Overview",
-            description = "This is the Preview of the Vehicle...",
-            eye = Vec3(-1.57f, 0.77f, -1.34f),
-            lookAt = Vec3(0.00f, 0.10f, 0.00f),
-            steps = listOf(
-                "Walk around the vehicle",
-                "Check for visible damage",
-                "Inspect undercarriage"
-            )
-        ),
-        CameraSlide(
-            title = "Vehicle Overview2",
-            description = "This is the Preview of the Vehicle...",
-            eye = Vec3(-1.57f, 0.77f, -1.34f),
-            lookAt = Vec3(0.00f, 0.10f, 0.00f),
-            steps = listOf(
-                "Check body panels",
-                "Inspect windshield and glass",
-                "Check mirrors and wipers"
-            )
-        ),
-        CameraSlide(
-            title = "Battery",
-            description = "Check Battery...",
-            eye = Vec3(-0.15f, 0.37f, -0.74f),
-            lookAt = Vec3(0.00f, 0.10f, 0.00f),
-            steps = listOf(
-                "Check terminal connections",
-                "Look for corrosion or leaks",
-                "Verify voltage is 12.4–12.7V",
-                "Inspect battery case for swelling"
-            )
-        ),
-        CameraSlide(
-            title = "Lights",
-            description = "Check all Lights:...",
-            eye = Vec3(-0.01f, 0.55f, -1.25f),
-            lookAt = Vec3(-0.01f, 0.10f, 0.00f),
-            steps = listOf(
-                "Test headlights (low & high beam)",
-                "Check tail lights and brake lights",
-                "Test turn signals front and rear",
-                "Check reverse and hazard lights"
-            )
-        ),
-        CameraSlide(
-            title = "Oil",
-            description = "Check your oil, and oil level..",
-            eye = Vec3(0.07f, 0.37f, -0.74f),
-            lookAt = Vec3(0.00f, -0.3f, 0.00f),
-            steps = listOf(
-                "Pull out dipstick and wipe clean",
-                "Reinsert and check oil level",
-                "Check oil color (should be amber)",
-                "Look for milky or gritty texture"
-            )
-        ),
-        CameraSlide(
-            title = "Water",
-            description = "Check Water Radiator Level...",
-            eye = Vec3(-0.01f, 0.37f, -0.69f),
-            lookAt = Vec3(0.00f, -0.6f, 0.00f),
-            steps = listOf(
-                "Check coolant reservoir level",
-                "Inspect for leaks around hoses",
-                "Check radiator cap condition",
-                "Verify coolant color is clean"
-            )
-        ),
-        CameraSlide(
-            title = "Brake",
-            description = "Check Brake...",
-            eye = Vec3(-0.7f, 0.15f, -1.2f),
-            lookAt = Vec3(0.00f, 0f, 0.00f),
-            steps = listOf(
-                "Inspect brake pad thickness",
-                "Check rotor surface for grooves",
-                "Look for brake fluid leaks",
-                "Test brake pedal feel and travel"
-            )
-        ),
-        CameraSlide(
-            title = "Tire Air Pressure",
-            description = "Check tire...",
-            eye = Vec3(0.7f, 0.15f, -1.2f),
-            lookAt = Vec3(0.00f, 0f, 0.00f),
-            steps = listOf(
-                "Check pressure on all 4 tires",
-                "Inspect tread depth",
-                "Look for cracks or bulges",
-                "Check spare tire pressure"
-            )
-        ),
-        CameraSlide(
-            title = "Engine",
-            description = "Inspect for Unusual Engine Behaviors and Sounds",
-            eye = Vec3(-0.03f, 0.50f, -0.770f),
-            lookAt = Vec3(0.10f, -0.20f, 0.00f),
-            steps = listOf(
-                "Listen for unusual sounds",
-                "Check for smoke or burning smell",
-                "Inspect belts and hoses",
-                "Check air filter condition"
-            )
-        ),
-    )
+    private var lockedAnimTime: Float = 0f
+    private var currentAnimTime: Float = 0f
+    private var isScrubbing: Boolean = false
 
     // ─────────────────────────────────────────────────────────────────────────
     //  Lifecycle
@@ -207,7 +107,11 @@ class MAINTAINANCEActivity : AppCompatActivity() {
 
         modelLoader = ModelLoader(sceneView.engine, this)
 
-        sceneView.onFrame = { enforceHoodPoseBySlide() }
+        sceneView.onFrame = { _ ->
+            if (!isScrubbing) {
+                applyAnimationTime(lockedAnimTime)
+            }
+        }
 
         captureManipulatorOnce()
         setupModelSelector()
@@ -219,6 +123,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     override fun onDestroy() {
         cameraAnimJob?.cancel()
         cameraInfoJob?.cancel()
+        animScrubJob?.cancel()
         super.onDestroy()
     }
 
@@ -243,13 +148,11 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     }
 
     private fun setupModelSelector() {
-        val models = assets.list("")?.filter { it.endsWith(".glb") }?.sorted() ?: emptyList()
-
-        if (models.isEmpty()) {
+        if (guideList.isEmpty()) {
             modelSpinner.adapter = ArrayAdapter(
                 this,
                 android.R.layout.simple_spinner_item,
-                listOf("No models found")
+                listOf("No maintenance guides found")
             )
             return
         }
@@ -257,16 +160,23 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         modelSpinner.adapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_item,
-            models
+            guideList.map { it.name }
         ).also { it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
 
         modelSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 (view as? TextView)?.setTextColor(0xFFFFD700.toInt())
-                loadModel(models[position])
+                loadGuide(guideList[position])
             }
             override fun onNothingSelected(parent: AdapterView<*>) = Unit
         }
+    }
+
+    private fun loadGuide(guide: MaintenanceGuide) {
+        currentGuide = guide
+        currentSlides = guide.slides
+        currentSlideIndex = 0
+        loadModel(guide.glbFile)
     }
 
     private fun setupControls() {
@@ -281,7 +191,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
 
         btnNext.setOnClickListener {
             if (!isCameraLocked) return@setOnClickListener
-            val to = (currentSlideIndex + 1).coerceAtMost(slides.lastIndex)
+            val to = (currentSlideIndex + 1).coerceAtMost(currentSlides.lastIndex)
             sceneView.cameraManipulator = null
             currentSlideIndex = to
             goToSlide(to, animated = true)
@@ -318,7 +228,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     private fun updateUiState() {
         btnCameraLock.text = if (isCameraLocked) "Camera: LOCK" else "Camera: FREE"
         btnPrev.isEnabled  = isCameraLocked && currentSlideIndex > 0
-        btnNext.isEnabled  = isCameraLocked && currentSlideIndex < slides.lastIndex
+        btnNext.isEnabled  = isCameraLocked && currentSlideIndex < currentSlides.lastIndex
     }
 
     private fun loadModel(fileName: String) {
@@ -329,8 +239,13 @@ class MAINTAINANCEActivity : AppCompatActivity() {
             }
 
             val instance  = modelLoader.createModelInstance(assetFileLocation = fileName)
-            val modelNode = ModelNode(instance, scaleToUnits = 1.5f).apply {
+            val modelNode = ModelNode(
+                modelInstance = instance,
+                autoAnimate = false,
+                scaleToUnits = 1.5f
+            ).apply {
                 isEditable = !isCameraLocked
+                playingAnimations.clear()
             }
 
             modelNode.modelInstance.animator?.let { animator ->
@@ -344,9 +259,44 @@ class MAINTAINANCEActivity : AppCompatActivity() {
             applyCustomStartCamera()
 
             currentSlideIndex  = 0
-            slideTitle.text    = slides[currentSlideIndex].title
-            slideDesc.text     = slides[currentSlideIndex].description
+            goToSlide(currentSlideIndex, animated = false)
             updateUiState()
+        }
+    }
+
+    private fun applyAnimationTime(time: Float) {
+        val animator = currentModelNode?.modelInstance?.animator ?: return
+        lockedAnimTime = time
+        currentAnimTime = time
+        repeat(animator.animationCount) { i ->
+            val duration = animator.getAnimationDuration(i)
+            animator.applyAnimation(i, time.coerceIn(0f, duration))
+        }
+        animator.updateBoneMatrices()
+    }
+
+    private fun scrubAnimationTo(
+        slideStartTime: Float,
+        targetTime: Float,
+        durationMs: Long = 650L
+    ) {
+        animScrubJob?.cancel()
+        animScrubJob = lifecycleScope.launch {
+            isScrubbing = true
+
+            applyAnimationTime(slideStartTime)
+
+            val steps = 30
+            val stepDelay = (durationMs / steps).coerceAtLeast(1L)
+            repeat(steps) { i ->
+                val t = (i + 1) / steps.toFloat()
+                val eased = easeInOutCubic(t)
+                applyAnimationTime(lerp(slideStartTime, targetTime, eased))
+                delay(stepDelay)
+            }
+
+            applyAnimationTime(targetTime)
+            isScrubbing = false
         }
     }
 
@@ -359,7 +309,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     }
 
     private fun goToSlide(index: Int, animated: Boolean) {
-        val slide = slides[index]
+        val slide = currentSlides.getOrNull(index) ?: return
         slideTitle.text = slide.title
         slideDesc.text  = slide.description
 
@@ -384,19 +334,15 @@ class MAINTAINANCEActivity : AppCompatActivity() {
                 endLook   = slide.lookAt,
                 durationMs = 650L
             )
+            scrubAnimationTo(
+                slideStartTime = slide.animationStartTime,
+                targetTime = slide.animationTime,
+                durationMs = 650L
+            )
         } else {
             setCamera(slide.eye, slide.lookAt)
+            applyAnimationTime(slide.animationTime)
         }
-    }
-
-    private fun enforceHoodPoseBySlide() {
-        val modelNode = currentModelNode ?: return
-        val animator  = modelNode.modelInstance.animator ?: return
-        val duration  = animator.getAnimationDuration(hoodAnimationIndex)
-        val end = (duration - 0.001f).coerceAtLeast(0f)
-        val t   = if (currentSlideIndex >= 1) end else 0f
-        animator.applyAnimation(hoodAnimationIndex, t)
-        animator.updateBoneMatrices()
     }
 
     private fun setCamera(cameraPos: Vec3, lookTarget: Vec3) {

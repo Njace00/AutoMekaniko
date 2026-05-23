@@ -29,89 +29,127 @@ val P0301Guide = DtcGuide(
     animationClipStartTimes = listOf(f(0)),
     slides      = listOf(
 
+
         DtcSlide(
             title              = "Overview",
             description        = "Full view of the engine before any parts are removed.",
             eye                = Vec3(-1.57f, 0.77f, -1.34f),
             lookAt             = Vec3(0.00f,  0.10f,  0.00f),
-            animationStartTime = f(0),    // start at frame 0
-            animationTime      = f(0),    // freeze at frame 0 — nothing moves yet
+            animationStartTime = f(0),
+            animationTime      = f(0),
             steps              = listOf(
-                "Open the hood",
-                "Locate the engine bank",
-                "Find cylinder 1 (front-most)"
+                "test",
+                "test",
+                "test"
             )
         ),
+
 
         DtcSlide(
             title              = "Remove Engine Top Cover",
             description        = "Remove the plastic top cover to access the ignition coils.",
             eye                = Vec3(0.04f, 0.39f, -0.84f),
             lookAt             = Vec3(0.10f, 0.20f,  0.00f),
-            animationStartTime = f(1),    // jump to frame 1, then scrub →
-            animationTime      = f(50),   // freeze at frame 40
+            animationStartTime = f(1),
+            animationTime      = f(50),
             steps              = listOf(
-                "Locate the plastic engine cover",
-                "Pull upward firmly to unclip",
-                "Set aside safely"
+                "test",
+                "test",
+                "test"
             )
         ),
+
 
         DtcSlide(
             title              = "Remove Ignition Coil",
             description        = "Disconnect and remove the ignition coil for cylinder 1.",
             eye                = Vec3(0.04f,  0.33f, -0.7774f),
             lookAt             = Vec3(0.10f,  0.20f,  0.00f),
-            animationStartTime = f(70),   // jump to frame 70, then scrub →
-            animationTime      = f(90),   // freeze at frame 90
+            animationStartTime = f(70),
+            animationTime      = f(90),
             steps              = listOf(
-                "Disconnect coil electrical connector",
-                "Remove the coil bolt (10mm)",
-                "Pull the coil straight up"
+                "test",
+                "test",
+                "test"
             )
         ),
+
 
         DtcSlide(
             title              = "Remove Spark Plug",
             description        = "Use a spark plug socket to remove the old plug.",
             eye                = Vec3(0.08f,  0.47f, -0.64f),
             lookAt             = Vec3(0.10f, -0.30f,  0.00f),
-            animationStartTime = f(100),  // jump to frame 100, then scrub →
-            animationTime      = f(130),  // freeze at frame 130
+            animationStartTime = f(100),
+            animationTime      = f(130),
             steps              = listOf(
-                "Attach spark plug socket to extension",
-                "Turn counter-clockwise to loosen",
-                "Remove plug carefully"
+                "test",
+                "test",
+                "test"
             )
         ),
 
+
         DtcSlide(
-            title              = "Inspect and Replace",
+            title              = "Inspect",
             description        = "Check gap and install the new spark plug.",
-            eye                = Vec3(-0.03f, 0.50f, -0.77f),
-            lookAt             = Vec3(0.30f, -0.20f,  0.00f),
-            animationStartTime = f(130),  // continue from where previous left off
-            animationTime      = f(150),  // freeze at frame 150
+            eye                = Vec3(0.04f,  0.33f, -0.7774f),
+            lookAt             = Vec3(0.10f,  0.20f,  0.00f),
+            animationStartTime = f(130),
+            animationTime      = f(200),
             steps              = listOf(
-                "Check gap on new plug (0.8-1.0mm)",
-                "Thread in new plug by hand",
-                "Torque to spec (20-25 Nm)",
-                "Reinstall coil and connector"
+                "test",
+                "test",
+                "test",
+                "test"
             )
         ),
 
+
         DtcSlide(
-            title              = "Clear Code and Test",
+            title              = "Replace with the new one",
             description        = "Clear the DTC and verify the fix.",
-            eye                = Vec3(-1.57f, 0.77f, -1.34f),
-            lookAt             = Vec3(0.00f,  0.10f,  0.00f),
-            animationStartTime = f(150),  // continue from previous
-            animationTime      = f(150),  // freeze — fully reassembled, nothing left to show
+            eye                = Vec3(0.04f,  0.33f, -0.7774f),
+            lookAt             = Vec3(0.10f,  0.20f,  0.00f),
+            animationStartTime = f(200),
+            animationTime      = f(250),
             steps              = listOf(
-                "Use OBD scanner to clear P0301",
-                "Start engine and let it idle",
-                "Check for misfire on live data",
-                "Test drive and rescan"
+                "test",
+                "test",
+                "test",
+                "test"
+            )
+        ),
+
+
+        DtcSlide(
+            title              = "Put back the Ignition Coil",
+            description        = "Clear the DTC and verify the fix.",
+            eye                = Vec3(0.04f,  0.33f, -0.7774f),
+            lookAt             = Vec3(0.10f,  0.20f,  0.00f),
+            animationStartTime = f(250),
+            animationTime      = f(295),
+            steps              = listOf(
+                "test",
+                "test",
+                "test",
+                "test"
+            )
+        ),
+
+
+        DtcSlide(
+            title              = "Assemble the Engine Top Cover Again",
+            description        = "Clear the DTC and verify the fix.",
+            eye                = Vec3(0.04f,  0.33f, -0.7774f),
+            lookAt             = Vec3(0.10f,  0.20f,  0.00f),
+            animationStartTime = f(300),
+            animationTime      = f(318),
+            steps              = listOf(
+                "test",
+                "test",
+                "test",
+                "test"
             )
         )
 
