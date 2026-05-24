@@ -28,17 +28,21 @@
             app:layout_constraintStart_toStartOf="parent"/>
 
         <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
+            android:id="@+id/appTitle"
+            android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginStart="8dp"
-            android:gravity="center_vertical"
+            android:gravity="center"
             android:text="AutoMekaniko"
-            android:textColor="#e02020"
-            android:textSize="20sp"
-            app:layout_constraintTop_toTopOf="parent"
+            android:textSize="22sp"
+            android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/burger"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0">
+            <!-- "Auto" in white, "Mekaniko" in red — set via SpannableString in Kotlin -->
+        </TextView>
 
         <!-- ── TAB BUTTONS ── -->
         <LinearLayout

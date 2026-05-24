@@ -46,13 +46,13 @@ val VPMCGuide = MaintenanceGuide(
                 "Verify voltage is 12.4-12.7V",
                 "Inspect battery case for swelling"
             ),
-            animationStartTime = f(70),
+            animationStartTime = f(60),
             animationTime = f(100)
         ),
         MaintenanceSlide(
             title = "Lights",
             description = "Check all Lights:...",
-            eye = MaintenanceVec3(-0.01f, 0.55f, -1.25f),
+            eye = MaintenanceVec3(-0.01f, 0.55f, -1.65f),
             lookAt = MaintenanceVec3(-0.01f, 0.10f, 0.00f),
             steps = listOf(
                 "Test headlights (low & high beam)",
@@ -60,7 +60,7 @@ val VPMCGuide = MaintenanceGuide(
                 "Test turn signals front and rear",
                 "Check reverse and hazard lights"
             ),
-            animationStartTime = f(140),
+            animationStartTime = f(100),
             animationTime = f(170)
         ),
         MaintenanceSlide(
@@ -88,7 +88,7 @@ val VPMCGuide = MaintenanceGuide(
                 "Check radiator cap condition",
                 "Verify coolant color is clean"
             ),
-            animationStartTime = f(260),
+            animationStartTime = f(240),
             animationTime = f(275)
         ),
         MaintenanceSlide(
@@ -116,7 +116,7 @@ val VPMCGuide = MaintenanceGuide(
                 "Look for cracks or bulges",
                 "Check spare tire pressure"
             ),
-            animationStartTime = f(321),
+            animationStartTime = f(315),
             animationTime = f(380)
         ),
         MaintenanceSlide(
@@ -130,7 +130,7 @@ val VPMCGuide = MaintenanceGuide(
                 "Inspect belts and hoses",
                 "Check air filter condition"
             ),
-            animationStartTime = f(380),
+            animationStartTime = f(340),
             animationTime = f(405)
         )
     )

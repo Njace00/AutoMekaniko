@@ -12,6 +12,9 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.InputType
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -114,6 +117,14 @@ class OBDActivity : AppCompatActivity() {
         setupCardLabels()
         setupFuelLevelCardLongPress()
         btnConnect.setOnClickListener { onConnectClicked() }
+
+        // ── "Auto" white, "Mekaniko" red ──────────────────────────────────────
+        val appTitle = findViewById<TextView>(R.id.appTitle)
+        val titleText = "AutoMekaniko"
+        val spannable = SpannableString(titleText)
+        spannable.setSpan(ForegroundColorSpan(0xFFFFFFFF.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannable.setSpan(ForegroundColorSpan(0xFFe02020.toInt()), 4, titleText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        appTitle.text = spannable
     }
 
     override fun onDestroy() {
@@ -504,7 +515,7 @@ class OBDActivity : AppCompatActivity() {
             }
             AlertDialog.Builder(this)
                 .setTitle("Fuel level (manual)")
-                .setMessage("Kung NO DATA ang ECU sa PID 012F, ilagay dito ang tank % (tantsa).")
+                .setMessage("Manual Input if no data(no sensor on the ECU")
                 .setView(input)
                 .setPositiveButton("OK") { d, _ ->
                     val t = input.text.toString().trim().replace(',', '.')

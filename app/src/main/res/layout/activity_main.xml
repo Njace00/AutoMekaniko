@@ -28,52 +28,21 @@
             app:layout_constraintStart_toStartOf="parent"/>
 
         <TextView
-            android:id="@+id/title"
+            android:id="@+id/appTitle"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:gravity="center"
             android:text="AutoMekaniko"
-            android:textColor="#e02020"
-            android:textSize="20sp"
+            android:textSize="22sp"
             android:textStyle="bold"
-            android:letterSpacing="0.04"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
-
-        <LinearLayout
-            android:id="@+id/tabGroup"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:layout_marginEnd="12dp"
-            android:orientation="horizontal"
-            android:clipChildren="true"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
-
-            <TextView
-                android:id="@+id/tab3D"
-                android:layout_width="80dp"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="3D View"
-                android:textSize="12sp"
-                android:textColor="#e02020"
-                android:background="@android:color/transparent"/>
-
-            <TextView
-                android:id="@+id/tabOBD"
-                android:layout_width="80dp"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="OBD Data"
-                android:textSize="12sp"
-                android:textColor="#e02020"
-                android:background="@android:color/transparent"/>
-
-        </LinearLayout>
+            app:layout_constraintVertical_bias="0.0">
+            <!-- "Auto" in white, "Mekaniko" in red — set via SpannableString in Kotlin -->
+        </TextView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

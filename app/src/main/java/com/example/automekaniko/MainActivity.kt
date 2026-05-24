@@ -2,6 +2,9 @@ package com.example.automekaniko
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -9,13 +12,20 @@ import androidx.cardview.widget.CardView
 
 class MainActivity : AppCompatActivity() {
 
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Tab bar
-        val tab3D  = findViewById<TextView>(R.id.tab3D)
-        val tabOBD = findViewById<TextView>(R.id.tabOBD)
+
+        // ── "Auto" white, "Mekaniko" red ──────────────────────────────────────
+        val appTitle = findViewById<TextView>(R.id.appTitle)
+        val titleText = "AutoMekaniko"
+        val spannable = SpannableString(titleText)
+        spannable.setSpan(ForegroundColorSpan(0xFFFFFFFF.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannable.setSpan(ForegroundColorSpan(0xFFe02020.toInt()), 4, titleText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        appTitle.text = spannable
 
         // Cards (the visible clickable areas)
         val card3D   = findViewById<CardView>(R.id.card3D)
@@ -30,10 +40,6 @@ class MainActivity : AppCompatActivity() {
         val liveTxt    = findViewById<TextView>(R.id.livetxt)
         val connectTxt = findViewById<TextView>(R.id.connecttxt)
         val settingTxt = findViewById<TextView>(R.id.settingtxt)
-
-        // Tab bar
-        tab3D.setOnClickListener  { go(GuidesActivity::class.java) }
-        tabOBD.setOnClickListener { go(OBDActivity::class.java) }
 
         // Cards
         card3D.setOnClickListener   { go(GuidesActivity::class.java) }

@@ -1,6 +1,9 @@
 package com.example.automekaniko
 
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
@@ -94,6 +97,14 @@ class DtcActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_3d_dtc_guide)
+
+        // ── "Auto" white, "Mekaniko" red ──────────────────────────────────────
+        val appTitle = findViewById<TextView>(R.id.appTitle)
+        val titleText = "AutoMekaniko"
+        val spannable = SpannableString(titleText)
+        spannable.setSpan(ForegroundColorSpan(0xFFFFFFFF.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannable.setSpan(ForegroundColorSpan(0xFFe02020.toInt()), 4, titleText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        appTitle.text = spannable
 
         sceneView          = findViewById(R.id.sceneView)
         dtcSpinner         = findViewById(R.id.dtcSpinner)
