@@ -20,7 +20,8 @@ val VPMCGuide = MaintenanceGuide(
                 "Inspect undercarriage"
             ),
             animationStartTime = f(1),
-            animationTime = f(1)
+            animationTime = f(1),
+            animationDurationMs = 650L
         ),
         MaintenanceSlide(
             title = "Vehicle Overview2",
@@ -33,7 +34,8 @@ val VPMCGuide = MaintenanceGuide(
                 "Check mirrors and wipers"
             ),
             animationStartTime = f(1),
-            animationTime = f(60)
+            animationTime = f(60),
+            animationDurationMs = 650L
         ),
         MaintenanceSlide(
             title = "Battery",
@@ -47,7 +49,8 @@ val VPMCGuide = MaintenanceGuide(
                 "Inspect battery case for swelling"
             ),
             animationStartTime = f(60),
-            animationTime = f(100)
+            animationTime = f(100),
+            animationDurationMs = 650L
         ),
         MaintenanceSlide(
             title = "Lights",
@@ -61,7 +64,8 @@ val VPMCGuide = MaintenanceGuide(
                 "Check reverse and hazard lights"
             ),
             animationStartTime = f(100),
-            animationTime = f(170)
+            animationTime = f(170),
+            animationDurationMs = 650L
         ),
         MaintenanceSlide(
             title = "Oil",
@@ -75,7 +79,8 @@ val VPMCGuide = MaintenanceGuide(
                 "Look for milky or gritty texture"
             ),
             animationStartTime = f(220),
-            animationTime = f(240)
+            animationTime = f(240),
+            animationDurationMs = 650L
         ),
         MaintenanceSlide(
             title = "Water",
@@ -89,7 +94,8 @@ val VPMCGuide = MaintenanceGuide(
                 "Verify coolant color is clean"
             ),
             animationStartTime = f(240),
-            animationTime = f(275)
+            animationTime = f(275),
+            animationDurationMs = 650L
         ),
         MaintenanceSlide(
             title = "Brake",
@@ -102,8 +108,9 @@ val VPMCGuide = MaintenanceGuide(
                 "Look for brake fluid leaks",
                 "Test brake pedal feel and travel"
             ),
-            animationStartTime = f(290),
-            animationTime = f(320)
+            animationStartTime = f(310),
+            animationTime = f(320),
+            animationDurationMs = 1050L
         ),
         MaintenanceSlide(
             title = "Tire Air Pressure",
@@ -117,7 +124,8 @@ val VPMCGuide = MaintenanceGuide(
                 "Check spare tire pressure"
             ),
             animationStartTime = f(315),
-            animationTime = f(380)
+            animationTime = f(380),
+            animationDurationMs = 1250L
         ),
         MaintenanceSlide(
             title = "Engine",
@@ -131,7 +139,9 @@ val VPMCGuide = MaintenanceGuide(
                 "Check air filter condition"
             ),
             animationStartTime = f(340),
-            animationTime = f(405)
+            animationTime = f(405),
+            animationDurationMs = 1850L
         )
     )
 )
+

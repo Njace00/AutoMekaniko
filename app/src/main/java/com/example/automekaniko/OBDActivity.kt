@@ -52,7 +52,6 @@ class OBDActivity : AppCompatActivity() {
     private lateinit var tvBleStatus:  TextView
     private lateinit var tvStatusMsg:  TextView
     private lateinit var btnConnect:   Button
-
     private lateinit var speedVal:    TextView
     private lateinit var rpmVal:      TextView
     private lateinit var coolantVal:  TextView
@@ -73,7 +72,6 @@ class OBDActivity : AppCompatActivity() {
     private lateinit var vCat2:       TextView
     private lateinit var vModVoltage: TextView
     private lateinit var vFuelRate:   TextView
-
     private var bluetoothGatt:     BluetoothGatt? = null
     private var writeChar:         BluetoothGattCharacteristic? = null
     private var notifyChar:        BluetoothGattCharacteristic? = null
@@ -81,25 +79,20 @@ class OBDActivity : AppCompatActivity() {
     private var inputStream:       InputStream?  = null
     private var outputStream:      OutputStream? = null
     private var classicConnectJob: Job? = null
-
     private var isConnected   = false
     private var isInitialized = false
     private val responseChannel = Channel<String>(capacity = Channel.UNLIMITED)
     private var pollJob: Job? = null
     private val mainHandler = Handler(Looper.getMainLooper())
-
     private val unsupportedPids = mutableSetOf<String>()
-
     // Tracks how many core cycles have run — extended sensors fire every 3rd
     private var extendedCycle = 0
-
     private val permLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { grants ->
         if (grants.all { it.value }) startBleScan()
         else toast("Permissions required for Bluetooth discovery")
     }
-
     /**
      * Optional: itakda ang fuel level (0–100) kapag walang PID 012F ang ECU.
      * I-disable: [setManualFuelLevelPercent(-1f)]
@@ -109,7 +102,6 @@ class OBDActivity : AppCompatActivity() {
         getSharedPreferences(PREF_NAME, MODE_PRIVATE).edit()
             .putFloat(KEY_FUEL_LEVEL_MANUAL, pct).apply()
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_obd_scanner)
@@ -125,6 +117,7 @@ class OBDActivity : AppCompatActivity() {
         spannable.setSpan(ForegroundColorSpan(0xFFFFFFFF.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         spannable.setSpan(ForegroundColorSpan(0xFFe02020.toInt()), 4, titleText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         appTitle.text = spannable
+        AppNavigation.wire(this)
     }
 
     override fun onDestroy() {

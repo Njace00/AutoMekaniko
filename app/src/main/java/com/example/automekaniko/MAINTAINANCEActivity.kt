@@ -37,7 +37,8 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         val lookAt: Vec3,
         val steps: List<String> = emptyList(),
         val animationStartTime: Float = 0f,
-        val animationTime: Float = 0f
+        val animationTime: Float = 0f,
+        val animationDurationMs: Long = 650L
     )
 
     private lateinit var sceneView: SceneView
@@ -97,6 +98,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         spannable.setSpan(ForegroundColorSpan(0xFFFFFFFF.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         spannable.setSpan(ForegroundColorSpan(0xFFe02020.toInt()), 4, titleText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         appTitle.text = spannable
+        AppNavigation.wire(this)
 
         sceneView    = findViewById(R.id.sceneView)
         modelSpinner = findViewById(R.id.modelSpinner)
@@ -348,7 +350,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
             scrubAnimationTo(
                 slideStartTime = slide.animationStartTime,
                 targetTime = slide.animationTime,
-                durationMs = 650L
+                durationMs = slide.animationDurationMs
             )
         } else {
             setCamera(slide.eye, slide.lookAt)

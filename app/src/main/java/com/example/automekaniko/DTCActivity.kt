@@ -105,6 +105,7 @@ class DtcActivity : AppCompatActivity() {
         spannable.setSpan(ForegroundColorSpan(0xFFFFFFFF.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         spannable.setSpan(ForegroundColorSpan(0xFFe02020.toInt()), 4, titleText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         appTitle.text = spannable
+        AppNavigation.wire(this)
 
         sceneView          = findViewById(R.id.sceneView)
         dtcSpinner         = findViewById(R.id.dtcSpinner)
@@ -422,7 +423,7 @@ class DtcActivity : AppCompatActivity() {
             scrubAnimationTo(
                 slideStartTime = slide.animationStartTime,
                 targetTime     = slide.animationTime,
-                durationMs     = 650L
+                durationMs     = slide.animationDurationMs
             )
         } else {
             setCamera(slide.eye, slide.lookAt)

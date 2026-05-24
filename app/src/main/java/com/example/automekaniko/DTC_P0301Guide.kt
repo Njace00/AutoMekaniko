@@ -8,6 +8,7 @@ package com.example.automekaniko
 //   Each slide has two time values:
 //     animationStartTime — the animation instantly jumps HERE when you enter the slide
 //     animationTime      — then scrubs smoothly TO HERE and freezes
+//     animationDurationMs — how long the scrub takes in milliseconds
 //
 //   Use f(frame) to convert frame numbers → seconds (assumes 24 fps).
 //   Example: frame 40 = f(40) = 40 / 24f = 1.667s
@@ -15,7 +16,7 @@ package com.example.automekaniko
 //   To find the right values:
 //     1. Run the app, go to this guide
 //     2. Tap through slides and watch the animation
-//     3. Adjust animationStartTime / animationTime, rebuild, repeat
+//     3. Adjust animationStartTime / animationTime / animationDurationMs, rebuild, repeat
 
 private fun f(frame: Int): Float = frame / 24f
 
@@ -37,6 +38,7 @@ val P0301Guide = DtcGuide(
             lookAt             = Vec3(0.00f,  0.10f,  0.00f),
             animationStartTime = f(0),
             animationTime      = f(0),
+            animationDurationMs = 650L,
             steps              = listOf(
                 "test",
                 "test",
@@ -52,6 +54,7 @@ val P0301Guide = DtcGuide(
             lookAt             = Vec3(0.10f, 0.20f,  0.00f),
             animationStartTime = f(1),
             animationTime      = f(50),
+            animationDurationMs = 650L,
             steps              = listOf(
                 "test",
                 "test",
@@ -67,6 +70,7 @@ val P0301Guide = DtcGuide(
             lookAt             = Vec3(0.10f,  0.20f,  0.00f),
             animationStartTime = f(70),
             animationTime      = f(90),
+            animationDurationMs = 650L,
             steps              = listOf(
                 "test",
                 "test",
@@ -82,6 +86,7 @@ val P0301Guide = DtcGuide(
             lookAt             = Vec3(0.10f, -0.30f,  0.00f),
             animationStartTime = f(100),
             animationTime      = f(130),
+            animationDurationMs = 650L,
             steps              = listOf(
                 "test",
                 "test",
@@ -97,6 +102,7 @@ val P0301Guide = DtcGuide(
             lookAt             = Vec3(0.10f,  0.20f,  0.00f),
             animationStartTime = f(130),
             animationTime      = f(200),
+            animationDurationMs = 650L,
             steps              = listOf(
                 "test",
                 "test",
@@ -113,6 +119,7 @@ val P0301Guide = DtcGuide(
             lookAt             = Vec3(0.10f,  0.20f,  0.00f),
             animationStartTime = f(200),
             animationTime      = f(250),
+            animationDurationMs = 1500L,
             steps              = listOf(
                 "test",
                 "test",
@@ -129,6 +136,7 @@ val P0301Guide = DtcGuide(
             lookAt             = Vec3(0.10f,  0.20f,  0.00f),
             animationStartTime = f(250),
             animationTime      = f(295),
+            animationDurationMs = 650L,
             steps              = listOf(
                 "test",
                 "test",
@@ -145,6 +153,7 @@ val P0301Guide = DtcGuide(
             lookAt             = Vec3(0.10f,  0.20f,  0.00f),
             animationStartTime = f(300),
             animationTime      = f(318),
+            animationDurationMs = 650L,
             steps              = listOf(
                 "test",
                 "test",
@@ -155,3 +164,5 @@ val P0301Guide = DtcGuide(
 
     )
 )
+
+

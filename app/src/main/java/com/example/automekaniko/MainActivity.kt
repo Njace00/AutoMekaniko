@@ -26,6 +26,7 @@ class MainActivity : AppCompatActivity() {
         spannable.setSpan(ForegroundColorSpan(0xFFFFFFFF.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         spannable.setSpan(ForegroundColorSpan(0xFFe02020.toInt()), 4, titleText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         appTitle.text = spannable
+        AppNavigation.wire(this)
 
         // Cards (the visible clickable areas)
         val card3D   = findViewById<CardView>(R.id.card3D)
@@ -35,12 +36,6 @@ class MainActivity : AppCompatActivity() {
         val viewBtn = findViewById<Button>(R.id.viewbtn)
         val liveBtn = findViewById<Button>(R.id.livebtn)
 
-        // Bottom nav
-        val homeTxt    = findViewById<TextView>(R.id.hometxt)
-        val liveTxt    = findViewById<TextView>(R.id.livetxt)
-        val connectTxt = findViewById<TextView>(R.id.connecttxt)
-        val settingTxt = findViewById<TextView>(R.id.settingtxt)
-
         // Cards
         card3D.setOnClickListener   { go(GuidesActivity::class.java) }
         cardLive.setOnClickListener { go(OBDActivity::class.java) }
@@ -49,11 +44,6 @@ class MainActivity : AppCompatActivity() {
         viewBtn.setOnClickListener { go(GuidesActivity::class.java) }
         liveBtn.setOnClickListener { go(OBDActivity::class.java) }
 
-        // Bottom nav
-        homeTxt.setOnClickListener    { /* already here */ }
-        liveTxt.setOnClickListener    { go(OBDActivity::class.java) }
-        connectTxt.setOnClickListener { go(OBDActivity::class.java) }
-        settingTxt.setOnClickListener { /* future settings */ }
     }
 
     private fun <T : Any> go(target: Class<T>) {
