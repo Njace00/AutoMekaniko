@@ -10,12 +10,10 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.lifecycleScope
 import io.github.sceneview.SceneView
@@ -38,7 +36,6 @@ class DtcActivity : AppCompatActivity() {
     private lateinit var sceneView:          SceneView
     private lateinit var modelLoader:        ModelLoader
     private lateinit var dtcSpinner:         Spinner
-    private lateinit var topScroll:          ScrollView
     private lateinit var slidePanel:         ConstraintLayout
     private lateinit var checklistOverlay:   LinearLayout
     private lateinit var btnPrev:            Button
@@ -48,12 +45,6 @@ class DtcActivity : AppCompatActivity() {
     private lateinit var lockOverlay:        View
     private lateinit var overlayTitle:       TextView
     private lateinit var checklistContainer: LinearLayout
-    private lateinit var infoCard:           CardView
-    private lateinit var tvDtcCode:          TextView
-    private lateinit var tvDtcName:          TextView
-    private lateinit var tvDtcDesc:          TextView
-    private lateinit var partsSection:       LinearLayout
-    private lateinit var partsContainer:     LinearLayout
 
     // -------------------------------------------------------------------------
     // State
@@ -109,7 +100,6 @@ class DtcActivity : AppCompatActivity() {
 
         sceneView          = findViewById(R.id.sceneView)
         dtcSpinner         = findViewById(R.id.dtcSpinner)
-        topScroll          = findViewById(R.id.topScroll)
         slidePanel         = findViewById(R.id.slidePanel)
         checklistOverlay   = findViewById(R.id.checklistOverlay)
         btnPrev            = findViewById(R.id.btnPrev)
@@ -119,12 +109,12 @@ class DtcActivity : AppCompatActivity() {
         lockOverlay        = findViewById(R.id.lockOverlay)
         overlayTitle       = findViewById(R.id.overlayTitle)
         checklistContainer = findViewById(R.id.checklistContainer)
-        infoCard           = findViewById(R.id.infoCard)
-        tvDtcCode          = findViewById(R.id.tvDtcCode)
-        tvDtcName          = findViewById(R.id.tvDtcName)
-        tvDtcDesc          = findViewById(R.id.tvDtcDesc)
-        partsSection       = findViewById(R.id.partsSection)
-        partsContainer     = findViewById(R.id.partsContainer)
+        //infoCard           = findViewById(R.id.infoCard)
+        //tvDtcCode          = findViewById(R.id.tvDtcCode)
+        //tvDtcName          = findViewById(R.id.tvDtcName)
+        //tvDtcDesc          = findViewById(R.id.tvDtcDesc)
+        //partsSection       = findViewById(R.id.partsSection)
+        //partsContainer     = findViewById(R.id.partsContainer)
 
         modelLoader = ModelLoader(sceneView.engine, this)
 
@@ -191,10 +181,11 @@ class DtcActivity : AppCompatActivity() {
         lockedAnimTime    = 0f
         updateUiState()
 
-        tvDtcCode.text = entry.code
-        tvDtcName.text = entry.name
-        tvDtcDesc.text = entry.description
+        //tvDtcCode.text = entry.code
+        //tvDtcName.text = entry.name
+        //tvDtcDesc.text = entry.description
 
+        /*
         partsContainer.removeAllViews()
         entry.parts.forEach { part ->
             val tv = TextView(this).apply {
@@ -205,9 +196,10 @@ class DtcActivity : AppCompatActivity() {
             }
             partsContainer.addView(tv)
         }
+        */
 
-        infoCard.visibility         = View.VISIBLE
-        partsSection.visibility     = View.VISIBLE
+        //infoCard.visibility         = View.VISIBLE
+        //partsSection.visibility     = View.VISIBLE
         slidePanel.visibility       = View.VISIBLE
         checklistOverlay.visibility = View.VISIBLE
 

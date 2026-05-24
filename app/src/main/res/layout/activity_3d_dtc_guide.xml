@@ -219,12 +219,14 @@
         Max height capped so it never covers the whole scene.
         visibility="gone" until a DTC code is selected (same as before).
     -->
-    <ScrollView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topScroll"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:clipToPadding="false"
+        android:layout_height="wrap_content"
         android:background="#CC0a0a0a"
+        android:paddingHorizontal="14dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/dtcSpinner"
         app:layout_constraintBottom_toTopOf="@id/checklistOverlay"
@@ -233,158 +235,28 @@
         app:layout_constraintHeight_max="260dp"
         app:layout_constraintVertical_bias="0.0">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="14dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp">
-
-
-            <TextView
-                android:id="@+id/pageTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:text="DTC Codes"
-                android:textColor="#ffffff"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toEndOf="parent"
-                app:layout_constraintBaseline_toBaselineOf="parent"/>
-
-            <TextView
-                android:id="@+id/pageSub"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="10dp"
-                android:text="Select a code to view the repair guide"
-                android:textColor="#888888"
-                android:textSize="12sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/pageTitle"/>
 
             <!-- DTC info card — shown once a code is selected -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/infoCard"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:visibility="gone"
-                app:cardBackgroundColor="#1e1e1e"
-                app:cardCornerRadius="10dp"
-                app:cardElevation="0dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/pageSub">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="14dp">
-
-                    <TextView
-                        android:id="@+id/tvDtcCode"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="#2a0a0a"
-                        android:paddingHorizontal="8dp"
-                        android:paddingVertical="4dp"
-                        android:text="P0301"
-                        android:textColor="#e02020"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"/>
-
-                    <TextView
-                        android:id="@+id/tvDtcName"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:text="Cylinder 1 Misfire Detected"
-                        android:textColor="#ffffff"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        app:layout_constraintStart_toEndOf="@id/tvDtcCode"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="@id/tvDtcCode"/>
 
 
 
-                    <View
-                        android:id="@+id/divider"
-                        android:layout_width="0dp"
-                        android:layout_height="1dp"
-                        android:layout_marginTop="10dp"
-                        android:background="#2e2e2e"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tvDtcName"/>
 
-                    <TextView
-                        android:id="@+id/tvDtcDesc"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:lineSpacingMultiplier="1.4"
-                        android:text="A misfire in cylinder 1 means the fuel-air mixture is not igniting correctly."
-                        android:textColor="#aaaaaa"
-                        android:textSize="12sp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/divider"/>
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Parts section -->
-            <LinearLayout
-                android:id="@+id/partsSection"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/infoCard">
-
-                <TextView
-                    android:id="@+id/partsLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="6dp"
-                    android:text="Parts you may need"
-                    android:textColor="#888888"
-                    android:textSize="11sp"/>
-
-                <LinearLayout
-                    android:id="@+id/partsContainer"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"/>
-
-            </LinearLayout>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </ScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!--
-        CHECKLIST OVERLAY — floats bottom-left of sceneView,
-        above the slidePanel. Same as maintenance layout.
+        CHECKLIST OVERLAY — floats top-right of sceneView.
     -->
     <LinearLayout
         android:id="@+id/checklistOverlay"
         android:layout_width="180dp"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
         android:orientation="vertical"
         android:background="#CC111111"
         android:padding="10dp"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/slidePanel"
-        app:layout_constraintStart_toStartOf="@id/sceneView">
+        android:layout_marginTop="70dp"
+        app:layout_constraintTop_toTopOf="@id/sceneView"
+        app:layout_constraintEnd_toEndOf="@id/sceneView">
 
         <TextView
             android:id="@+id/overlayTitle"
