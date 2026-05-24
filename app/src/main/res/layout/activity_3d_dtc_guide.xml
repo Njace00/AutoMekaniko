@@ -123,19 +123,25 @@
 
         <Button
             android:id="@+id/btnPrev"
-            android:layout_width="86dp"
-            android:layout_height="38dp"
+            android:layout_width="78dp"
+            android:layout_height="34dp"
+            android:backgroundTint="#1a1a1a"
             android:text="Prev"
             android:textAllCaps="false"
+            android:textColor="#e02020"
+            android:textSize="12sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
         <Button
             android:id="@+id/btnNext"
-            android:layout_width="86dp"
-            android:layout_height="38dp"
+            android:layout_width="78dp"
+            android:layout_height="34dp"
+            android:backgroundTint="#1a1a1a"
             android:text="Next"
             android:textAllCaps="false"
+            android:textColor="#e02020"
+            android:textSize="12sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
