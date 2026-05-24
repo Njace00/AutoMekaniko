@@ -172,6 +172,7 @@ class DtcActivity : AppCompatActivity() {
             override fun onItemSelected(
                 parent: AdapterView<*>, view: View?, position: Int, id: Long
             ) {
+                (view as? TextView)?.setTextColor(0xFFFFFFFF.toInt())
                 if (position == 0) return
                 loadDtcEntry(dtcList[position - 1])
             }
@@ -188,6 +189,7 @@ class DtcActivity : AppCompatActivity() {
         currentSlideIndex = 0
         currentAnimTime   = 0f
         lockedAnimTime    = 0f
+        updateUiState()
 
         tvDtcCode.text = entry.code
         tvDtcName.text = entry.name
@@ -261,6 +263,7 @@ class DtcActivity : AppCompatActivity() {
 
             currentSlideIndex = 0
             goToSlide(0, animated = false)
+            updateUiState()
         }
     }
 
@@ -359,6 +362,7 @@ class DtcActivity : AppCompatActivity() {
             sceneView.cameraManipulator = null
             currentSlideIndex = to
             goToSlide(to, animated = true)
+            updateUiState()
         }
 
         btnNext.setOnClickListener {
@@ -368,7 +372,10 @@ class DtcActivity : AppCompatActivity() {
             sceneView.cameraManipulator = null
             currentSlideIndex = to
             goToSlide(to, animated = true)
+            updateUiState()
         }
+
+        updateUiState()
     }
 
     private fun setCameraLockState(locked: Boolean) {
@@ -386,6 +393,15 @@ class DtcActivity : AppCompatActivity() {
             val p = sceneView.cameraNode.position
             currentCameraEye = Vec3(p.x, p.y, p.z)
         }
+        updateUiState()
+    }
+
+    private fun updateUiState() {
+        val lastSlideIndex = currentEntry?.slides?.lastIndex ?: -1
+        val hasEntry = currentEntry != null
+
+        btnPrev.isEnabled = isCameraLocked && hasEntry && currentSlideIndex > 0
+        btnNext.isEnabled = isCameraLocked && hasEntry && currentSlideIndex < lastSlideIndex
     }
 
     // -------------------------------------------------------------------------

@@ -40,9 +40,9 @@ val P0301Guide = DtcGuide(
             animationTime      = f(0),
             animationDurationMs = 650L,
             steps              = listOf(
-                "test",
-                "test",
-                "test"
+                "Ensure the engine is cool and the ignition is off",
+                "Open the hood and visually inspect the engine bay",
+                "Locate cylinder 1 — the first cylinder nearest the front of the engine"
             )
         ),
 
@@ -56,9 +56,9 @@ val P0301Guide = DtcGuide(
             animationTime      = f(50),
             animationDurationMs = 650L,
             steps              = listOf(
-                "test",
-                "test",
-                "test"
+                "Locate the plastic engine top cover",
+                "Unclip or unscrew the cover retaining bolts",
+                "Lift and set the cover aside in a safe place"
             )
         ),
 
@@ -72,9 +72,10 @@ val P0301Guide = DtcGuide(
             animationTime      = f(90),
             animationDurationMs = 650L,
             steps              = listOf(
-                "test",
-                "test",
-                "test"
+                "Locate the ignition coil on cylinder 1",
+                "Press the tab and disconnect the electrical connector",
+                "Remove the coil retaining bolt using an 8mm socket",
+                "Pull the coil straight up and out of the spark plug well"
             )
         ),
 
@@ -88,81 +89,79 @@ val P0301Guide = DtcGuide(
             animationTime      = f(130),
             animationDurationMs = 650L,
             steps              = listOf(
-                "test",
-                "test",
-                "test"
+                "Attach a spark plug socket (16mm) to an extension bar",
+                "Insert it into the spark plug well and turn counter-clockwise",
+                "Carefully remove the spark plug and set it aside for inspection"
             )
         ),
 
 
         DtcSlide(
             title              = "Inspect",
-            description        = "Check gap and install the new spark plug.",
+            description        = "Examine the old spark plug for wear, fouling, or damage.",
             eye                = Vec3(0.04f,  0.33f, -0.7774f),
             lookAt             = Vec3(0.10f,  0.20f,  0.00f),
             animationStartTime = f(130),
             animationTime      = f(200),
             animationDurationMs = 650L,
             steps              = listOf(
-                "test",
-                "test",
-                "test",
-                "test"
+                "Check the electrode for excessive wear or erosion",
+                "Look for black carbon deposits (rich mixture) or white residue (lean/overheating)",
+                "Check the gap using a feeler gauge — correct gap is typically 1.0–1.1mm",
+                "Replace the plug if worn, fouled, or gap is out of spec"
             )
         ),
 
 
         DtcSlide(
             title              = "Replace with the new one",
-            description        = "Clear the DTC and verify the fix.",
+            description        = "Install the new spark plug with the correct torque.",
             eye                = Vec3(0.04f,  0.33f, -0.7774f),
             lookAt             = Vec3(0.10f,  0.20f,  0.00f),
             animationStartTime = f(200),
             animationTime      = f(250),
             animationDurationMs = 1500L,
             steps              = listOf(
-                "test",
-                "test",
-                "test",
-                "test"
+                "Thread the new spark plug in by hand to avoid cross-threading",
+                "Tighten with a spark plug socket to 18–25 Nm (do not overtighten)",
+                "Verify the plug is seated flush and secure",
+                "Apply a small amount of dielectric grease inside the coil boot (optional)"
             )
         ),
 
 
         DtcSlide(
             title              = "Put back the Ignition Coil",
-            description        = "Clear the DTC and verify the fix.",
+            description        = "Reinstall the ignition coil onto cylinder 1.",
             eye                = Vec3(0.04f,  0.33f, -0.7774f),
             lookAt             = Vec3(0.10f,  0.20f,  0.00f),
             animationStartTime = f(250),
             animationTime      = f(295),
             animationDurationMs = 650L,
             steps              = listOf(
-                "test",
-                "test",
-                "test",
-                "test"
+                "Lower the ignition coil back into the spark plug well",
+                "Press it firmly until it seats onto the plug",
+                "Reinstall and tighten the retaining bolt",
+                "Reconnect the electrical connector until it clicks"
             )
         ),
 
 
         DtcSlide(
             title              = "Assemble the Engine Top Cover Again",
-            description        = "Clear the DTC and verify the fix.",
+            description        = "Reinstall the engine cover and verify the repair.",
             eye                = Vec3(0.04f,  0.33f, -0.7774f),
             lookAt             = Vec3(0.10f,  0.20f,  0.00f),
             animationStartTime = f(300),
             animationTime      = f(318),
             animationDurationMs = 650L,
             steps              = listOf(
-                "test",
-                "test",
-                "test",
-                "test"
+                "Place the engine top cover back into position",
+                "Clip or bolt it down securely",
+                "Start the engine and listen for smooth idle",
+                "Use an OBD scanner to clear the P0301 code and confirm no reoccurrence"
             )
         )
 
     )
 )
-
-

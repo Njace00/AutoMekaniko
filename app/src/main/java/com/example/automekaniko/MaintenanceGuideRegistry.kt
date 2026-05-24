@@ -8,5 +8,6 @@ package com.example.automekaniko
 //   3. Add it to maintenanceGuides below.
 
 val maintenanceGuides: List<MaintenanceGuide> = listOf(
-    VPMCGuide
+    VPMCGuide,
+    ChangeOilGuide,
 )

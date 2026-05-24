@@ -178,7 +178,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
 
         modelSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                (view as? TextView)?.setTextColor(0xFFFFD700.toInt())
+                (view as? TextView)?.setTextColor(0xFFFFFFFF.toInt())
                 loadGuide(guideList[position])
             }
             override fun onNothingSelected(parent: AdapterView<*>) = Unit

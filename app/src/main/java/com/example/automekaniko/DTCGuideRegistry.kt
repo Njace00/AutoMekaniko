@@ -11,6 +11,7 @@ package com.example.automekaniko
 val dtcGuides: List<DtcGuide> = listOf(
 
     P0301Guide,
+    P2118Guide,
 
     // P0420Guide,   // uncomment when you create P0420Guide.kt
     // P0171Guide,
