@@ -149,8 +149,10 @@ class DtcActivity : AppCompatActivity() {
     // -------------------------------------------------------------------------
 
     private fun setupDtcSpinner() {
-        val labels = listOf("Select a DTC code...") +
-                dtcList.map { "${it.code}  —  ${it.name}" }
+        /*val labels = listOf("Select a DTC code...") +            <- //autoload yung model
+                dtcList.map { "${it.code}  —  ${it.name}" }*/
+
+        val labels = dtcList.map { "${it.code}  —  ${it.name}" }
 
         dtcSpinner.adapter = ArrayAdapter(
             this,
@@ -163,8 +165,10 @@ class DtcActivity : AppCompatActivity() {
                 parent: AdapterView<*>, view: View?, position: Int, id: Long
             ) {
                 (view as? TextView)?.setTextColor(0xFFFFFFFF.toInt())
-                if (position == 0) return
-                loadDtcEntry(dtcList[position - 1])
+                /*if (position == 0) return                   <- //autoload yung model
+                loadDtcEntry(dtcList[position - 1])*/
+
+                loadDtcEntry(dtcList[position])
             }
             override fun onNothingSelected(parent: AdapterView<*>) = Unit
         }

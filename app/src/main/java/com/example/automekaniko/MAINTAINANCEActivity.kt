@@ -147,7 +147,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     // ─────────────────────────────────────────────────────────────────────────
 
 
-    /** Styles a tab TextView as active (gold + bold) or inactive (transparent). */
+
 
 
     // ─────────────────────────────────────────────────────────────────────────
