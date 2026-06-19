@@ -5,9 +5,9 @@ import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
+import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
 
 class GuidesActivity : AppCompatActivity() {
 
@@ -23,13 +23,43 @@ class GuidesActivity : AppCompatActivity() {
         appTitle.text = spannable
         AppNavigation.wire(this)
 
-        findViewById<CardView>(R.id.cardDtc).setOnClickListener {
+        findViewById<View>(R.id.cardDtc).setOnClickListener {
             go(DtcActivity::class.java)
         }
 
-        findViewById<CardView>(R.id.cardMaintenance).setOnClickListener {
+        findViewById<View>(R.id.cardMaintenance).setOnClickListener {
             go(MAINTAINANCEActivity::class.java)
         }
+
+        findViewById<View>(R.id.backBtn).setOnClickListener {
+            finish()
+        }
+
+        setupGuidePreviews()
+    }
+
+    private fun setupGuidePreviews() {
+        GuideCardUi.bindPreviewCards(
+            this,
+            listOf(
+                R.id.cardDtcPreview1,
+                R.id.cardDtcPreview2,
+                R.id.cardDtcPreview3,
+                R.id.cardDtcPreview4
+            ),
+            GuideCardUi.dtcPreviewCards()
+        )
+
+        GuideCardUi.bindPreviewCards(
+            this,
+            listOf(
+                R.id.cardMaintPreview1,
+                R.id.cardMaintPreview2,
+                R.id.cardMaintPreview3,
+                R.id.cardMaintPreview4
+            ),
+            GuideCardUi.maintenancePreviewCards()
+        )
     }
 
     private fun <T : Any> go(target: Class<T>) {

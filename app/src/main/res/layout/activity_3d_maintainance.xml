@@ -1,220 +1,340 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#0a0a0a">
 
-    <!-- TOP BAR -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:background="#232222"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/burger"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_margin="20sp"
-            android:gravity="center_vertical|start"
-            android:text=""
-            android:textColor="#e02020"
-            android:textSize="25sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
-
-        <TextView
             android:id="@+id/appTitle"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:gravity="center"
             android:text="AutoMekaniko"
-            android:textSize="22sp"
+            android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0">
-            <!-- "Auto" in white, "Mekaniko" in red â€” set via SpannableString in Kotlin -->
-        </TextView>
-
-        <LinearLayout
-            android:id="@+id/tabGroup"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:layout_marginEnd="12dp"
-            android:orientation="horizontal"
-            android:clipChildren="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Model selector spinner -->
-    <Spinner
-        android:id="@+id/modelSpinner"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:layout_margin="12dp"
-        android:background="@drawable/spinner_border"
-        app:layout_constraintTop_toBottomOf="@id/topBar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <!-- 3D Scene -->
-    <io.github.sceneview.SceneView
-        android:id="@+id/sceneView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/modelSpinner"
-        app:layout_constraintBottom_toTopOf="@id/slidePanel"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <!-- Lock overlay (touch blocker when camera is locked) -->
-    <View
-        android:id="@+id/lockOverlay"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="@android:color/transparent"
-        android:visibility="visible"
-        app:layout_constraintTop_toTopOf="@id/sceneView"
-        app:layout_constraintBottom_toBottomOf="@id/sceneView"
-        app:layout_constraintStart_toStartOf="@id/sceneView"
-        app:layout_constraintEnd_toEndOf="@id/sceneView"/>
-
-    <!--
-        CHECKLIST OVERLAY
-        Sits on top of the SceneView, anchored to its top-left corner.
-        Semi-transparent dark card so the 3D scene stays visible behind it.
-        Content is swapped dynamically in goToSlide() via checklistContainer.
-    -->
-    <LinearLayout
-        android:id="@+id/checklistOverlay"
-        android:layout_width="180dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/headerSection"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:orientation="vertical"
-        android:background="#CC111111"
-        android:padding="10dp"
-        app:layout_constraintTop_toTopOf="@id/sceneView"
-        app:layout_constraintStart_toStartOf="@id/sceneView">
+        android:paddingHorizontal="24dp"
+        android:paddingTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/topBar">
 
-        <!-- Slide title repeated here so it's readable without looking down -->
+        <ImageView
+            android:id="@+id/backBtn"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/abc_ic_ab_back_material"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="#e02020" />
+
         <TextView
-            android:id="@+id/overlayTitle"
+            android:id="@+id/tvMaintainanceTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Vehicle Overview"
-            android:textColor="#e02020"
+            android:layout_marginStart="12dp"
+            android:text="Maintainance"
+            android:textColor="#ffffff"
+            android:textSize="22sp"
             android:textStyle="bold"
-            android:textSize="13sp"
-            android:layout_marginBottom="6dp"/>
+            app:layout_constraintBottom_toBottomOf="@id/backBtn"
+            app:layout_constraintStart_toEndOf="@id/backBtn"
+            app:layout_constraintTop_toTopOf="@id/backBtn" />
 
-        <!-- Steps are added here programmatically in goToSlide() -->
-        <LinearLayout
-            android:id="@+id/checklistContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"/>
-
-    </LinearLayout>
-
-    <!-- Slide panel -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/slidePanel"
-        android:layout_width="0dp"
-        android:layout_height="120dp"
-        android:background="#AA111111"
-        android:padding="8dp"
-        app:layout_constraintBottom_toTopOf="@id/bottomBar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <Button
-            android:id="@+id/btnPrev"
-            android:layout_width="78dp"
-            android:layout_height="34dp"
-            android:backgroundTint="#1a1a1a"
-            android:text="Prev"
-            android:textAllCaps="false"
-            android:textColor="#e02020"
-            android:textSize="12sp"
+        <Spinner
+            android:id="@+id/modelSpinner"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="invisible"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <Button
-            android:id="@+id/btnNext"
-            android:layout_width="78dp"
-            android:layout_height="34dp"
-            android:backgroundTint="#1a1a1a"
-            android:text="Next"
-            android:textAllCaps="false"
-            android:textColor="#e02020"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Step-by-Step Guides in a 3D Environment"
+            android:textColor="#888888"
             android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintStart_toStartOf="@id/tvMaintainanceTitle"
+            app:layout_constraintTop_toBottomOf="@id/tvMaintainanceTitle" />
 
-        <Button
-            android:id="@+id/btnCameraLock"
-            android:layout_width="112dp"
-            android:layout_height="32dp"
-            android:backgroundTint="#1a1a1a"
-            android:text="Camera: LOCK"
-            android:textAllCaps="false"
-            android:textColor="#e02020"
-            android:textSize="11sp"
-            app:layout_constraintTop_toBottomOf="@id/btnNext"
-            app:layout_constraintEnd_toEndOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/mainCard"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/card_left_border_thick"
+        app:layout_constraintBottom_toTopOf="@id/progressSection"
+        app:layout_constraintTop_toBottomOf="@id/headerSection">
+
+        <io.github.sceneview.SceneView
+            android:id="@+id/sceneView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/lockOverlay"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintBottom_toBottomOf="@id/sceneView"
+            app:layout_constraintEnd_toEndOf="@id/sceneView"
+            app:layout_constraintStart_toStartOf="@id/sceneView"
+            app:layout_constraintTop_toTopOf="@id/sceneView" />
+
+        <TextView
+            android:id="@+id/modelTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Types of Oil &amp; Recommended"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/closeTab"
+            android:layout_width="40dp"
+            android:layout_height="120dp"
+            android:background="@drawable/close_tab_bg"
+            android:clickable="true"
+            android:elevation="4dp"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/ivTabArrowTop"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:rotation="90"
+                android:src="@drawable/ic_expand_more"
+                app:tint="#FFFFFF" />
+
+            <TextView
+                android:id="@+id/tvTabText"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="8dp"
+                android:gravity="center"
+                android:rotation="270"
+                android:singleLine="true"
+                android:text="OPEN"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/ivTabArrowBottom"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:rotation="90"
+                android:src="@drawable/ic_expand_less"
+                app:tint="#FFFFFF" />
+
+        </LinearLayout>
+
+        <ScrollView
+            android:id="@+id/infoSlidePanel"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#FF232222"
+            android:elevation="2dp"
+            android:padding="16dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/closeTab"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvInfoPanelTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="Types of Oil &amp; Recommended"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:id="@+id/infoItemsContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+                </FrameLayout>
+            </LinearLayout>
+        </ScrollView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/progressSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@id/navButtonsSection">
+
+        <ImageView
+            android:id="@+id/ivProgressIcon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_star_circle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="#e02020" />
 
         <TextView
             android:id="@+id/slideTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Slide 1"
-            android:textColor="#e02020"
+            android:layout_marginStart="12dp"
+            android:text="Lights"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp"
             android:textStyle="bold"
-            android:textSize="16sp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@id/btnPrev"
-            app:layout_constraintEnd_toStartOf="@id/btnNext"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivProgressIcon"
+            app:layout_constraintTop_toTopOf="@id/ivProgressIcon" />
 
         <TextView
             android:id="@+id/slideDesc"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Description"
-            android:textColor="#FFFFFF"
-            android:textSize="13sp"
-            android:maxLines="2"
-            app:layout_constraintTop_toBottomOf="@id/slideTitle"
+            android:text="Check every light both front and back (1/4 Done)"
+            android:textColor="#888888"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/slideTitle"
-            app:layout_constraintEnd_toEndOf="@id/slideTitle"/>
+            app:layout_constraintTop_toBottomOf="@id/slideTitle" />
 
-        <TextView
-            android:id="@+id/tvCameraInfo"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textColor="#e02020"
-            android:textSize="11sp"
-            android:maxLines="2"
-            app:layout_constraintTop_toBottomOf="@id/slideDesc"
-            app:layout_constraintBottom_toBottomOf="parent"
+        <View
+            android:id="@+id/progressIndicator"
+            android:layout_width="100dp"
+            android:layout_height="4dp"
+            android:layout_marginTop="8dp"
+            android:background="#e02020"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btnCameraLock"/>
+            app:layout_constraintTop_toBottomOf="@id/ivProgressIcon" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- BOTTOM BAR -->
+    <LinearLayout
+        android:id="@+id/navButtonsSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@id/bottomBar">
+
+        <Button
+            android:id="@+id/btnPrev"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:backgroundTint="#555555"
+            android:text="Prev"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/btnNext"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="2"
+            android:backgroundTint="#e02020"
+            android:text="Next"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/checklistOverlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/overlayTitle"
+            android:layout_width="0dp"
+            android:layout_height="0dp" />
+
+        <LinearLayout
+            android:id="@+id/checklistContainer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvCameraInfo"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnCameraLock"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottomBar"
         android:layout_width="match_parent"
@@ -223,54 +343,61 @@
         android:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <TextView
+        <ImageView
             android:id="@+id/hometxt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Home"
-            android:textColor="#555555"
-            android:textSize="13sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="12dp"
+            android:src="@drawable/ic_home"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/livetxt"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:tint="#555555" />
 
-        <TextView
+        <ImageView
             android:id="@+id/livetxt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Live Data"
-            android:textColor="#555555"
-            android:textSize="13sp"
-            app:layout_constraintStart_toEndOf="@id/hometxt"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="12dp"
+            android:src="@drawable/ic_car"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/connecttxt"
+            app:layout_constraintStart_toEndOf="@id/hometxt"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:tint="#555555" />
 
-        <TextView
+        <ImageView
             android:id="@+id/connecttxt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Guides"
-            android:textColor="#e02020"
-            android:textSize="13sp"
-            app:layout_constraintStart_toEndOf="@id/livetxt"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="12dp"
+            android:src="@drawable/ic_bluetooth"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/settingtxt"
+            app:layout_constraintStart_toEndOf="@id/livetxt"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:tint="#e02020" />
 
-        <TextView
+        <ImageView
             android:id="@+id/settingtxt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Settings"
-            android:textColor="#555555"
-            android:textSize="13sp"
-            app:layout_constraintStart_toEndOf="@id/connecttxt"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="12dp"
+            android:src="@drawable/ic_settings"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/connecttxt"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:tint="#555555" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -5,45 +5,71 @@ import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
+import android.view.View
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import com.example.automekaniko.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // ── "Auto" white, "Mekaniko" red ──────────────────────────────────────
-        val appTitle = findViewById<TextView>(R.id.appTitle)
         val titleText = "AutoMekaniko"
         val spannable = SpannableString(titleText)
         spannable.setSpan(ForegroundColorSpan(0xFFFFFFFF.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         spannable.setSpan(ForegroundColorSpan(0xFFe02020.toInt()), 4, titleText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        appTitle.text = spannable
+        binding.appTitle.text = spannable
         AppNavigation.wire(this)
 
         // Cards (the visible clickable areas)
-        val card3D   = findViewById<CardView>(R.id.card3D)
-        val cardLive = findViewById<CardView>(R.id.cardLive)
+        binding.card3D.setOnClickListener { go(GuidesActivity::class.java) }
+        binding.cardLive.setOnClickListener { go(OBDActivity::class.java) }
 
-        // Hidden buttons kept for backward compat — wire them too just in case
-        val viewBtn = findViewById<Button>(R.id.viewbtn)
-        val liveBtn = findViewById<Button>(R.id.livebtn)
+        setupHomeGuidePreviews()
 
-        // Cards
-        card3D.setOnClickListener   { go(GuidesActivity::class.java) }
-        cardLive.setOnClickListener { go(OBDActivity::class.java) }
+        // ── Bottom Navigation Bar ────────────────────────────────────────
+        setupBottomNavigation()
+    }
 
-        // Hidden buttons (fallback)
-        viewBtn.setOnClickListener { go(GuidesActivity::class.java) }
-        liveBtn.setOnClickListener { go(OBDActivity::class.java) }
+    private fun setupHomeGuidePreviews() {
+        GuideCardUi.bindPreviewCards(
+            this,
+            listOf(
+                R.id.homeGuidePreview1,
+                R.id.homeGuidePreview2,
+                R.id.homeGuidePreview3,
+                R.id.homeGuidePreview4
+            ),
+            GuideCardUi.homePreviewCards()
+        )
+    }
 
+    private fun setupBottomNavigation() {
+        binding.hometxt.setOnClickListener {
+            Toast.makeText(this, "Home", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.livetxt.setOnClickListener {
+            go(MAINTAINANCEActivity::class.java)
+        }
+
+        binding.connecttxt.setOnClickListener {
+            BluetoothManager.connectToELM327(this)
+        }
+
+        binding.settingtxt.setOnClickListener {
+            Toast.makeText(this, "Settings", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun <T : Any> go(target: Class<T>) {
@@ -53,3 +79,6 @@ class MainActivity : AppCompatActivity() {
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
     }
 }
+
+
+

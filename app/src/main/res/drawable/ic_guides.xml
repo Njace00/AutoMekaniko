@@ -1,0 +1,17 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <!-- Red circular background -->
+    <path
+        android:fillColor="#E2231A"
+        android:pathData="M24,4 A20,20 0 0 1 24,44 A20,20 0 0 1 24,4 Z" />
+
+    <!-- Five-pointed star -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M24,13 L26.65,20.36 L34.46,20.60 L28.28,25.39 L30.47,32.90 L24,28.5 L17.53,32.90 L19.72,25.39 L13.54,20.60 L21.36,20.36 Z" />
+
+</vector>

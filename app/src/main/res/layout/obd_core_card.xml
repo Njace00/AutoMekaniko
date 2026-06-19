@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="@drawable/obd_core_card_bg">
+
+    <TextView
+        android:id="@+id/cardLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="LABEL"
+        android:textColor="#888888"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        android:textAllCaps="true"/>
+
+    <TextView
+        android:id="@+id/cardValue"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="N / A"
+        android:textColor="#ffffff"
+        android:textSize="28sp"
+        android:textStyle="bold"/>
+
+</LinearLayout>

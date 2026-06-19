@@ -5,17 +5,20 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.lifecycleScope
+import com.example.automekaniko.databinding.Activity3dDtcGuideBinding
+import com.example.automekaniko.databinding.ItemChecklistStepBinding
 import io.github.sceneview.SceneView
 import io.github.sceneview.gesture.CameraGestureDetector
 import io.github.sceneview.loaders.ModelLoader
@@ -27,24 +30,22 @@ import kotlinx.coroutines.launch
 
 class DtcActivity : AppCompatActivity() {
 
+    private lateinit var binding: Activity3dDtcGuideBinding
     private val dtcList = dtcGuides
 
     // -------------------------------------------------------------------------
-    // Views
+    // Views (removed individual view declarations)
     // -------------------------------------------------------------------------
 
     private lateinit var sceneView:          SceneView
     private lateinit var modelLoader:        ModelLoader
-    private lateinit var dtcSpinner:         Spinner
-    private lateinit var slidePanel:         ConstraintLayout
-    private lateinit var checklistOverlay:   LinearLayout
-    private lateinit var btnPrev:            Button
-    private lateinit var btnNext:            Button
-    private lateinit var slideTitle:         TextView
-    private lateinit var slideDesc:          TextView
-    private lateinit var lockOverlay:        View
-    private lateinit var overlayTitle:       TextView
-    private lateinit var checklistContainer: LinearLayout
+
+    private var suppressSpinnerCallback = false
+    private var isInfoOpen = false
+    private var dtcConfirmedInSession = false
+    private var pendingDtcIndex = -1
+
+    private val previewGlbFile = "Vehicle Preventive Maintenance Checklist (VPMC).glb"
 
     // -------------------------------------------------------------------------
     // State
@@ -61,25 +62,15 @@ class DtcActivity : AppCompatActivity() {
     private var currentCameraEye   = Vec3(0f, 0f, 0f)
     private var currentOrbitTarget = Vec3(0f, 0.5f, 0f)
 
-    private val startEye    = Vec3(0f, 0.945f, -1.22f)
-    private val startLookAt = Vec3(0f, 0.5f, 0f)
+    private val startEye    = Vec3(0.15f, 0.95f, -2.75f)
+    private val startLookAt = Vec3(0f, 0.30f, 0f)
 
     private var savedManipulator:    CameraGestureDetector.CameraManipulator? = null
     private var manipulatorCaptured: Boolean = false
 
     private var currentAnimTime: Float = 0f
-
-    // SceneView's render loop auto-advances the animator every frame.
-    // We freeze the pose by re-stamping lockedAnimTime on every onFrame callback.
-    // During scrubbing this tracks the in-progress value; at rest it holds the
-    // target slide time so the pose stays frozen between slides.
-    private var lockedAnimTime: Float = 0f
-
-    // FIX: When true, onFrame backs off so the scrub coroutine has full control
-    // of the animator. Without this flag, onFrame re-stamps the old lockedAnimTime
-    // on every render frame between coroutine delay() steps, causing the model to
-    // snap back to the previous slide's pose mid-scrub.
-    private var isScrubbing: Boolean = false
+    private var lockedAnimTime:  Float = 0f
+    private var isScrubbing:     Boolean = false
 
     // -------------------------------------------------------------------------
     // Lifecycle
@@ -87,41 +78,21 @@ class DtcActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_3d_dtc_guide)
+        binding = Activity3dDtcGuideBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // ── "Auto" white, "Mekaniko" red ──────────────────────────────────────
-        val appTitle = findViewById<TextView>(R.id.appTitle)
         val titleText = "AutoMekaniko"
         val spannable = SpannableString(titleText)
         spannable.setSpan(ForegroundColorSpan(0xFFFFFFFF.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         spannable.setSpan(ForegroundColorSpan(0xFFe02020.toInt()), 4, titleText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        appTitle.text = spannable
+        binding.appTitle.text = spannable
         AppNavigation.wire(this)
 
-        sceneView          = findViewById(R.id.sceneView)
-        dtcSpinner         = findViewById(R.id.dtcSpinner)
-        slidePanel         = findViewById(R.id.slidePanel)
-        checklistOverlay   = findViewById(R.id.checklistOverlay)
-        btnPrev            = findViewById(R.id.btnPrev)
-        btnNext            = findViewById(R.id.btnNext)
-        slideTitle         = findViewById(R.id.slideTitle)
-        slideDesc          = findViewById(R.id.slideDesc)
-        lockOverlay        = findViewById(R.id.lockOverlay)
-        overlayTitle       = findViewById(R.id.overlayTitle)
-        checklistContainer = findViewById(R.id.checklistContainer)
-        //infoCard           = findViewById(R.id.infoCard)
-        //tvDtcCode          = findViewById(R.id.tvDtcCode)
-        //tvDtcName          = findViewById(R.id.tvDtcName)
-        //tvDtcDesc          = findViewById(R.id.tvDtcDesc)
-        //partsSection       = findViewById(R.id.partsSection)
-        //partsContainer     = findViewById(R.id.partsContainer)
+        sceneView = binding.sceneView
+        binding.infoTab.setOnClickListener { toggleInfoPanel() }
 
         modelLoader = ModelLoader(sceneView.engine, this)
 
-        // Re-stamp lockedAnimTime on every frame across ALL tracks so SceneView's
-        // internal render loop cannot advance the animation past our frozen pose.
-        // FIX: Only stamp when NOT scrubbing — during a scrub the coroutine owns
-        // lockedAnimTime and onFrame must not interfere.
         sceneView.onFrame = { _ ->
             if (!isScrubbing) {
                 val animator = currentModelNode?.modelInstance?.animator
@@ -136,12 +107,72 @@ class DtcActivity : AppCompatActivity() {
         setupDtcSpinner()
         setupControls()
         setCameraLockState(true)
+        loadPreviewModel()
+
+        binding.backBtn.setOnClickListener { finish() }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (currentModelNode == null) {
+            loadPreviewModel()
+        }
+    }
+
+    private fun loadPreviewModel() {
+        lifecycleScope.launch {
+            delay(200L)
+            loadGlbModel(previewGlbFile)
+            currentEntry = null
+            currentSlideIndex = 0
+            dtcConfirmedInSession = false
+            applyCustomStartCamera()
+        }
     }
 
     override fun onDestroy() {
         cameraAnimJob?.cancel()
         animScrubJob?.cancel()
         super.onDestroy()
+    }
+
+    // -------------------------------------------------------------------------
+    // INFO panel
+    // -------------------------------------------------------------------------
+
+    private fun toggleInfoPanel() {
+        isInfoOpen = !isInfoOpen
+        if (isInfoOpen) {
+            binding.tvTabText.text = "CLOSE"
+            dtcConfirmedInSession = false
+            binding.checklistOverlay.visibility = View.GONE
+            binding.dtcSelectOverlay.visibility = View.VISIBLE
+            suppressSpinnerCallback = true
+            binding.dtcSpinner.setSelection(0)
+            pendingDtcIndex = -1
+            suppressSpinnerCallback = false
+            binding.btnConfirmDtc.isEnabled = false
+            binding.btnConfirmDtc.alpha = 0.4f
+            applyCustomStartCamera()
+        } else {
+            binding.tvTabText.text = "INFO"
+            binding.dtcSelectOverlay.visibility = View.GONE
+            binding.checklistOverlay.visibility = View.GONE
+            dtcConfirmedInSession = false
+            loadPreviewModel()
+        }
+    }
+
+    private fun confirmDtcSelection() {
+        if (pendingDtcIndex < 0 || pendingDtcIndex >= dtcList.size) {
+            Toast.makeText(this, "Please select a DTC code first.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val entry = dtcList[pendingDtcIndex]
+        dtcConfirmedInSession = true
+        binding.dtcSelectOverlay.visibility = View.GONE
+        loadDtcEntry(entry, showChecklist = true)
     }
 
     // -------------------------------------------------------------------------
@@ -152,19 +183,23 @@ class DtcActivity : AppCompatActivity() {
         val labels = listOf("Select a DTC code...") +
                 dtcList.map { "${it.code}  —  ${it.name}" }
 
-        dtcSpinner.adapter = ArrayAdapter(
+        binding.dtcSpinner.adapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_item,
             labels
         ).also { it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
 
-        dtcSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        binding.dtcSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>, view: View?, position: Int, id: Long
             ) {
                 (view as? TextView)?.setTextColor(0xFFFFFFFF.toInt())
-                if (position == 0) return
-                loadDtcEntry(dtcList[position - 1])
+                if (suppressSpinnerCallback) return
+
+                val hasSelection = position > 0
+                pendingDtcIndex = if (hasSelection) position - 1 else -1
+                binding.btnConfirmDtc.isEnabled = hasSelection
+                binding.btnConfirmDtc.alpha = if (hasSelection) 1f else 0.4f
             }
             override fun onNothingSelected(parent: AdapterView<*>) = Unit
         }
@@ -174,43 +209,28 @@ class DtcActivity : AppCompatActivity() {
     // Load entry
     // -------------------------------------------------------------------------
 
-    private fun loadDtcEntry(entry: DtcGuide) {
+    private fun loadDtcEntry(entry: DtcGuide, showChecklist: Boolean = false) {
         currentEntry      = entry
         currentSlideIndex = 0
         currentAnimTime   = 0f
         lockedAnimTime    = 0f
         updateUiState()
-
-        //tvDtcCode.text = entry.code
-        //tvDtcName.text = entry.name
-        //tvDtcDesc.text = entry.description
-
-        /*
-        partsContainer.removeAllViews()
-        entry.parts.forEach { part ->
-            val tv = TextView(this).apply {
-                text     = "• $part"
-                textSize = 11f
-                setTextColor(0xFFcccccc.toInt())
-                setPadding(0, 2, 0, 2)
+        loadGlbModel(entry.glbFile) {
+            currentSlideIndex = 0
+            goToSlide(0, animated = false, applySlideCamera = false)
+            applyCustomStartCamera()
+            updateUiState()
+            if (showChecklist && isInfoOpen) {
+                binding.checklistOverlay.visibility = View.VISIBLE
             }
-            partsContainer.addView(tv)
         }
-        */
-
-        //infoCard.visibility         = View.VISIBLE
-        //partsSection.visibility     = View.VISIBLE
-        slidePanel.visibility       = View.VISIBLE
-        checklistOverlay.visibility = View.VISIBLE
-
-        loadModel(entry.glbFile, entry.slides)
     }
 
     // -------------------------------------------------------------------------
     // Model loading
     // -------------------------------------------------------------------------
 
-    private fun loadModel(fileName: String, slides: List<DtcSlide>) {
+    private fun loadGlbModel(fileName: String, onLoaded: (() -> Unit)? = null) {
         lifecycleScope.launch {
             currentModelNode?.let {
                 sceneView.removeChildNode(it)
@@ -248,14 +268,9 @@ class DtcActivity : AppCompatActivity() {
             sceneView.addChildNode(modelNode)
             currentModelNode = modelNode
 
-            // Lock at time 0 immediately so onFrame holds the first pose
             lockedAnimTime = 0f
             applyAnimationTime(0f)
-            applyCustomStartCamera()
-
-            currentSlideIndex = 0
-            goToSlide(0, animated = false)
-            updateUiState()
+            onLoaded?.invoke()
         }
     }
 
@@ -264,17 +279,15 @@ class DtcActivity : AppCompatActivity() {
         lifecycleScope.launch {
             delay(32L)
             setCamera(startEye, startLookAt)
+            delay(120L)
+            setCamera(startEye, startLookAt)
         }
     }
 
     // -------------------------------------------------------------------------
-    // Animation — stamp a pose, then lock there
+    // Animation
     // -------------------------------------------------------------------------
 
-    // Stamps the given global time across ALL animation tracks and updates lockedAnimTime
-    // so onFrame continues holding that pose every subsequent frame. Some GLB clips
-    // end earlier than the full tutorial timeline, so clamp each clip individually
-    // to keep completed parts frozen at their last keyed pose.
     private fun applyAnimationTime(time: Float) {
         val animator = currentModelNode?.modelInstance?.animator ?: return
         lockedAnimTime  = time
@@ -305,11 +318,6 @@ class DtcActivity : AppCompatActivity() {
         return time.coerceIn(0f, duration)
     }
 
-    // Per-slide scrub:
-    //   1. Set isScrubbing = true so onFrame backs off completely
-    //   2. Instantly JUMP to slideStartTime (no interpolation — skips irrelevant frames)
-    //   3. Smoothly SCRUB from slideStartTime → targetTime
-    //   4. FREEZE at targetTime, then hand control back to onFrame via isScrubbing = false
     private fun scrubAnimationTo(
         slideStartTime: Float,
         targetTime: Float,
@@ -317,14 +325,9 @@ class DtcActivity : AppCompatActivity() {
     ) {
         animScrubJob?.cancel()
         animScrubJob = lifecycleScope.launch {
-
-            // FIX: Disable onFrame stamping so it cannot fight our jump/scrub
             isScrubbing = true
-
-            // Step 1: instant jump to the slide's start frame
             applyAnimationTime(slideStartTime)
 
-            // Step 2: smooth scrub from start → target
             val steps     = 30
             val stepDelay = (durationMs / steps).coerceAtLeast(1L)
             repeat(steps) { i ->
@@ -334,10 +337,7 @@ class DtcActivity : AppCompatActivity() {
                 delay(stepDelay)
             }
 
-            // Step 3: snap to exact target and freeze
             applyAnimationTime(targetTime)
-
-            // FIX: Hand control back to onFrame — it will now hold this pose every frame
             isScrubbing = false
         }
     }
@@ -347,7 +347,9 @@ class DtcActivity : AppCompatActivity() {
     // -------------------------------------------------------------------------
 
     private fun setupControls() {
-        btnPrev.setOnClickListener {
+        binding.btnConfirmDtc.setOnClickListener { confirmDtcSelection() }
+
+        binding.btnPrev.setOnClickListener {
             if (!isCameraLocked) return@setOnClickListener
             currentEntry ?: return@setOnClickListener
             val to = (currentSlideIndex - 1).coerceAtLeast(0)
@@ -357,7 +359,7 @@ class DtcActivity : AppCompatActivity() {
             updateUiState()
         }
 
-        btnNext.setOnClickListener {
+        binding.btnNext.setOnClickListener {
             if (!isCameraLocked) return@setOnClickListener
             val entry = currentEntry ?: return@setOnClickListener
             val to = (currentSlideIndex + 1).coerceAtMost(entry.slides.lastIndex)
@@ -375,12 +377,12 @@ class DtcActivity : AppCompatActivity() {
         if (locked) {
             if (savedManipulator == null) savedManipulator = sceneView.cameraManipulator
             sceneView.cameraManipulator  = null
-            lockOverlay.visibility       = View.VISIBLE
+            binding.lockOverlay.visibility       = View.VISIBLE
             currentModelNode?.isEditable = false
         } else {
             if (sceneView.cameraManipulator == null && savedManipulator != null)
                 sceneView.cameraManipulator = savedManipulator
-            lockOverlay.visibility       = View.GONE
+            binding.lockOverlay.visibility       = View.GONE
             currentModelNode?.isEditable = true
             val p = sceneView.cameraNode.position
             currentCameraEye = Vec3(p.x, p.y, p.z)
@@ -392,32 +394,27 @@ class DtcActivity : AppCompatActivity() {
         val lastSlideIndex = currentEntry?.slides?.lastIndex ?: -1
         val hasEntry = currentEntry != null
 
-        btnPrev.isEnabled = isCameraLocked && hasEntry && currentSlideIndex > 0
-        btnNext.isEnabled = isCameraLocked && hasEntry && currentSlideIndex < lastSlideIndex
+        binding.btnPrev.isEnabled = isCameraLocked && hasEntry && dtcConfirmedInSession && currentSlideIndex > 0
+        binding.btnNext.isEnabled = isCameraLocked && hasEntry && dtcConfirmedInSession && currentSlideIndex < lastSlideIndex
+
+        binding.btnPrev.alpha = if (binding.btnPrev.isEnabled) 1f else 0.4f
+        binding.btnNext.alpha = if (binding.btnNext.isEnabled) 1f else 0.4f
     }
 
     // -------------------------------------------------------------------------
     // Slide navigation
     // -------------------------------------------------------------------------
 
-    private fun goToSlide(index: Int, animated: Boolean) {
+    private fun goToSlide(index: Int, animated: Boolean, applySlideCamera: Boolean = true) {
         val entry = currentEntry ?: return
         val slide = entry.slides[index]
+        val total = entry.slides.size
 
-        slideTitle.text   = slide.title
-        slideDesc.text    = slide.description
-        overlayTitle.text = slide.title
+        binding.slideTitle.text   = slide.title
+        binding.slideDesc.text    = "${slide.description} (${index + 1}/$total Done)"
+        binding.overlayTitle.text = slide.title
 
-        checklistContainer.removeAllViews()
-        slide.steps.forEach { step ->
-            val tv = TextView(this).apply {
-                text     = "• $step"
-                textSize = 12f
-                setTextColor(0xFFFFFFFF.toInt())
-                setPadding(0, 3, 0, 3)
-            }
-            checklistContainer.addView(tv)
-        }
+        populateChecklist(slide.steps)
 
         if (animated) {
             animateCameraPose(
@@ -427,16 +424,27 @@ class DtcActivity : AppCompatActivity() {
                 endLook    = slide.lookAt,
                 durationMs = 650L
             )
-            // Jump to this slide's start frame, then scrub to its pause frame
             scrubAnimationTo(
                 slideStartTime = slide.animationStartTime,
                 targetTime     = slide.animationTime,
                 durationMs     = slide.animationDurationMs
             )
         } else {
-            setCamera(slide.eye, slide.lookAt)
-            // Non-animated (first load): snap directly to the pause frame
+            if (applySlideCamera) {
+                setCamera(slide.eye, slide.lookAt)
+            }
             applyAnimationTime(slide.animationTime)
+        }
+    }
+
+    private fun populateChecklist(steps: List<String>) {
+        binding.checklistContainer.removeAllViews()
+        val inflater = LayoutInflater.from(this)
+
+        steps.forEach { step ->
+            val rowBinding = ItemChecklistStepBinding.inflate(inflater, binding.checklistContainer, true)
+            rowBinding.stepLabel.text = step
+            rowBinding.stepCheckboxIcon.setImageResource(R.drawable.checkbox_red_checked)
         }
     }
 
