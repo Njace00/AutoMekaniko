@@ -2,9 +2,9 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="100dp"
+    android:layout_height="110dp"
     android:orientation="vertical"
-    android:padding="12dp"
+    android:padding="16dp"
     android:background="@drawable/obd_core_card_bg">
 
     <TextView
@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:text="LABEL"
         android:textColor="#888888"
-        android:textSize="10sp"
+        android:textSize="11sp"
         android:textStyle="bold"
         android:textAllCaps="true"/>
 
@@ -24,7 +24,7 @@
         android:gravity="center"
         android:text="N / A"
         android:textColor="#ffffff"
-        android:textSize="28sp"
+        android:textSize="32sp"
         android:textStyle="bold"/>
 
 </LinearLayout>

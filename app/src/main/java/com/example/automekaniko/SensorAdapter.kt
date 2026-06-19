@@ -28,7 +28,7 @@ class SensorAdapter(private val sensors: List<SensorData>) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val sensor = sensors[position]
         holder.binding.cardLabel.text = sensor.label
-        holder.binding.cardValue.text = "${sensor.value} ${sensor.unit}"
+        holder.binding.cardValue.text = sensor.value
         holder.binding.cardProgress.progress = sensor.progress
     }
 

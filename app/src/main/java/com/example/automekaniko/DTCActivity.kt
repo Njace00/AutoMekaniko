@@ -1,5 +1,6 @@
 package com.example.automekaniko
 
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
@@ -7,12 +8,12 @@ import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.animation.DecelerateInterpolator
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -31,7 +32,11 @@ import kotlinx.coroutines.launch
 class DtcActivity : AppCompatActivity() {
 
     private lateinit var binding: Activity3dDtcGuideBinding
-    private val dtcList = dtcGuides
+    private var dtcList: List<DtcGuide> = dtcGuides
+    private val activeNavColor = 0xFFFF2020.toInt()
+    private val inactiveNavColor = 0xFF666666.toInt()
+    private val nextButtonColor = 0xFFE02020.toInt()
+    private val prevButtonColor = 0xFF8A8A8A.toInt()
 
     // -------------------------------------------------------------------------
     // Views (removed individual view declarations)
@@ -40,10 +45,8 @@ class DtcActivity : AppCompatActivity() {
     private lateinit var sceneView:          SceneView
     private lateinit var modelLoader:        ModelLoader
 
-    private var suppressSpinnerCallback = false
     private var isInfoOpen = false
     private var dtcConfirmedInSession = false
-    private var pendingDtcIndex = -1
 
     private val previewGlbFile = "Vehicle Preventive Maintenance Checklist (VPMC).glb"
 
@@ -78,6 +81,7 @@ class DtcActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableFullscreenChrome()
         binding = Activity3dDtcGuideBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -87,6 +91,7 @@ class DtcActivity : AppCompatActivity() {
         spannable.setSpan(ForegroundColorSpan(0xFFe02020.toInt()), 4, titleText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         binding.appTitle.text = spannable
         AppNavigation.wire(this)
+        applyDtcBottomNavColors()
 
         sceneView = binding.sceneView
         binding.infoTab.setOnClickListener { toggleInfoPanel() }
@@ -104,18 +109,32 @@ class DtcActivity : AppCompatActivity() {
         }
 
         captureManipulatorOnce()
-        setupDtcSpinner()
         setupControls()
         setCameraLockState(true)
-        loadPreviewModel()
+
+        // Automatically load the first guide if list is not empty
+        if (dtcList.isNotEmpty()) {
+            dtcConfirmedInSession = true
+            loadDtcEntry(dtcList[0], showChecklist = true)
+        } else {
+            loadPreviewModel()
+        }
 
         binding.backBtn.setOnClickListener { finish() }
     }
 
     override fun onResume() {
         super.onResume()
+        enableFullscreenChrome()
         if (currentModelNode == null) {
             loadPreviewModel()
+        }
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            enableFullscreenChrome()
         }
     }
 
@@ -136,6 +155,26 @@ class DtcActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
+    @Suppress("DEPRECATION")
+    private fun enableFullscreenChrome() {
+        window.statusBarColor = 0xFF000000.toInt()
+        window.navigationBarColor = 0xFF000000.toInt()
+        window.decorView.systemUiVisibility =
+            View.SYSTEM_UI_FLAG_FULLSCREEN or
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+    }
+
+    private fun applyDtcBottomNavColors() {
+        binding.hometxt.setColorFilter(inactiveNavColor)
+        binding.livetxt.setColorFilter(inactiveNavColor)
+        binding.connecttxt.setColorFilter(activeNavColor)
+        binding.settingtxt.setColorFilter(inactiveNavColor)
+    }
+
     // -------------------------------------------------------------------------
     // INFO panel
     // -------------------------------------------------------------------------
@@ -143,67 +182,140 @@ class DtcActivity : AppCompatActivity() {
     private fun toggleInfoPanel() {
         isInfoOpen = !isInfoOpen
         if (isInfoOpen) {
-            binding.tvTabText.text = "CLOSE"
-            dtcConfirmedInSession = false
-            binding.checklistOverlay.visibility = View.GONE
-            binding.dtcSelectOverlay.visibility = View.VISIBLE
-            suppressSpinnerCallback = true
-            binding.dtcSpinner.setSelection(0)
-            pendingDtcIndex = -1
-            suppressSpinnerCallback = false
-            binding.btnConfirmDtc.isEnabled = false
-            binding.btnConfirmDtc.alpha = 0.4f
-            applyCustomStartCamera()
+            openInfoPanel()
         } else {
-            binding.tvTabText.text = "INFO"
-            binding.dtcSelectOverlay.visibility = View.GONE
-            binding.checklistOverlay.visibility = View.GONE
-            dtcConfirmedInSession = false
-            loadPreviewModel()
+            closeInfoPanel()
         }
     }
 
-    private fun confirmDtcSelection() {
-        if (pendingDtcIndex < 0 || pendingDtcIndex >= dtcList.size) {
-            Toast.makeText(this, "Please select a DTC code first.", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val entry = dtcList[pendingDtcIndex]
-        dtcConfirmedInSession = true
-        binding.dtcSelectOverlay.visibility = View.GONE
-        loadDtcEntry(entry, showChecklist = true)
+    private fun openInfoPanel() {
+        val slideWidth = binding.mainCard.width.takeIf { it > 0 } ?: binding.root.width
+        binding.tvTabText.text = "CLOSE"
+        binding.infoSlidePanel.animate().cancel()
+        binding.infoTab.animate().cancel()
+        binding.infoSlidePanel.translationX = slideWidth.toFloat()
+        binding.infoSlidePanel.alpha = 0f
+        binding.infoSlidePanel.visibility = View.VISIBLE
+        binding.infoSlidePanel.animate()
+            .translationX(0f)
+            .alpha(1f)
+            .setDuration(260L)
+            .setInterpolator(DecelerateInterpolator())
+            .start()
+        binding.infoTab.animate()
+            .translationX(-6f)
+            .setDuration(260L)
+            .setInterpolator(DecelerateInterpolator())
+            .start()
+        binding.ivTabArrowTop.animate().rotation(180f).setDuration(220L).start()
+        binding.ivTabArrowBottom.animate().rotation(180f).setDuration(220L).start()
     }
 
-    // -------------------------------------------------------------------------
-    // Spinner
-    // -------------------------------------------------------------------------
-
-    private fun setupDtcSpinner() {
-        val labels = listOf("Select a DTC code...") +
-                dtcList.map { "${it.code}  —  ${it.name}" }
-
-        binding.dtcSpinner.adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_spinner_item,
-            labels
-        ).also { it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
-
-        binding.dtcSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>, view: View?, position: Int, id: Long
-            ) {
-                (view as? TextView)?.setTextColor(0xFFFFFFFF.toInt())
-                if (suppressSpinnerCallback) return
-
-                val hasSelection = position > 0
-                pendingDtcIndex = if (hasSelection) position - 1 else -1
-                binding.btnConfirmDtc.isEnabled = hasSelection
-                binding.btnConfirmDtc.alpha = if (hasSelection) 1f else 0.4f
+    private fun closeInfoPanel() {
+        val slideWidth = binding.mainCard.width.takeIf { it > 0 } ?: binding.root.width
+        binding.tvTabText.text = "INFO"
+        binding.infoSlidePanel.animate().cancel()
+        binding.infoTab.animate().cancel()
+        binding.infoSlidePanel.animate()
+            .translationX(slideWidth.toFloat())
+            .alpha(0f)
+            .setDuration(220L)
+            .setInterpolator(DecelerateInterpolator())
+            .withEndAction {
+                binding.infoSlidePanel.visibility = View.GONE
+                binding.infoSlidePanel.translationX = 0f
+                binding.infoSlidePanel.alpha = 1f
             }
-            override fun onNothingSelected(parent: AdapterView<*>) = Unit
+            .start()
+        binding.infoTab.animate()
+            .translationX(0f)
+            .setDuration(220L)
+            .setInterpolator(DecelerateInterpolator())
+            .start()
+        binding.ivTabArrowTop.animate().rotation(0f).setDuration(180L).start()
+        binding.ivTabArrowBottom.animate().rotation(0f).setDuration(180L).start()
+    }
+
+    private fun updateInfoPanel(slide: DtcSlide) {
+        val fallbackItems = mutableListOf<MAINTAINANCEActivity.InfoItem>()
+        val guide = currentEntry
+        if (slide.infoItems.isEmpty()) {
+            guide?.let {
+                fallbackItems.add(MAINTAINANCEActivity.InfoItem("DTC", "${it.code} - ${it.name}"))
+                fallbackItems.add(MAINTAINANCEActivity.InfoItem("Guide", it.description))
+                if (it.parts.isNotEmpty()) {
+                    fallbackItems.add(MAINTAINANCEActivity.InfoItem("Parts", it.parts.joinToString(", ")))
+                }
+            }
+            if (slide.steps.isNotEmpty()) {
+                fallbackItems.add(MAINTAINANCEActivity.InfoItem("Current Step", slide.steps.joinToString("\n")))
+            }
+        }
+
+        val items = if (slide.infoItems.isEmpty()) fallbackItems else slide.infoItems
+        binding.tvInfoPanelTitle.text = slide.infoTitle ?: "Recommended Info"
+        binding.infoItemsContainer.removeAllViews()
+
+        items.forEach { item ->
+            val itemLayout = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    setMargins(0, 0, 0, 16.toPx())
+                }
+            }
+
+            val leftContainer = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                layoutParams = LinearLayout.LayoutParams(
+                    100.toPx(),
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+            }
+
+            val titleTv = TextView(this).apply {
+                text = item.title
+                setTextColor(0xFFFFFFFF.toInt())
+                textSize = 12f
+                setTypeface(null, android.graphics.Typeface.BOLD)
+            }
+            leftContainer.addView(titleTv)
+
+            if (item.imageResId != null) {
+                val iv = ImageView(this).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        80.toPx(),
+                        80.toPx()
+                    ).apply {
+                        setMargins(0, 4.toPx(), 0, 0)
+                    }
+                    setImageResource(item.imageResId)
+                    scaleType = ImageView.ScaleType.FIT_CENTER
+                }
+                leftContainer.addView(iv)
+            }
+
+            itemLayout.addView(leftContainer)
+
+            val descTv = TextView(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f
+                )
+                text = item.description
+                setTextColor(0xFFCCCCCC.toInt())
+                textSize = 11f
+            }
+            itemLayout.addView(descTv)
+
+            binding.infoItemsContainer.addView(itemLayout)
         }
     }
+
+    private fun Int.toPx(): Int = (this * resources.displayMetrics.density).toInt()
 
     // -------------------------------------------------------------------------
     // Load entry
@@ -220,8 +332,8 @@ class DtcActivity : AppCompatActivity() {
             goToSlide(0, animated = false, applySlideCamera = false)
             applyCustomStartCamera()
             updateUiState()
-            if (showChecklist && isInfoOpen) {
-                binding.checklistOverlay.visibility = View.VISIBLE
+            if (showChecklist) {
+                binding.checklistOverlay.visibility = View.GONE
             }
         }
     }
@@ -347,8 +459,6 @@ class DtcActivity : AppCompatActivity() {
     // -------------------------------------------------------------------------
 
     private fun setupControls() {
-        binding.btnConfirmDtc.setOnClickListener { confirmDtcSelection() }
-
         binding.btnPrev.setOnClickListener {
             if (!isCameraLocked) return@setOnClickListener
             currentEntry ?: return@setOnClickListener
@@ -397,8 +507,12 @@ class DtcActivity : AppCompatActivity() {
         binding.btnPrev.isEnabled = isCameraLocked && hasEntry && dtcConfirmedInSession && currentSlideIndex > 0
         binding.btnNext.isEnabled = isCameraLocked && hasEntry && dtcConfirmedInSession && currentSlideIndex < lastSlideIndex
 
-        binding.btnPrev.alpha = if (binding.btnPrev.isEnabled) 1f else 0.4f
-        binding.btnNext.alpha = if (binding.btnNext.isEnabled) 1f else 0.4f
+        binding.btnPrev.backgroundTintList = ColorStateList.valueOf(prevButtonColor)
+        binding.btnNext.backgroundTintList = ColorStateList.valueOf(nextButtonColor)
+        binding.btnPrev.setTextColor(0xFFFFFFFF.toInt())
+        binding.btnNext.setTextColor(0xFFFFFFFF.toInt())
+        binding.btnPrev.alpha = 1f
+        binding.btnNext.alpha = 1f
     }
 
     // -------------------------------------------------------------------------
@@ -415,6 +529,7 @@ class DtcActivity : AppCompatActivity() {
         binding.overlayTitle.text = slide.title
 
         populateChecklist(slide.steps)
+        updateInfoPanel(slide)
 
         if (animated) {
             animateCameraPose(

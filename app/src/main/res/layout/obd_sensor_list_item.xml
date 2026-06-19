@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="14dp"
+    android:padding="16dp"
     android:layout_marginBottom="12dp"
     android:background="@drawable/obd_list_item_bg">
 
@@ -12,7 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginBottom="8dp">
+        android:layout_marginBottom="10dp"
+        android:gravity="center_vertical">
 
         <TextView
             android:id="@+id/cardLabel"
@@ -40,7 +41,7 @@
         android:id="@+id/cardProgress"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="4dp"
+        android:layout_height="2dp"
         android:progress="0"
         android:max="100"
         android:progressDrawable="@drawable/obd_progress_bar" />

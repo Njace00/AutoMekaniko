@@ -1,5 +1,8 @@
 package com.example.automekaniko
 
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
 import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.*
@@ -71,7 +74,21 @@ class OBDActivity : AppCompatActivity() {
         binding = ActivityObdScannerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val appTitle = "AutoMekaniko"
+        val spannable = SpannableString(appTitle)
+        spannable.setSpan(
+            ForegroundColorSpan(0xFFE02020.toInt()),
+            4, 9,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        binding.mainAppTitle.text = spannable
+
         setupSensors()
+
+        binding.cardRpm.cardLabel.text = "RPM"
+        binding.cardSpeed.cardLabel.text = "SPEED"
+        binding.cardCoolant.cardLabel.text = "COOLANT"
+        binding.cardThrottle.cardLabel.text = "THROTTLE"
 
         binding.backBtn.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
@@ -97,7 +114,7 @@ class OBDActivity : AppCompatActivity() {
     private fun setupSensors() {
         sensorsList.clear()
         sensorsList.addAll(listOf(
-            SensorData("0110", "Mass Air Flow", "g/s"),
+            SensorData("0110", "Mass Air Flow [MAF]", "g/s"),
             SensorData("0114", "O2 Sensor 1", "V"),
             SensorData("0115", "O2 Sensor 2", "V"),
             SensorData("015E", "Fuel Rate", "L/h"),
@@ -715,7 +732,15 @@ class OBDActivity : AppCompatActivity() {
     private fun setBleConnected(c: Boolean) {
         statusResetJob?.cancel()
         binding.tvBleStatus.text = if (c) "Connected" else "Disconnected"
-        binding.statusDot.backgroundTintList = ColorStateList.valueOf(if (c) 0xFF00E676.toInt() else 0xFFFF5555.toInt())
+        
+        if (c) {
+            binding.statusCapsule.backgroundTintList = ColorStateList.valueOf(0xFF00C853.toInt()) // Green
+            binding.statusDot.backgroundTintList = ColorStateList.valueOf(0xFFFFFFFF.toInt())
+        } else {
+            binding.statusCapsule.backgroundTintList = null // Use default red from drawable
+            binding.statusDot.backgroundTintList = null
+        }
+
         binding.btnConnect.text = if (c) "DISCONNECT" else "CONNECT"
         binding.btnConnect.isEnabled = true
 
