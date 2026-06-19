@@ -2,27 +2,13 @@ package com.example.automekaniko
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.AlertDialog
 import android.bluetooth.*
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Typeface
+import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.text.InputType
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.style.ForegroundColorSpan
 import android.util.Log
-import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -35,6 +21,8 @@ import kotlinx.coroutines.channels.Channel
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.UUID
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 private val SERVICE_UUIDS = listOf(
     UUID.fromString("0000fff0-0000-1000-8000-00805f9b34fb"),
@@ -44,9 +32,6 @@ private val SERVICE_UUIDS = listOf(
 private val RFCOMM_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
 private val CCCD_UUID   = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
 private const val TAG   = "MainActivity"
-
-private const val PREF_NAME = "automekaniko_obd"
-private const val KEY_FUEL_LEVEL_MANUAL = "fuel_level_manual_pct"
 
 /** Huwag permanent i-blacklist — madalas ang false NO DATA / timeout sa BLE */
 private val PID_NEVER_BLACKLIST = setOf("010B", "012F", "015E")
@@ -70,25 +55,15 @@ class OBDActivity : AppCompatActivity() {
     private val responseChannel = Channel<String>(capacity = Channel.UNLIMITED)
     private var pollJob: Job? = null
     private var statusResetJob: Job? = null
-    private val mainHandler = Handler(Looper.getMainLooper())
     private val unsupportedPids = mutableSetOf<String>()
     // Tracks how many core cycles have run — extended sensors fire every 3rd
     private var extendedCycle = 0
+    private var latestEngineLoad: Double? = null
     private val permLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { grants ->
         if (grants.all { it.value }) startBleScan()
         else toast("Permissions required for Bluetooth discovery")
-    }
-
-    /**
-     * Optional: itakda ang fuel level (0–100) kapag walang PID 012F ang ECU.
-     * I-disable: [setManualFuelLevelPercent(-1f)]
-     */
-    fun setManualFuelLevelPercent(pct: Float) {
-        require(pct in -1f..100f) { "Use -1f to disable, or 0f..100f" }
-        getSharedPreferences(PREF_NAME, MODE_PRIVATE).edit()
-            .putFloat(KEY_FUEL_LEVEL_MANUAL, pct).apply()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -97,7 +72,6 @@ class OBDActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupSensors()
-        setupFuelLevelCardLongPress()
 
         binding.backBtn.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
@@ -174,8 +148,8 @@ class OBDActivity : AppCompatActivity() {
     }
 
     private fun startBleScan() {
-        val bm = getSystemService(Context.BLUETOOTH_SERVICE) as android.bluetooth.BluetoothManager
-        val adapter: android.bluetooth.BluetoothAdapter? = bm.adapter
+        val bm = getSystemService(android.bluetooth.BluetoothManager::class.java)
+        val adapter: BluetoothAdapter? = bm?.adapter
         if (adapter == null || !adapter.isEnabled) { toast("Enable Bluetooth first"); return }
 
         setStatus("Checking paired devices…")
@@ -226,7 +200,7 @@ class OBDActivity : AppCompatActivity() {
                 outputStream = bluetoothSocket?.outputStream
                 isConnected  = true
                 runOnUiThread { setBleConnected(true); binding.btnConnect.isEnabled = true; setStatus("Connected! Initializing…") }
-                delay(1000)
+                delay(1.seconds)
                 initElm327()
                 startPollLoop()
             } catch (e: Exception) {
@@ -246,13 +220,15 @@ class OBDActivity : AppCompatActivity() {
     private val gattCallback = object : BluetoothGattCallback() {
 
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
-            when {
-                newState == BluetoothProfile.STATE_CONNECTED && status == BluetoothGatt.GATT_SUCCESS -> {
-                    Log.i(TAG, "GATT connected")
-                    runOnUiThread { setStatus("Connected! Loading services…") }
-                    if (hasBleConnectPermission()) gatt.discoverServices()
+            when (newState) {
+                BluetoothProfile.STATE_CONNECTED -> {
+                    if (status == BluetoothGatt.GATT_SUCCESS) {
+                        Log.i(TAG, "GATT connected")
+                        runOnUiThread { setStatus("Connected! Loading services…") }
+                        if (hasBleConnectPermission()) gatt.discoverServices()
+                    }
                 }
-                newState == BluetoothProfile.STATE_DISCONNECTED -> {
+                BluetoothProfile.STATE_DISCONNECTED -> {
                     Log.i(TAG, "GATT disconnected status=$status")
                     isConnected = false; isInitialized = false; pollJob?.cancel()
                     runOnUiThread { onDisconnected() }
@@ -283,11 +259,16 @@ class OBDActivity : AppCompatActivity() {
             if (cccd != null) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
                     gatt.writeDescriptor(cccd, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
-                else { cccd.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE; gatt.writeDescriptor(cccd) }
+                else {
+                    @Suppress("DEPRECATION")
+                    cccd.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+                    @Suppress("DEPRECATION")
+                    gatt.writeDescriptor(cccd)
+                }
             } else {
                 isConnected = true
                 runOnUiThread { setBleConnected(true); binding.btnConnect.isEnabled = true }
-                lifecycleScope.launch(Dispatchers.IO) { delay(1000); initElm327(); startPollLoop() }
+                lifecycleScope.launch(Dispatchers.IO) { delay(1.seconds); initElm327(); startPollLoop() }
             }
         }
 
@@ -295,13 +276,15 @@ class OBDActivity : AppCompatActivity() {
             if (status == BluetoothGatt.GATT_SUCCESS && descriptor.uuid == CCCD_UUID) {
                 isConnected = true
                 runOnUiThread { setBleConnected(true); binding.btnConnect.isEnabled = true }
-                lifecycleScope.launch(Dispatchers.IO) { delay(1000); initElm327(); startPollLoop() }
+                lifecycleScope.launch(Dispatchers.IO) { delay(1.seconds); initElm327(); startPollLoop() }
             }
         }
 
         override fun onCharacteristicChanged(gatt: BluetoothGatt, c: BluetoothGattCharacteristic, v: ByteArray) {
             responseChannel.trySend(String(v, Charsets.UTF_8))
         }
+
+        @Deprecated("Deprecated in Java")
         @Suppress("DEPRECATION")
         override fun onCharacteristicChanged(gatt: BluetoothGatt, c: BluetoothGattCharacteristic) {
             responseChannel.trySend(String(c.value ?: return, Charsets.UTF_8))
@@ -322,7 +305,14 @@ class OBDActivity : AppCompatActivity() {
                 BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE else BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
                 bluetoothGatt?.writeCharacteristic(c, b, type)
-            else { c.writeType = type; c.value = b; bluetoothGatt?.writeCharacteristic(c) }
+            else {
+                @Suppress("DEPRECATION")
+                c.writeType = type
+                @Suppress("DEPRECATION")
+                c.value = b
+                @Suppress("DEPRECATION")
+                bluetoothGatt?.writeCharacteristic(c)
+            }
         } catch (e: Exception) { Log.e(TAG, "sendRaw: ${e.message}") }
     }
 
@@ -335,24 +325,26 @@ class OBDActivity : AppCompatActivity() {
                 val buf = ByteArray(4096); val sb = StringBuilder()
                 val t0 = System.currentTimeMillis()
                 while (System.currentTimeMillis() - t0 < timeout) {
-                    val avail = inputStream!!.available()
+                    val avail = withContext(Dispatchers.IO) { inputStream!!.available() }
                     if (avail > 0) {
-                        val n = inputStream!!.read(buf, 0, minOf(avail, buf.size))
+                        val n = withContext(Dispatchers.IO) { inputStream!!.read(buf, 0, minOf(avail, buf.size)) }
                         if (n > 0) {
                             sb.append(String(buf, 0, n, Charsets.UTF_8))
                             if (sb.contains(">")) break
                         }
-                    } else delay(5) // was 10ms — halved for faster classic polling
+                    } else delay(5.milliseconds) // was 10ms — halved for faster classic polling
                 }
                 sb.toString().trim().also { Log.d(TAG, "CMD=$cmd RSP=${it.take(120)}") }
             } catch (e: Exception) { Log.e(TAG, "send '$cmd': ${e.message}"); "" }
         }
 
-        while (responseChannel.tryReceive().isSuccess) {}
+        while (responseChannel.tryReceive().isSuccess) {
+            // Drain the channel before sending a new command
+        }
         withContext(Dispatchers.Main) { sendRaw(cmd) }
         val sb = StringBuilder(); val end = System.currentTimeMillis() + timeout
         while (System.currentTimeMillis() < end) {
-            val chunk = withTimeoutOrNull(end - System.currentTimeMillis()) { responseChannel.receive() } ?: break
+            val chunk = withTimeoutOrNull((end - System.currentTimeMillis()).milliseconds) { responseChannel.receive() } ?: break
             sb.append(chunk); if (sb.contains(">")) break
         }
         return sb.toString().trim().also { if (it.isEmpty()) Log.w(TAG, "Timeout: $cmd") }
@@ -364,7 +356,7 @@ class OBDActivity : AppCompatActivity() {
         // ATAT1 = adaptive timing: ELM327 auto-shortens wait based on ECU response speed
         for (cmd in listOf("ATZ", "ATE0", "ATL0", "ATS0", "ATH0", "ATSP0", "ATAT1")) {
             send(cmd, if (cmd == "ATZ") 5000 else 2000)
-            delay(300)
+            delay(300.milliseconds)
         }
         isInitialized = true
         runOnUiThread { setStatus("Polling Live Data…") }
@@ -387,14 +379,15 @@ class OBDActivity : AppCompatActivity() {
                     val spd  = parseSpeed(spdRaw)
                     val cool = parseTemp(coolRaw, "05")
                     val thr  = parsePerc(thrRaw, "11")
-                    val load = parsePerc(loadRaw, "04")
+                    val loadStr = parsePerc(loadRaw, "04")
+                    latestEngineLoad = loadStr?.toDoubleOrNull()
 
                     runOnUiThread {
                         rpm?.let  { binding.cardRpm.cardValue.text = it }
                         spd?.let  { binding.cardSpeed.cardValue.text = it }
                         cool?.let { binding.cardCoolant.cardValue.text = it }
                         thr?.let  { binding.cardThrottle.cardValue.text = it }
-                        load?.let { updateSensor("0104", it, it.toFloatOrNull()?.toInt() ?: 0) }
+                        loadStr?.let { updateSensor("0104", it, it.toFloatOrNull()?.toInt() ?: 0) }
                     }
 
                     // Extended sensors: every 3rd core cycle
@@ -402,7 +395,7 @@ class OBDActivity : AppCompatActivity() {
 
                 } catch (e: Exception) {
                     if (e is CancellationException) throw e
-                    Log.e(TAG, "Poll error: ${e.message}"); delay(1000)
+                    Log.e(TAG, "Poll error: ${e.message}"); delay(1.seconds)
                 }
             }
         }
@@ -442,7 +435,7 @@ class OBDActivity : AppCompatActivity() {
         val o2s2 = parseO2(o2s2Rsp, "15")
         val fuelR = parseFuelRate(fuelRRsp) ?: estimateFuelRateLphFromMaf(mafRsp)
         val modV = parseVolt(modVRsp)
-        val map = parseMapAll(mapRsp, parseBaro(baroRsp)?.toIntOrNull(), null)
+        val map = parseMapAll(mapRsp, parseBaro(baroRsp)?.toIntOrNull(), latestEngineLoad)
         val fuel = readFuelLevelFull(extTimeout)
         val stft = parseFuelTrim(stftRsp, "06")
         val ltft = parseFuelTrim(ltftRsp, "07")
@@ -469,30 +462,14 @@ class OBDActivity : AppCompatActivity() {
         }
     }
 
-    private fun fuelManualPct(): Float =
-        getSharedPreferences(PREF_NAME, MODE_PRIVATE).getFloat(KEY_FUEL_LEVEL_MANUAL, -1f)
-
-    /** Long press sa Fuel Level card → manual % (kapag walang 012F ang ECU) */
-    private fun setupFuelLevelCardLongPress() {
-        binding.sensorRecyclerView.setOnLongClickListener {
-            // Need a better way to handle long press on list item, 
-            // but for now let's just use the binding reference if we were using static cards.
-            // Since it's a RecyclerView now, this long press needs to be in the Adapter.
-            // For brevity, I'll just remove the direct binding call that's causing error.
-            true
-        }
-    }
-
     private suspend fun readFuelLevelFull(extMs: Long): String? {
         repeat(2) { attempt ->
             val raw = send("012F", extMs)
             parseFuelLevelExhaustive(raw)?.let { return it }
             if (raw.contains("NO DATA", ignoreCase = true)) return@repeat
-            delay(100L * (attempt + 1))
+            delay(100.milliseconds * (attempt + 1))
         }
         tryFuelLevelAlternateHeaders(extMs)?.let { return it }
-        val manual = fuelManualPct()
-        if (manual in 0f..100f) return "%.1f".format(manual)
         return null
     }
 
@@ -502,14 +479,14 @@ class OBDActivity : AppCompatActivity() {
         for (h in headers) {
             try {
                 send("AT SH $h", 800)
-                delay(100)
+                delay(100.milliseconds)
                 val raw = send("012F", timeoutEach)
                 parseFuelLevelExhaustive(raw)?.let { return it }
             } catch (e: Exception) {
                 Log.w(TAG, "fuel probe SH $h: ${e.message}")
             }
         }
-        try { send("AT SH 7E0", 600); delay(100) } catch (_: Exception) {}
+        try { send("AT SH 7E0", 600); delay(100.milliseconds) } catch (_: Exception) {}
         return null
     }
 
@@ -738,13 +715,13 @@ class OBDActivity : AppCompatActivity() {
     private fun setBleConnected(c: Boolean) {
         statusResetJob?.cancel()
         binding.tvBleStatus.text = if (c) "Connected" else "Disconnected"
-        binding.statusDot.backgroundTintList = android.content.res.ColorStateList.valueOf(if (c) 0xFF00E676.toInt() else 0xFFFF5555.toInt())
+        binding.statusDot.backgroundTintList = ColorStateList.valueOf(if (c) 0xFF00E676.toInt() else 0xFFFF5555.toInt())
         binding.btnConnect.text = if (c) "DISCONNECT" else "CONNECT"
         binding.btnConnect.isEnabled = true
 
         if (!c) {
             statusResetJob = lifecycleScope.launch {
-                delay(3000)
+                delay(3.seconds)
                 binding.tvBleStatus.text = "Connect"
             }
         }
@@ -768,6 +745,7 @@ class OBDActivity : AppCompatActivity() {
             it.value = "N / A"
             it.progress = 0
         }
+        @Suppress("NotifyDataSetChanged")
         sensorAdapter.notifyDataSetChanged()
     }
 
