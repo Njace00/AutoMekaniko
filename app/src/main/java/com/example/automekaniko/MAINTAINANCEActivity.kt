@@ -1,17 +1,24 @@
 package com.example.automekaniko
 
+import android.animation.ValueAnimator
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
+import android.view.LayoutInflater
 import android.view.View
+import android.view.animation.DecelerateInterpolator
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Button
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.lifecycleScope
+import com.example.automekaniko.databinding.Activity3dMaintainanceBinding
+import com.example.automekaniko.databinding.ItemChecklistStepBinding
 import io.github.sceneview.SceneView
 import io.github.sceneview.gesture.CameraGestureDetector
 import io.github.sceneview.loaders.ModelLoader
@@ -26,9 +33,16 @@ import kotlin.math.sqrt
 
 class MAINTAINANCEActivity : AppCompatActivity() {
 
+    private lateinit var binding: Activity3dMaintainanceBinding
     private val guideList = maintenanceGuides
 
     data class Vec3(val x: Float, val y: Float, val z: Float)
+
+    data class InfoItem(
+        val title: String,
+        val description: String,
+        val imageResId: Int? = null
+    )
 
     data class CameraSlide(
         val title: String,
@@ -38,28 +52,13 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         val steps: List<String> = emptyList(),
         val animationStartTime: Float = 0f,
         val animationTime: Float = 0f,
-        val animationDurationMs: Long = 650L
+        val animationDurationMs: Long = 650L,
+        val infoTitle: String? = null,
+        val infoItems: List<InfoItem> = emptyList()
     )
 
     private lateinit var sceneView: SceneView
     private lateinit var modelLoader: ModelLoader
-    private lateinit var modelSpinner: Spinner
-
-    private lateinit var btnPrev: Button
-    private lateinit var btnNext: Button
-    private lateinit var btnCameraLock: Button
-    private lateinit var slideTitle: TextView
-    private lateinit var slideDesc: TextView
-    private lateinit var tvCameraInfo: TextView
-    private lateinit var lockOverlay: View
-
-    // ── Tab views ─────────────────────────────────────────────────────────────
-    //private lateinit var tab3D:  TextView
-    //private lateinit var tabOBD: TextView
-
-    // ── Checklist overlay ─────────────────────────────────────────────────────
-    private lateinit var overlayTitle:       TextView
-    private lateinit var checklistContainer: android.widget.LinearLayout
 
     private var currentModelNode: ModelNode? = null
     private var currentGuide: MaintenanceGuide? = null
@@ -74,8 +73,8 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     private var currentCameraEye    = Vec3(0f, 0f, 0f)
     private var currentOrbitTarget  = Vec3(0f, 0.5f, 0f)
 
-    private val startEye    = Vec3(0f, 0.945f, -1.22f)
-    private val startLookAt = Vec3(0f, 0.5f, 0f)
+    private val startEye    = Vec3(0.15f, 0.95f, -2.75f)
+    private val startLookAt = Vec3(0f, 0.30f, 0f)
 
     private var savedManipulator: CameraGestureDetector.CameraManipulator? = null
     private var manipulatorCaptured = false
@@ -83,40 +82,29 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     private var lockedAnimTime: Float = 0f
     private var currentAnimTime: Float = 0f
     private var isScrubbing: Boolean = false
+    private var isInfoOpen: Boolean = false
+    private var isBottomDrawerOpen: Boolean = false
 
     // ─────────────────────────────────────────────────────────────────────────
     //  Lifecycle
     // ─────────────────────────────────────────────────────────────────────────
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_3d_maintainance)
+        binding = Activity3dMaintainanceBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // ── "Auto" white, "Mekaniko" red ──────────────────────────────────────
-        val appTitle = findViewById<TextView>(R.id.appTitle)
         val titleText = "AutoMekaniko"
         val spannable = SpannableString(titleText)
         spannable.setSpan(ForegroundColorSpan(0xFFFFFFFF.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         spannable.setSpan(ForegroundColorSpan(0xFFe02020.toInt()), 4, titleText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        appTitle.text = spannable
+        binding.appTitle.text = spannable
         AppNavigation.wire(this)
 
-        sceneView    = findViewById(R.id.sceneView)
-        modelSpinner = findViewById(R.id.modelSpinner)
-        btnPrev      = findViewById(R.id.btnPrev)
-        btnNext      = findViewById(R.id.btnNext)
-        btnCameraLock = findViewById(R.id.btnCameraLock)
-        slideTitle   = findViewById(R.id.slideTitle)
-        slideDesc    = findViewById(R.id.slideDesc)
-        tvCameraInfo = findViewById(R.id.tvCameraInfo)
-        lockOverlay  = findViewById(R.id.lockOverlay)
+        sceneView    = binding.sceneView
 
-        // ── Tab references ────────────────────────────────────────────────────
-        //tab3D  = findViewById(R.id.tab3D)
-        //tabOBD = findViewById(R.id.tabOBD)
-
-        // ── Checklist overlay ─────────────────────────────────────────────────
-        overlayTitle       = findViewById(R.id.overlayTitle)
-        checklistContainer = findViewById(R.id.checklistContainer)
+        binding.closeTab.setOnClickListener { toggleInfoPanel() }
+        binding.progressSection.setOnClickListener { toggleBottomDrawer() }
 
         modelLoader = ModelLoader(sceneView.engine, this)
 
@@ -131,6 +119,10 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         setupControls() // ← wire up tab clicks
         setCameraLockState(true)
         startCameraInfoUpdates()
+
+        binding.backBtn.setOnClickListener {
+            finish()
+        }
     }
 
     override fun onDestroy() {
@@ -153,6 +145,94 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     // ─────────────────────────────────────────────────────────────────────────
     //  BLE / camera boilerplate (unchanged from original)
     // ─────────────────────────────────────────────────────────────────────────
+    private fun toggleInfoPanel() {
+        isInfoOpen = !isInfoOpen
+        if (isInfoOpen) {
+            openInfoPanel()
+        } else {
+            closeInfoPanel()
+        }
+    }
+
+    private fun openInfoPanel() {
+        val slideWidth = binding.mainCard.width.takeIf { it > 0 } ?: binding.root.width
+        binding.tvTabText.text = "CLOSE"
+        binding.infoSlidePanel.animate().cancel()
+        binding.closeTab.animate().cancel()
+        binding.infoSlidePanel.translationX = slideWidth.toFloat()
+        binding.infoSlidePanel.alpha = 0f
+        binding.infoSlidePanel.visibility = View.VISIBLE
+        binding.infoSlidePanel.animate()
+            .translationX(0f)
+            .alpha(1f)
+            .setDuration(260L)
+            .setInterpolator(DecelerateInterpolator())
+            .start()
+        binding.closeTab.animate()
+            .translationX(-6f)
+            .setDuration(260L)
+            .setInterpolator(DecelerateInterpolator())
+            .start()
+        binding.ivTabArrowTop.animate().rotation(180f).setDuration(220L).start()
+        binding.ivTabArrowBottom.animate().rotation(180f).setDuration(220L).start()
+    }
+
+    private fun closeInfoPanel() {
+        val slideWidth = binding.mainCard.width.takeIf { it > 0 } ?: binding.root.width
+        binding.tvTabText.text = "INFO"
+        binding.infoSlidePanel.animate().cancel()
+        binding.closeTab.animate().cancel()
+        binding.infoSlidePanel.animate()
+            .translationX(slideWidth.toFloat())
+            .alpha(0f)
+            .setDuration(220L)
+            .setInterpolator(DecelerateInterpolator())
+            .withEndAction {
+                binding.infoSlidePanel.visibility = View.GONE
+                binding.infoSlidePanel.translationX = 0f
+                binding.infoSlidePanel.alpha = 1f
+            }
+            .start()
+        binding.closeTab.animate()
+            .translationX(0f)
+            .setDuration(220L)
+            .setInterpolator(DecelerateInterpolator())
+            .start()
+        binding.ivTabArrowTop.animate().rotation(0f).setDuration(180L).start()
+        binding.ivTabArrowBottom.animate().rotation(0f).setDuration(180L).start()
+    }
+
+    private fun toggleBottomDrawer() {
+        setBottomDrawerOpen(!isBottomDrawerOpen, animated = true)
+    }
+
+    private fun setBottomDrawerOpen(open: Boolean, animated: Boolean) {
+        isBottomDrawerOpen = open
+        binding.bottomChecklistScroll.visibility = if (open) View.VISIBLE else View.GONE
+        binding.bottomDrawerArrow.animate()
+            .rotation(if (open) 180f else 0f)
+            .setDuration(if (animated) 180L else 0L)
+            .start()
+
+        val targetHeight = (if (open) 220 else 96).toPx()
+        val params = binding.progressSection.layoutParams as ConstraintLayout.LayoutParams
+        if (!animated) {
+            params.height = targetHeight
+            binding.progressSection.layoutParams = params
+            return
+        }
+
+        ValueAnimator.ofInt(binding.progressSection.height.takeIf { it > 0 } ?: params.height, targetHeight).apply {
+            duration = 220L
+            interpolator = DecelerateInterpolator()
+            addUpdateListener { animator ->
+                params.height = animator.animatedValue as Int
+                binding.progressSection.layoutParams = params
+            }
+            start()
+        }
+    }
+
     private fun captureManipulatorOnce() {
         if (!manipulatorCaptured) {
             savedManipulator = sceneView.cameraManipulator
@@ -162,7 +242,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
 
     private fun setupModelSelector() {
         if (guideList.isEmpty()) {
-            modelSpinner.adapter = ArrayAdapter(
+            binding.modelSpinner.adapter = ArrayAdapter(
                 this,
                 android.R.layout.simple_spinner_item,
                 listOf("No maintenance guides found")
@@ -170,13 +250,13 @@ class MAINTAINANCEActivity : AppCompatActivity() {
             return
         }
 
-        modelSpinner.adapter = ArrayAdapter(
+        binding.modelSpinner.adapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_item,
             guideList.map { it.name }
         ).also { it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
 
-        modelSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        binding.modelSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 (view as? TextView)?.setTextColor(0xFFFFFFFF.toInt())
                 loadGuide(guideList[position])
@@ -189,11 +269,15 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         currentGuide = guide
         currentSlides = guide.slides
         currentSlideIndex = 0
+        
+        // Use "Maintainance" as the fixed header title per user request
+        binding.tvMaintainanceTitle.text = "Maintainance"
+
         loadModel(guide.glbFile)
     }
 
     private fun setupControls() {
-        btnPrev.setOnClickListener {
+        binding.btnPrev.setOnClickListener {
             if (!isCameraLocked) return@setOnClickListener
             val to = (currentSlideIndex - 1).coerceAtLeast(0)
             sceneView.cameraManipulator = null
@@ -202,7 +286,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
             updateUiState()
         }
 
-        btnNext.setOnClickListener {
+        binding.btnNext.setOnClickListener {
             if (!isCameraLocked) return@setOnClickListener
             val to = (currentSlideIndex + 1).coerceAtMost(currentSlides.lastIndex)
             sceneView.cameraManipulator = null
@@ -211,7 +295,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
             updateUiState()
         }
 
-        btnCameraLock.setOnClickListener {
+        binding.btnCameraLock.setOnClickListener {
             setCameraLockState(!isCameraLocked)
         }
 
@@ -224,12 +308,12 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         if (locked) {
             if (savedManipulator == null) savedManipulator = sceneView.cameraManipulator
             sceneView.cameraManipulator = null
-            lockOverlay.visibility = View.VISIBLE
+            binding.lockOverlay.visibility = View.VISIBLE
             currentModelNode?.isEditable = false
         } else {
             if (sceneView.cameraManipulator == null && savedManipulator != null)
                 sceneView.cameraManipulator = savedManipulator
-            lockOverlay.visibility = View.GONE
+            binding.lockOverlay.visibility = View.GONE
             currentModelNode?.isEditable = true
             val p = sceneView.cameraNode.position
             currentCameraEye = Vec3(p.x, p.y, p.z)
@@ -239,9 +323,9 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     }
 
     private fun updateUiState() {
-        btnCameraLock.text = if (isCameraLocked) "Camera: LOCK" else "Camera: FREE"
-        btnPrev.isEnabled  = isCameraLocked && currentSlideIndex > 0
-        btnNext.isEnabled  = isCameraLocked && currentSlideIndex < currentSlides.lastIndex
+        binding.btnCameraLock.text = if (isCameraLocked) "Camera: LOCK" else "Camera: FREE"
+        binding.btnPrev.isEnabled  = isCameraLocked && currentSlideIndex > 0
+        binding.btnNext.isEnabled  = isCameraLocked && currentSlideIndex < currentSlides.lastIndex
     }
 
     private fun loadModel(fileName: String) {
@@ -269,10 +353,9 @@ class MAINTAINANCEActivity : AppCompatActivity() {
             sceneView.addChildNode(modelNode)
             currentModelNode = modelNode
 
+            currentSlideIndex = 0
+            goToSlide(currentSlideIndex, animated = false, applySlideCamera = false)
             applyCustomStartCamera()
-
-            currentSlideIndex  = 0
-            goToSlide(currentSlideIndex, animated = false)
             updateUiState()
         }
     }
@@ -318,17 +401,19 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         lifecycleScope.launch {
             delay(32L)
             setCamera(startEye, startLookAt)
+            delay(120L)
+            setCamera(startEye, startLookAt)
         }
     }
 
-    private fun goToSlide(index: Int, animated: Boolean) {
+    private fun goToSlide(index: Int, animated: Boolean, applySlideCamera: Boolean = true) {
         val slide = currentSlides.getOrNull(index) ?: return
-        slideTitle.text = slide.title
-        slideDesc.text  = slide.description
+        binding.slideTitle.text = slide.title
+        binding.slideDesc.text  = slide.description
 
         // ── Update checklist overlay ──────────────────────────────────────────
-        overlayTitle.text = slide.title
-        checklistContainer.removeAllViews()
+        binding.overlayTitle.text = slide.title
+        binding.checklistContainer.removeAllViews()
         slide.steps.forEach { step ->
             val tv = android.widget.TextView(this).apply {
                 text = "• $step"
@@ -336,15 +421,21 @@ class MAINTAINANCEActivity : AppCompatActivity() {
                 setTextColor(0xFFFFFFFF.toInt())
                 setPadding(0, 3, 0, 3)
             }
-            checklistContainer.addView(tv)
+            binding.checklistContainer.addView(tv)
         }
+
+        updateInfoPanel(slide)
+
+        val useOverviewCamera = index <= 1
+        val targetEye  = if (useOverviewCamera) startEye else slide.eye
+        val targetLook = if (useOverviewCamera) startLookAt else slide.lookAt
 
         if (animated) {
             animateCameraPose(
                 startEye  = currentCameraEye,
                 startLook = currentOrbitTarget,
-                endEye    = slide.eye,
-                endLook   = slide.lookAt,
+                endEye    = targetEye,
+                endLook   = targetLook,
                 durationMs = 650L
             )
             scrubAnimationTo(
@@ -353,10 +444,97 @@ class MAINTAINANCEActivity : AppCompatActivity() {
                 durationMs = slide.animationDurationMs
             )
         } else {
-            setCamera(slide.eye, slide.lookAt)
+            if (applySlideCamera) {
+                setCamera(targetEye, targetLook)
+            }
             applyAnimationTime(slide.animationTime)
         }
     }
+
+    private fun updateInfoPanel(slide: CameraSlide) {
+        // If there's no info content, we can hide the entire tab or just clear it.
+        // For now, let's just clear it.
+        if (slide.infoItems.isEmpty()) {
+            isInfoOpen = false
+            binding.infoSlidePanel.animate().cancel()
+            binding.closeTab.animate().cancel()
+            binding.closeTab.visibility = View.GONE
+            binding.infoSlidePanel.visibility = View.GONE
+            binding.infoSlidePanel.translationX = 0f
+            binding.infoSlidePanel.alpha = 1f
+            binding.tvTabText.text = "INFO"
+            binding.ivTabArrowTop.rotation = 0f
+            binding.ivTabArrowBottom.rotation = 0f
+            binding.infoItemsContainer.removeAllViews()
+            return
+        } else {
+            binding.closeTab.visibility = View.VISIBLE
+            binding.tvTabText.text = if (isInfoOpen) "CLOSE" else "INFO"
+        }
+
+        binding.tvInfoPanelTitle.text = slide.infoTitle ?: "Recommended Info"
+        binding.infoItemsContainer.removeAllViews()
+
+        slide.infoItems.forEach { item ->
+            val itemLayout = android.widget.LinearLayout(this).apply {
+                orientation = android.widget.LinearLayout.HORIZONTAL
+                layoutParams = android.widget.LinearLayout.LayoutParams(
+                    android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    setMargins(0, 0, 0, 16.toPx())
+                }
+            }
+
+            val leftContainer = android.widget.LinearLayout(this).apply {
+                orientation = android.widget.LinearLayout.VERTICAL
+                layoutParams = android.widget.LinearLayout.LayoutParams(
+                    100.toPx(),
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+            }
+
+            val titleTv = android.widget.TextView(this).apply {
+                text = item.title
+                setTextColor(0xFFFFFFFF.toInt())
+                textSize = 12f
+                setTypeface(null, android.graphics.Typeface.BOLD)
+            }
+            leftContainer.addView(titleTv)
+
+            if (item.imageResId != null) {
+                val iv = android.widget.ImageView(this).apply {
+                    layoutParams = android.widget.LinearLayout.LayoutParams(
+                        80.toPx(),
+                        80.toPx()
+                    ).apply {
+                        setMargins(0, 4.toPx(), 0, 0)
+                    }
+                    setImageResource(item.imageResId)
+                    scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+                }
+                leftContainer.addView(iv)
+            }
+
+            itemLayout.addView(leftContainer)
+
+            val descTv = android.widget.TextView(this).apply {
+                layoutParams = android.widget.LinearLayout.LayoutParams(
+                    0,
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f
+                )
+                text = item.description
+                setTextColor(0xFFCCCCCC.toInt())
+                textSize = 11f
+            }
+            itemLayout.addView(descTv)
+
+            binding.infoItemsContainer.addView(itemLayout)
+        }
+    }
+
+    private fun Int.toPx(): Int = (this * resources.displayMetrics.density).toInt()
 
     private fun setCamera(cameraPos: Vec3, lookTarget: Vec3) {
         currentCameraEye   = cameraPos
@@ -403,7 +581,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
                 val yaw      = Math.toDegrees(atan2(dx, dz).toDouble()).toFloat()
                 val pitch    = Math.toDegrees(asin((dy / distance).toDouble())).toFloat()
 
-                tvCameraInfo.text =
+                binding.tvCameraInfo.text =
                     "eye=(%.2f, %.2f, %.2f) target=(%.2f, %.2f, %.2f) d=%.2f yaw=%.1f pitch=%.1f"
                         .format(cam.x, cam.y, cam.z, target.x, target.y, target.z, distance, yaw, pitch)
 

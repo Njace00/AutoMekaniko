@@ -43,6 +43,13 @@ val P0301Guide = DtcGuide(
                 "Ensure the engine is cool and the ignition is off",
                 "Open the hood and visually inspect the engine bay",
                 "Locate cylinder 1 — the first cylinder nearest the front of the engine"
+            ),
+            infoTitle = "Cylinder 1 Misfire",
+            infoItems = listOf(
+                MAINTAINANCEActivity.InfoItem("What to Use", "Use a high-quality OBD2 scanner and specialized spark plug tools."),
+                MAINTAINANCEActivity.InfoItem("What NOT to Use", "Do not handle ignition components with wet hands or while the engine is hot."),
+                MAINTAINANCEActivity.InfoItem("Diagnostic", "Check for physical damage to the ignition coil and wiring harness."),
+                MAINTAINANCEActivity.InfoItem("Safety", "Always disconnect the battery before working on electrical components.")
             )
         ),
 
@@ -59,6 +66,12 @@ val P0301Guide = DtcGuide(
                 "Locate the plastic engine top cover",
                 "Unclip or unscrew the cover retaining bolts",
                 "Lift and set the cover aside in a safe place"
+            ),
+            infoTitle = "Engine Cover Removal",
+            infoItems = listOf(
+                MAINTAINANCEActivity.InfoItem("What to Use", "Use a 10mm socket or screwdriver depending on your model."),
+                MAINTAINANCEActivity.InfoItem("What NOT to Use", "Do not force the cover; if it's stuck, check for hidden bolts or clips."),
+                MAINTAINANCEActivity.InfoItem("Tip", "Place all bolts in a magnetic tray so you don't lose them.")
             )
         ),
 
@@ -160,6 +173,13 @@ val P0301Guide = DtcGuide(
                 "Clip or bolt it down securely",
                 "Start the engine and listen for smooth idle",
                 "Use an OBD scanner to clear the P0301 code and confirm no reoccurrence"
+            ),
+            infoTitle = "Lighting System",
+            infoItems = listOf(
+                MAINTAINANCEActivity.InfoItem("What to Use", "Use high-quality halogen or LED bulbs matching your vehicle's specifications. Wear gloves."),
+                MAINTAINANCEActivity.InfoItem("What NOT to Use", "Do not touch the glass part of a new halogen bulb with bare fingers; oils can cause it to burst."),
+                MAINTAINANCEActivity.InfoItem("Headlights", "Check both low and high beams. Dim lights may indicate a failing bulb or battery."),
+                MAINTAINANCEActivity.InfoItem("Signals", "Ensure all 4 turn signals blink at a normal rate. Fast blinking means a bulb is out.")
             )
         )
 

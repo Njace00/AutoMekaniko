@@ -2,6 +2,7 @@ package com.example.automekaniko
 
 import android.content.Intent
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
@@ -12,11 +13,31 @@ object AppNavigation {
             activity.finish()
         }
 
-        activity.findOptional<TextView>(R.id.connecttxt)?.text = "Guides"
+        (activity.findOptional<View>(R.id.connecttxt) as? TextView)?.text = "Guides"
 
         setNav(activity, R.id.hometxt, MainActivity::class.java)
         setNav(activity, R.id.connecttxt, GuidesActivity::class.java)
         setNav(activity, R.id.livetxt, OBDActivity::class.java)
+
+        highlight(activity)
+    }
+
+    private fun highlight(activity: AppCompatActivity) {
+        setNavColor(activity.findOptional<View>(R.id.hometxt), activity is MainActivity)
+        setNavColor(activity.findOptional<View>(R.id.livetxt), activity is OBDActivity)
+        setNavColor(
+            activity.findOptional<View>(R.id.connecttxt),
+            activity is GuidesActivity || activity is DtcActivity || activity is MAINTAINANCEActivity
+        )
+        setNavColor(activity.findOptional<View>(R.id.settingtxt), false)
+    }
+
+    private fun setNavColor(view: View?, active: Boolean) {
+        val color = if (active) 0xFFe02020.toInt() else 0xFF555555.toInt()
+        when (view) {
+            is ImageView -> view.setColorFilter(color)
+            is TextView -> view.setTextColor(color)
+        }
     }
 
     private fun setNav(activity: AppCompatActivity, viewId: Int, target: Class<out AppCompatActivity>) {

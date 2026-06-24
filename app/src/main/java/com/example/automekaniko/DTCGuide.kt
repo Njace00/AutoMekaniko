@@ -14,7 +14,9 @@ data class DtcSlide(
     val steps: List<String> = emptyList(),
     val animationStartTime: Float = 0f,
     val animationTime: Float = 0f,
-    val animationDurationMs: Long = 650L
+    val animationDurationMs: Long = 650L,
+    val infoTitle: String? = null,
+    val infoItems: List<MAINTAINANCEActivity.InfoItem> = emptyList()
 )
 
 data class DtcGuide(

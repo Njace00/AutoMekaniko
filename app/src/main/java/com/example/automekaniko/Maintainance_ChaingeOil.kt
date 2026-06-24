@@ -102,6 +102,14 @@ val ChangeOilGuide = MaintenanceGuide(
                 "Open the oil filler cap",
                 "Pour the correct amount of oil",
                 "Check oil level using dipstick"
+            ),
+            infoTitle = "Types of Oil & Recommended",
+            infoItems = listOf(
+                MAINTAINANCEActivity.InfoItem("What to Use", "Always use the viscosity grade (e.g., 5W-30) specified in your owner's manual."),
+                MAINTAINANCEActivity.InfoItem("What NOT to Use", "Do not use oil additives unless recommended by the manufacturer. Avoid mixing different oil types."),
+                MAINTAINANCEActivity.InfoItem("Conventional Oil", "Standard motor oil made from refined crude oil. Provides basic protection.", R.drawable.conventionaloil),
+                MAINTAINANCEActivity.InfoItem("Full Synthetic Oil", "Chemically engineered for higher performance and superior protection.", R.drawable.fullysynthetic),
+                MAINTAINANCEActivity.InfoItem("High Mileage Oil", "Designed specifically for vehicles with over 75,000 miles.", R.drawable.highmilleage)
             )
         ),
 

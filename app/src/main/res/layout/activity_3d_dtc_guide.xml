@@ -1,278 +1,419 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0a0a0a">
+    android:background="#000000">
 
-    <!-- TOP BAR — pinned to top, fixed height -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topBar"
-        android:layout_width="0dp"
-        android:layout_height="64dp"
-        android:background="#232222"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <TextView
-            android:id="@+id/burger"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_marginStart="16dp"
-            android:gravity="center_vertical"
-            android:text="☰"
-            android:textColor="#e02020"
-            android:textSize="24sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+        android:layout_width="match_parent"
+        android:layout_height="104dp"
+        android:background="#000000"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/appTitle"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:gravity="center"
             android:text="AutoMekaniko"
-            android:textSize="22sp"
+            android:textSize="32sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0">
-            <!-- "Auto" in white, "Mekaniko" in red — set via SpannableString in Kotlin -->
-        </TextView>
+            app:layout_constraintVertical_bias="0.58" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#444444"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- BOTTOM BAR — pinned to bottom, fixed height -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/bottomBar"
+        android:id="@+id/headerSection"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:background="#0f0f0f"
-        android:elevation="8dp"
-        app:layout_constraintBottom_toBottomOf="parent">
+        android:layout_height="66dp"
+        android:background="#000000"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="18dp"
+        app:layout_constraintTop_toBottomOf="@id/topBar">
 
-        <TextView
-            android:id="@+id/hometxt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Home"
-            android:textColor="#555555"
-            android:textSize="13sp"
-            android:textStyle="bold"
+        <ImageView
+            android:id="@+id/backBtn"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/abc_ic_ab_back_material"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/livetxt"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:tint="#ff2020" />
 
         <TextView
-            android:id="@+id/livetxt"
+            android:id="@+id/tvDtcTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Live Data"
-            android:textColor="#555555"
-            android:textSize="13sp"
-            app:layout_constraintStart_toEndOf="@id/hometxt"
-            app:layout_constraintEnd_toStartOf="@id/connecttxt"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            android:layout_marginStart="12dp"
+            android:text="DTC Guides"
+            android:textColor="#ffffff"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@id/backBtn"
+            app:layout_constraintStart_toEndOf="@id/backBtn"
+            app:layout_constraintTop_toTopOf="@id/backBtn" />
 
         <TextView
-            android:id="@+id/connecttxt"
+            android:id="@+id/tvDtcSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Guides"
-            android:textColor="#e02020"
-            android:textSize="13sp"
-            app:layout_constraintStart_toEndOf="@id/livetxt"
-            app:layout_constraintEnd_toStartOf="@id/settingtxt"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-
-        <TextView
-            android:id="@+id/settingtxt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Settings"
-            android:textColor="#555555"
-            android:textSize="13sp"
-            app:layout_constraintStart_toEndOf="@id/connecttxt"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            android:text="Step-by-Step Guides in a 3D Environment"
+            android:textColor="#d0d0d0"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@id/tvDtcTitle"
+            app:layout_constraintTop_toBottomOf="@id/tvDtcTitle" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- SLIDE PANEL — fixed 120dp height, sits above bottomBar, same as maintenance -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/slidePanel"
-        android:layout_width="0dp"
-        android:layout_height="120dp"
-        android:background="#AA111111"
-        android:padding="8dp"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@id/bottomBar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:id="@+id/mainCard"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="#000000"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        app:layout_constraintBottom_toTopOf="@id/progressSection"
+        app:layout_constraintTop_toBottomOf="@id/headerSection">
 
-        <Button
-            android:id="@+id/btnPrev"
-            android:layout_width="78dp"
-            android:layout_height="34dp"
-            android:backgroundTint="#1a1a1a"
-            android:text="Prev"
-            android:textAllCaps="false"
-            android:textColor="#e02020"
-            android:textSize="12sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-
-        <Button
-            android:id="@+id/btnNext"
-            android:layout_width="78dp"
-            android:layout_height="34dp"
-            android:backgroundTint="#1a1a1a"
-            android:text="Next"
-            android:textAllCaps="false"
-            android:textColor="#e02020"
-            android:textSize="12sp"
+        <io.github.sceneview.SceneView
+            android:id="@+id/sceneView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
+        <View
+            android:id="@+id/lockOverlay"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintBottom_toBottomOf="@id/sceneView"
+            app:layout_constraintEnd_toEndOf="@id/sceneView"
+            app:layout_constraintStart_toStartOf="@id/sceneView"
+            app:layout_constraintTop_toTopOf="@id/sceneView" />
 
+        <LinearLayout
+            android:id="@+id/infoTab"
+            android:layout_width="24dp"
+            android:layout_height="84dp"
+            android:background="@drawable/info_tab_bg"
+            android:clickable="true"
+            android:elevation="14dp"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/ivTabArrowTop"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_chevron_left"
+                app:tint="#FFFFFF" />
+
+            <TextView
+                android:id="@+id/tvTabText"
+                android:layout_width="72dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:rotation="270"
+                android:singleLine="true"
+                android:text="INFO"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/ivTabArrowBottom"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_chevron_left"
+                app:tint="#FFFFFF" />
+
+        </LinearLayout>
+
+        <ScrollView
+            android:id="@+id/infoSlidePanel"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#FF232222"
+            android:elevation="10dp"
+            android:padding="16dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/infoTab"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvInfoPanelTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="Recommended Info"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:id="@+id/infoItemsContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+                </FrameLayout>
+            </LinearLayout>
+        </ScrollView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/progressSection"
+        android:layout_width="match_parent"
+        android:layout_height="96dp"
+        android:background="#202020"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingStart="16dp"
+        android:paddingEnd="18dp"
+        android:paddingBottom="10dp"
+        app:layout_constraintBottom_toTopOf="@id/navButtonsSection">
+
+        <View
+            android:id="@+id/progressIndicator"
+            android:layout_width="128dp"
+            android:layout_height="4dp"
+            android:layout_marginTop="4dp"
+            android:background="#e02020"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ivProgressIcon"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:src="@drawable/ic_star_circle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/progressIndicator"
+            app:tint="#ff2020" />
+
+        <ImageView
+            android:id="@+id/bottomDrawerArrow"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:padding="5dp"
+            android:src="@drawable/ic_expand_less"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/ivProgressIcon"
+            app:tint="#ff2020" />
 
         <TextView
             android:id="@+id/slideTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textColor="#e02020"
-            android:textSize="16sp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
+            android:text="Overview"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@id/slideDesc"
-            app:layout_constraintStart_toEndOf="@id/btnPrev"
-            app:layout_constraintEnd_toStartOf="@id/btnNext"/>
+            app:layout_constraintEnd_toStartOf="@id/bottomDrawerArrow"
+            app:layout_constraintStart_toEndOf="@id/ivProgressIcon"
+            app:layout_constraintTop_toTopOf="@id/ivProgressIcon" />
 
         <TextView
             android:id="@+id/slideDesc"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textColor="#FFFFFF"
-            android:textSize="13sp"
-            android:maxLines="2"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@id/slideTitle"
-            app:layout_constraintEnd_toEndOf="@id/slideTitle"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!--
-        SCENE VIEW — now fills the full space between topBar and slidePanel,
-        exactly like the maintenance layout. All overlays float on top of it.
-    -->
-    <io.github.sceneview.SceneView
-        android:id="@+id/sceneView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/topBar"
-        app:layout_constraintBottom_toTopOf="@id/slidePanel"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <!-- LOCK OVERLAY — covers sceneView exactly -->
-    <View
-        android:id="@+id/lockOverlay"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@android:color/transparent"
-        android:clickable="true"
-        android:focusable="true"
-        android:visibility="visible"
-        app:layout_constraintTop_toTopOf="@id/sceneView"
-        app:layout_constraintBottom_toBottomOf="@id/sceneView"
-        app:layout_constraintStart_toStartOf="@id/sceneView"
-        app:layout_constraintEnd_toEndOf="@id/sceneView"/>
-
-    <!--
-        DTC SPINNER OVERLAY — floats at the top of the sceneView.
-        Anchored to sceneView top, full width with margin.
-        Touch passes through to sceneView beneath when not interacting.
-    -->
-    <Spinner
-        android:id="@+id/dtcSpinner"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:layout_marginHorizontal="12dp"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/spinner_border"
-        app:layout_constraintTop_toTopOf="@id/sceneView"
-        app:layout_constraintStart_toStartOf="@id/sceneView"
-        app:layout_constraintEnd_toEndOf="@id/sceneView"/>
-
-    <!--
-        INFO CARD + PARTS SCROLL OVERLAY — floats below the spinner,
-        anchored to the right side so the 3D model stays visible on the left.
-        Max height capped so it never covers the whole scene.
-        visibility="gone" until a DTC code is selected (same as before).
-    -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/topScroll"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="#CC0a0a0a"
-        android:paddingHorizontal="14dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/dtcSpinner"
-        app:layout_constraintBottom_toTopOf="@id/checklistOverlay"
-        app:layout_constraintStart_toStartOf="@id/sceneView"
-        app:layout_constraintEnd_toEndOf="@id/sceneView"
-        app:layout_constraintHeight_max="260dp"
-        app:layout_constraintVertical_bias="0.0">
-
-
-            <!-- DTC info card — shown once a code is selected -->
-
-
-
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!--
-        CHECKLIST OVERLAY — floats top-right of sceneView.
-    -->
-    <LinearLayout
-        android:id="@+id/checklistOverlay"
-        android:layout_width="180dp"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="#CC111111"
-        android:padding="10dp"
-        android:visibility="gone"
-        android:layout_marginTop="70dp"
-        app:layout_constraintTop_toTopOf="@id/sceneView"
-        app:layout_constraintEnd_toEndOf="@id/sceneView">
-
-        <TextView
-            android:id="@+id/overlayTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#e02020"
+            android:text="Step description"
+            android:textColor="#d0d0d0"
+            android:textSize="11sp"
             android:textStyle="bold"
-            android:textSize="13sp"
-            android:layout_marginBottom="6dp"/>
+            app:layout_constraintEnd_toEndOf="@id/slideTitle"
+            app:layout_constraintStart_toStartOf="@id/slideTitle"
+            app:layout_constraintTop_toBottomOf="@id/slideTitle" />
 
-        <LinearLayout
-            android:id="@+id/checklistContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"/>
+        <ScrollView
+            android:id="@+id/bottomChecklistScroll"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="12dp"
+            android:clipToPadding="false"
+            android:paddingBottom="8dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/slideTitle"
+            app:layout_constraintTop_toBottomOf="@id/slideDesc">
+
+            <LinearLayout
+                android:id="@+id/checklistContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </ScrollView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:id="@+id/navButtonsSection"
+        android:layout_width="match_parent"
+        android:layout_height="90dp"
+        android:background="#2b2b2b"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="24dp"
+        app:layout_constraintBottom_toTopOf="@id/bottomBar">
+
+        <Button
+            android:id="@+id/btnPrev"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_marginEnd="30dp"
+            android:layout_weight="1"
+            android:background="@drawable/btn_rounded_grey"
+            android:backgroundTint="#8a8a8a"
+            android:stateListAnimator="@null"
+            android:text="Prev"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/btnNext"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_weight="2"
+            android:background="@drawable/btn_rounded_red"
+            android:backgroundTint="#e02020"
+            android:stateListAnimator="@null"
+            android:text="Next"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp" />
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/overlayTitle"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvCameraInfo"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnCameraLock"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottomBar"
+        android:layout_width="match_parent"
+        android:layout_height="102dp"
+        android:background="#000000"
+        android:elevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageView
+            android:id="@+id/hometxt"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="14dp"
+            android:src="@drawable/ic_home"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/livetxt"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="#666666" />
+
+        <ImageView
+            android:id="@+id/livetxt"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="14dp"
+            android:src="@drawable/ic_car"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/connecttxt"
+            app:layout_constraintStart_toEndOf="@id/hometxt"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="#666666" />
+
+        <ImageView
+            android:id="@+id/connecttxt"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="14dp"
+            android:src="@drawable/ic_bluetooth"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/settingtxt"
+            app:layout_constraintStart_toEndOf="@id/livetxt"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="#ff2020" />
+
+        <ImageView
+            android:id="@+id/settingtxt"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="14dp"
+            android:src="@drawable/ic_settings"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/connecttxt"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="#666666" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

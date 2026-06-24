@@ -2,6 +2,7 @@ package com.example.automekaniko
 
 private typealias MaintenanceSlide = MAINTAINANCEActivity.CameraSlide
 private typealias MaintenanceVec3 = MAINTAINANCEActivity.Vec3
+private typealias MaintenanceInfoItem = MAINTAINANCEActivity.InfoItem
 
 private fun f(frame: Int): Float = frame / 24f
 
@@ -50,7 +51,14 @@ val VPMCGuide = MaintenanceGuide(
             ),
             animationStartTime = f(60),
             animationTime = f(100),
-            animationDurationMs = 650L
+            animationDurationMs = 650L,
+            infoTitle = "Battery Maintenance",
+            infoItems = listOf(
+                MaintenanceInfoItem("What to Use", "Use a digital multimeter for voltage and a wire brush for cleaning terminals."),
+                MaintenanceInfoItem("What NOT to Use", "Never use a flame near the battery (explosive gases) or a standard wrench without insulation."),
+                MaintenanceInfoItem("Voltage Check", "A healthy battery should read 12.4V to 12.7V when the engine is off."),
+                MaintenanceInfoItem("Corrosion", "Clean terminals if you see white/blue powdery deposits to ensure good contact.")
+            )
         ),
         MaintenanceSlide(
             title = "Lights",
@@ -65,7 +73,14 @@ val VPMCGuide = MaintenanceGuide(
             ),
             animationStartTime = f(100),
             animationTime = f(170),
-            animationDurationMs = 650L
+            animationDurationMs = 650L,
+            infoTitle = "Lighting System",
+            infoItems = listOf(
+                MaintenanceInfoItem("What to Use", "Use high-quality halogen or LED bulbs matching your vehicle's specifications. Wear gloves."),
+                MaintenanceInfoItem("What NOT to Use", "Do not touch the glass part of a new halogen bulb with bare fingers; oils can cause it to burst."),
+                MaintenanceInfoItem("Headlights", "Check both low and high beams. Dim lights may indicate a failing bulb or battery."),
+                MaintenanceInfoItem("Signals", "Ensure all 4 turn signals blink at a normal rate. Fast blinking means a bulb is out.")
+            )
         ),
         MaintenanceSlide(
             title = "Oil",
@@ -80,7 +95,15 @@ val VPMCGuide = MaintenanceGuide(
             ),
             animationStartTime = f(220),
             animationTime = f(240),
-            animationDurationMs = 650L
+            animationDurationMs = 650L,
+            infoTitle = "Types of Oil & Recommended",
+            infoItems = listOf(
+                MaintenanceInfoItem("What to Use", "Always use the viscosity grade (e.g., 5W-30) specified in your owner's manual."),
+                MaintenanceInfoItem("What NOT to Use", "Do not use oil additives unless recommended by the manufacturer. Avoid mixing different oil types."),
+                MaintenanceInfoItem("Conventional Oil", "Standard motor oil made from refined crude oil. Provides basic protection.", R.drawable.conventionaloil),
+                MaintenanceInfoItem("Full Synthetic Oil", "Chemically engineered for higher performance and superior protection.", R.drawable.fullysynthetic),
+                MaintenanceInfoItem("High Mileage Oil", "Designed specifically for vehicles with over 75,000 miles.", R.drawable.highmilleage)
+            )
         ),
         MaintenanceSlide(
             title = "Water",
@@ -95,7 +118,14 @@ val VPMCGuide = MaintenanceGuide(
             ),
             animationStartTime = f(240),
             animationTime = f(275),
-            animationDurationMs = 650L
+            animationDurationMs = 650L,
+            infoTitle = "Coolant & Cooling",
+            infoItems = listOf(
+                MaintenanceInfoItem("What to Use", "Use a 50/50 mix of distilled water and the specific coolant type (HOAT, OAT, etc.) for your car."),
+                MaintenanceInfoItem("What NOT to Use", "Never use 100% tap water (causes scale) or 100% coolant (freezes/overheats easily)."),
+                MaintenanceInfoItem("Reservoir Level", "Never open the radiator cap when the engine is hot. Check the plastic reservoir instead."),
+                MaintenanceInfoItem("Coolant Color", "Should be bright green, orange, or pink. If it looks rusty or oily, seek service.")
+            )
         ),
         MaintenanceSlide(
             title = "Brake",
@@ -110,7 +140,14 @@ val VPMCGuide = MaintenanceGuide(
             ),
             animationStartTime = f(310),
             animationTime = f(320),
-            animationDurationMs = 1050L
+            animationDurationMs = 1050L,
+            infoTitle = "Brake Safety",
+            infoItems = listOf(
+                MaintenanceInfoItem("What to Use", "Use the specific brake fluid grade (DOT 3, 4, or 5.1) listed on your reservoir cap."),
+                MaintenanceInfoItem("What NOT to Use", "Never use DOT 5 (silicone-based) in a system designed for DOT 3 or 4. Do not use old, opened fluid."),
+                MaintenanceInfoItem("Brake Fluid", "Check level in the master cylinder. Low fluid can mean worn pads or a leak."),
+                MaintenanceInfoItem("Pad Thickness", "If pads are less than 1/4 inch (6mm) thick, they should be replaced soon.")
+            )
         ),
         MaintenanceSlide(
             title = "Tire Air Pressure",
@@ -125,7 +162,14 @@ val VPMCGuide = MaintenanceGuide(
             ),
             animationStartTime = f(315),
             animationTime = f(380),
-            animationDurationMs = 1250L
+            animationDurationMs = 1250L,
+            infoTitle = "Tire Maintenance",
+            infoItems = listOf(
+                MaintenanceInfoItem("What to Use", "Use a reliable tire pressure gauge. Inflate to the PSI listed on the door jamb sticker."),
+                MaintenanceInfoItem("What NOT to Use", "Do not inflate to the 'Max PSI' listed on the tire sidewall; that is the tire's burst limit."),
+                MaintenanceInfoItem("Proper PSI", "Check the sticker inside the driver's door for the recommended pressure."),
+                MaintenanceInfoItem("Tread Depth", "Use a coin to check tread depth. Worn tires are dangerous in wet conditions.")
+            )
         ),
         MaintenanceSlide(
             title = "Engine",
@@ -140,7 +184,15 @@ val VPMCGuide = MaintenanceGuide(
             ),
             animationStartTime = f(340),
             animationTime = f(405),
-            animationDurationMs = 1850L
+            animationDurationMs = 1850L,
+            infoTitle = "Engine Inspection",
+            infoItems = listOf(
+                MaintenanceInfoItem("What to Do", "Start the engine when cold and listen carefully. Check for smooth idle, no rough sounds, and normal exhaust color."),
+                MaintenanceInfoItem("What NOT to Do", "Never touch the engine when running or hot. Do not remove the radiator cap while the engine is warm."),
+                MaintenanceInfoItem("Unusual Sounds", "Knocking, pinging, or grinding noises may indicate serious problems. Squealing usually means a worn belt."),
+                MaintenanceInfoItem("Fluid Leaks", "Look for oil, coolant, or transmission fluid leaks under the engine. Any puddle warrants immediate attention."),
+                MaintenanceInfoItem("Belts & Hoses", "Check for cracks, fraying, or soft spots. Belts should feel firm and hoses should have minimal give.")
+            )
         )
     )
 )
