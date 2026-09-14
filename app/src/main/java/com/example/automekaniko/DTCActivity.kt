@@ -114,7 +114,7 @@ class DtcActivity : AppCompatActivity() {
         // Automatically load the first guide if list is not empty
         if (dtcList.isNotEmpty()) {
             dtcConfirmedInSession = true
-            loadDtcEntry(dtcList[0], showChecklist = true)
+            loadDtcEntry(dtcList[0])
         } else {
             loadPreviewModel()
         }
@@ -125,9 +125,6 @@ class DtcActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         enableFullscreenChrome()
-        if (currentModelNode == null) {
-            loadPreviewModel()
-        }
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -144,7 +141,6 @@ class DtcActivity : AppCompatActivity() {
             currentEntry = null
             currentSlideIndex = 0
             dtcConfirmedInSession = false
-            applyCustomStartCamera()
         }
     }
 
@@ -344,7 +340,7 @@ class DtcActivity : AppCompatActivity() {
     // Load entry
     // -------------------------------------------------------------------------
 
-    private fun loadDtcEntry(entry: DtcGuide, showChecklist: Boolean = false) {
+    private fun loadDtcEntry(entry: DtcGuide) {
         currentEntry      = entry
         currentSlideIndex = 0
         checkedStepsBySlide.clear()
@@ -353,8 +349,7 @@ class DtcActivity : AppCompatActivity() {
         updateUiState()
         loadGlbModel(entry.glbFile) {
             currentSlideIndex = 0
-            goToSlide(0, animated = false, applySlideCamera = false)
-            applyCustomStartCamera()
+            goToSlide(0, animated = false, applySlideCamera = true)
             updateUiState()
         }
     }
@@ -404,16 +399,6 @@ class DtcActivity : AppCompatActivity() {
             lockedAnimTime = 0f
             applyAnimationTime(0f)
             onLoaded?.invoke()
-        }
-    }
-
-    private fun applyCustomStartCamera() {
-        setCamera(startEye, startLookAt)
-        lifecycleScope.launch {
-            delay(32L)
-            setCamera(startEye, startLookAt)
-            delay(120L)
-            setCamera(startEye, startLookAt)
         }
     }
 

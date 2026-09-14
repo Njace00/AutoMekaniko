@@ -9,23 +9,12 @@ import androidx.appcompat.app.AppCompatActivity
 object AppNavigation {
 
     fun wire(activity: AppCompatActivity) {
-
-        (activity.findOptional<View>(R.id.connecttxt) as? TextView)?.text = "Guides"
-
         setNav(activity, R.id.hometxt, MainActivity::class.java)
-        setNav(activity, R.id.connecttxt, GuidesActivity::class.java)
-        setNav(activity, R.id.livetxt, OBDActivity::class.java)
-
         highlight(activity)
     }
 
     private fun highlight(activity: AppCompatActivity) {
         setNavColor(activity.findOptional<View>(R.id.hometxt), activity is MainActivity)
-        setNavColor(activity.findOptional<View>(R.id.livetxt), activity is OBDActivity)
-        setNavColor(
-            activity.findOptional<View>(R.id.connecttxt),
-            activity is GuidesActivity || activity is DtcActivity || activity is MAINTAINANCEActivity
-        )
         setNavColor(activity.findOptional<View>(R.id.settingtxt), false)
     }
 

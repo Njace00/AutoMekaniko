@@ -14,8 +14,8 @@
 
         <TextView
             android:id="@+id/appTitle"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:gravity="center"
             android:text="AutoMekaniko"
             android:textSize="22sp"
@@ -352,30 +352,6 @@
             android:textSize="13sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/livetxt"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-
-        <TextView
-            android:id="@+id/livetxt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Live Data"
-            android:textColor="#555555"
-            android:textSize="13sp"
-            app:layout_constraintStart_toEndOf="@id/hometxt"
-            app:layout_constraintEnd_toStartOf="@id/connecttxt"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-
-        <TextView
-            android:id="@+id/connecttxt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Guides"
-            android:textColor="#e02020"
-            android:textSize="13sp"
-            app:layout_constraintStart_toEndOf="@id/livetxt"
             app:layout_constraintEnd_toStartOf="@id/settingtxt"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
@@ -387,7 +363,7 @@
             android:text="Settings"
             android:textColor="#555555"
             android:textSize="13sp"
-            app:layout_constraintStart_toEndOf="@id/connecttxt"
+            app:layout_constraintStart_toEndOf="@id/hometxt"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>

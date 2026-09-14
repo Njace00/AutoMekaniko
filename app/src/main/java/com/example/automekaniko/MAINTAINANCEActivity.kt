@@ -336,7 +336,13 @@ class MAINTAINANCEActivity : AppCompatActivity() {
                 it.destroy()
             }
 
-            val instance  = modelLoader.createModelInstance(assetFileLocation = fileName)
+            val instance = try {
+                modelLoader.createModelInstance(assetFileLocation = fileName)
+            } catch (e: Exception) {
+                android.widget.Toast.makeText(this@MAINTAINANCEActivity, "Error loading model: $fileName", android.widget.Toast.LENGTH_LONG).show()
+                null
+            } ?: return@launch
+
             val modelNode = ModelNode(
                 modelInstance = instance,
                 autoAnimate = false,
@@ -355,8 +361,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
             currentModelNode = modelNode
 
             currentSlideIndex = 0
-            goToSlide(currentSlideIndex, animated = false, applySlideCamera = false)
-            applyCustomStartCamera()
+            goToSlide(currentSlideIndex, animated = false, applySlideCamera = true)
             updateUiState()
         }
     }
@@ -394,16 +399,6 @@ class MAINTAINANCEActivity : AppCompatActivity() {
 
             applyAnimationTime(targetTime)
             isScrubbing = false
-        }
-    }
-
-    private fun applyCustomStartCamera() {
-        setCamera(startEye, startLookAt)
-        lifecycleScope.launch {
-            delay(32L)
-            setCamera(startEye, startLookAt)
-            delay(120L)
-            setCamera(startEye, startLookAt)
         }
     }
 
@@ -445,9 +440,8 @@ class MAINTAINANCEActivity : AppCompatActivity() {
 
         updateInfoPanel(slide)
 
-        val useOverviewCamera = index <= 1
-        val targetEye  = if (useOverviewCamera) startEye else slide.eye
-        val targetLook = if (useOverviewCamera) startLookAt else slide.lookAt
+        val targetEye  = slide.eye
+        val targetLook = slide.lookAt
 
         if (animated) {
             animateCameraPose(
