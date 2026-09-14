@@ -16,7 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="LABEL"
-        android:textColor="#8fb4cb"
+        android:textColor="#555555"
         android:textSize="9sp"
         android:letterSpacing="0.08"
         android:textAllCaps="true"/>
@@ -26,7 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="—"
-        android:textColor="#e3f5ff"
+        android:textColor="#222222"
         android:textSize="22sp"
         android:textStyle="bold"
         android:layout_marginTop="2dp"/>
@@ -36,7 +36,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="unit"
-        android:textColor="#6e95ad"
+        android:textColor="#777777"
         android:textSize="9sp"
         android:letterSpacing="0.04"
         android:layout_marginTop="1dp"/>

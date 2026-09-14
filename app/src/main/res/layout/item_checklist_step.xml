@@ -4,7 +4,11 @@
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingVertical="6dp">
+    android:paddingVertical="6dp"
+    android:paddingHorizontal="8dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="?android:attr/selectableItemBackground">
 
     <ImageView
         android:id="@+id/stepCheckboxIcon"
@@ -22,7 +26,7 @@
         android:layout_weight="1"
         android:gravity="start"
         android:textAlignment="viewStart"
-        android:textColor="#FFFFFF"
+        android:textColor="#222222"
         android:textSize="13sp" />
 
 </LinearLayout>

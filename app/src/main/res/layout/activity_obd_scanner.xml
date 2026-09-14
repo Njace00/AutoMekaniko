@@ -4,28 +4,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0a0a0a">
+    android:background="#ffffff">
 
     <!-- TOP BAR -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="64dp"
-        android:background="#232222"
+        android:background="#f8f9fa"
         app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:id="@+id/burger"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:text="☰"
-            android:textSize="25sp"
-            android:textColor="#e02020"
-            android:layout_margin="20sp"
-            android:gravity="center_vertical|start"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
 
         <TextView
             android:id="@+id/appTitle"
@@ -126,7 +113,7 @@
         android:orientation="horizontal"
         android:paddingHorizontal="12dp"
         android:paddingVertical="8dp"
-        android:background="#1a1a1a"
+        android:background="#f8f9fa"
         android:elevation="4dp"
         app:layout_constraintBottom_toTopOf="@id/bottomBar">
 
@@ -149,7 +136,7 @@
             android:layout_weight="1"
             android:gravity="center_vertical"
             android:text="Tap Connect to scan for ELM327 adapter"
-            android:textColor="#aaaaaa"
+            android:textColor="#555555"
             android:textSize="11sp"
             android:ellipsize="end"
             android:maxLines="2"
@@ -174,7 +161,7 @@
         android:id="@+id/bottomBar"
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:background="#0f0f0f"
+        android:background="#f8f9fa"
         android:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent">
 

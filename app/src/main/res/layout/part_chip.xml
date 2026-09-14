@@ -5,8 +5,8 @@
     android:layout_height="wrap_content"
     android:layout_marginEnd="6dp"
     android:layout_marginBottom="6dp"
-    android:background="#1a1a1a"
+    android:background="#fff0f0"
     android:paddingHorizontal="8dp"
     android:paddingVertical="4dp"
-    android:textColor="#cccccc"
+    android:textColor="#e02020"
     android:textSize="11sp"/>

@@ -4,28 +4,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0a0a0a">
+    android:background="#ffffff">
 
     <!-- TOP BAR -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="64dp"
-        android:background="#232222"
+        android:background="#f8f9fa"
         app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:id="@+id/burger"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:text="☰"
-            android:textSize="25sp"
-            android:textColor="#e02020"
-            android:layout_margin="20sp"
-            android:gravity="center_vertical|start"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
 
         <TextView
             android:id="@+id/appTitle"
@@ -73,9 +60,9 @@
                 android:foreground="?android:attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
-                app:cardBackgroundColor="#1e1e1e"
+                app:cardBackgroundColor="#ffffff"
                 app:cardCornerRadius="10dp"
-                app:cardElevation="4dp">
+                app:cardElevation="3dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -98,7 +85,7 @@
                             android:text="⚠"
                             android:textSize="22sp"
                             android:textColor="#e02020"
-                            android:background="#2a0a0a"
+                            android:background="#fff0f0"
                             android:layout_marginEnd="12dp"/>
 
                         <LinearLayout
@@ -111,7 +98,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="DTC Codes"
-                                android:textColor="#ffffff"
+                                android:textColor="#222222"
                                 android:textSize="18sp"
                                 android:textStyle="bold"/>
 
@@ -119,7 +106,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Step-by-Step Repair to Fix DTC error codes"
-                                android:textColor="#888888"
+                                android:textColor="#555555"
                                 android:textSize="11sp"
                                 android:layout_marginTop="3dp"/>
 
@@ -139,7 +126,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#2e2e2e"
+                        android:background="#e0e0e0"
                         android:layout_marginTop="12dp"
                         android:layout_marginBottom="12dp"/>
 
@@ -191,9 +178,9 @@
                 android:foreground="?android:attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
-                app:cardBackgroundColor="#1e1e1e"
+                app:cardBackgroundColor="#ffffff"
                 app:cardCornerRadius="10dp"
-                app:cardElevation="4dp">
+                app:cardElevation="3dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -215,7 +202,7 @@
                             android:gravity="center"
                             android:text="🔧"
                             android:textSize="22sp"
-                            android:background="#0f1a0f"
+                            android:background="#fff0f0"
                             android:layout_marginEnd="12dp"/>
 
                         <LinearLayout
@@ -228,7 +215,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Maintenance"
-                                android:textColor="#ffffff"
+                                android:textColor="#222222"
                                 android:textSize="18sp"
                                 android:textStyle="bold"/>
 
@@ -236,7 +223,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Step-by-Step Repair Guides and Checklist"
-                                android:textColor="#888888"
+                                android:textColor="#555555"
                                 android:textSize="11sp"
                                 android:layout_marginTop="3dp"/>
 
@@ -256,7 +243,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#2e2e2e"
+                        android:background="#e0e0e0"
                         android:layout_marginTop="12dp"
                         android:layout_marginBottom="12dp"/>
 
@@ -308,7 +295,7 @@
         android:id="@+id/bottomBar"
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:background="#0f0f0f"
+        android:background="#f8f9fa"
         android:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent">
 

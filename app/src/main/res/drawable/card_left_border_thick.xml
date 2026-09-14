@@ -10,7 +10,7 @@
     <!-- Inner rectangle - the dark grey background -->
     <item android:left="8dp">
         <shape android:shape="rectangle">
-            <solid android:color="#232222" />
+            <solid android:color="#ffffff" />
             <corners android:radius="12dp" />
         </shape>
     </item>

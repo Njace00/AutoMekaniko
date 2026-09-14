@@ -21,7 +21,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.lifecycleScope
 import com.example.automekaniko.databinding.Activity3dDtcGuideBinding
-import com.example.automekaniko.databinding.ItemChecklistStepBinding
 import io.github.sceneview.SceneView
 import io.github.sceneview.gesture.CameraGestureDetector
 import io.github.sceneview.loaders.ModelLoader
@@ -35,10 +34,6 @@ class DtcActivity : AppCompatActivity() {
 
     private lateinit var binding: Activity3dDtcGuideBinding
     private var dtcList: List<DtcGuide> = dtcGuides
-    private val activeNavColor = 0xFFFF2020.toInt()
-    private val inactiveNavColor = 0xFF666666.toInt()
-    private val nextButtonColor = 0xFFE02020.toInt()
-    private val prevButtonColor = 0xFF8A8A8A.toInt()
 
     // -------------------------------------------------------------------------
     // Views (removed individual view declarations)
@@ -61,6 +56,7 @@ class DtcActivity : AppCompatActivity() {
     private var currentEntry:      DtcGuide?  = null
     private var currentSlideIndex: Int        = 0
     private var isCameraLocked:    Boolean    = true
+    private val checkedStepsBySlide = mutableMapOf<Int, MutableSet<Int>>()
 
     private var cameraAnimJob: Job? = null
     private var animScrubJob:  Job? = null
@@ -90,14 +86,13 @@ class DtcActivity : AppCompatActivity() {
 
         val titleText = "AutoMekaniko"
         val spannable = SpannableString(titleText)
-        spannable.setSpan(ForegroundColorSpan(0xFFFFFFFF.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannable.setSpan(ForegroundColorSpan(0xFF222222.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         spannable.setSpan(ForegroundColorSpan(0xFFe02020.toInt()), 4, titleText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         binding.appTitle.text = spannable
         AppNavigation.wire(this)
-        applyDtcBottomNavColors()
 
         sceneView = binding.sceneView
-        binding.infoTab.setOnClickListener { toggleInfoPanel() }
+        binding.closeTab.setOnClickListener { toggleInfoPanel() }
         binding.progressSection.setOnClickListener { toggleBottomDrawer() }
 
         modelLoader = ModelLoader(sceneView.engine, this)
@@ -172,13 +167,6 @@ class DtcActivity : AppCompatActivity() {
                     View.SYSTEM_UI_FLAG_LAYOUT_STABLE
     }
 
-    private fun applyDtcBottomNavColors() {
-        binding.hometxt.setColorFilter(inactiveNavColor)
-        binding.livetxt.setColorFilter(inactiveNavColor)
-        binding.connecttxt.setColorFilter(activeNavColor)
-        binding.settingtxt.setColorFilter(inactiveNavColor)
-    }
-
     // -------------------------------------------------------------------------
     // INFO panel
     // -------------------------------------------------------------------------
@@ -196,7 +184,7 @@ class DtcActivity : AppCompatActivity() {
         val slideWidth = binding.mainCard.width.takeIf { it > 0 } ?: binding.root.width
         binding.tvTabText.text = "CLOSE"
         binding.infoSlidePanel.animate().cancel()
-        binding.infoTab.animate().cancel()
+        binding.closeTab.animate().cancel()
         binding.infoSlidePanel.translationX = slideWidth.toFloat()
         binding.infoSlidePanel.alpha = 0f
         binding.infoSlidePanel.visibility = View.VISIBLE
@@ -206,7 +194,7 @@ class DtcActivity : AppCompatActivity() {
             .setDuration(260L)
             .setInterpolator(DecelerateInterpolator())
             .start()
-        binding.infoTab.animate()
+        binding.closeTab.animate()
             .translationX(-6f)
             .setDuration(260L)
             .setInterpolator(DecelerateInterpolator())
@@ -219,7 +207,7 @@ class DtcActivity : AppCompatActivity() {
         val slideWidth = binding.mainCard.width.takeIf { it > 0 } ?: binding.root.width
         binding.tvTabText.text = "INFO"
         binding.infoSlidePanel.animate().cancel()
-        binding.infoTab.animate().cancel()
+        binding.closeTab.animate().cancel()
         binding.infoSlidePanel.animate()
             .translationX(slideWidth.toFloat())
             .alpha(0f)
@@ -231,7 +219,7 @@ class DtcActivity : AppCompatActivity() {
                 binding.infoSlidePanel.alpha = 1f
             }
             .start()
-        binding.infoTab.animate()
+        binding.closeTab.animate()
             .translationX(0f)
             .setDuration(220L)
             .setInterpolator(DecelerateInterpolator())
@@ -312,7 +300,7 @@ class DtcActivity : AppCompatActivity() {
 
             val titleTv = TextView(this).apply {
                 text = item.title
-                setTextColor(0xFFFFFFFF.toInt())
+                setTextColor(0xFF222222.toInt())
                 textSize = 12f
                 setTypeface(null, android.graphics.Typeface.BOLD)
             }
@@ -341,7 +329,7 @@ class DtcActivity : AppCompatActivity() {
                     1f
                 )
                 text = item.description
-                setTextColor(0xFFCCCCCC.toInt())
+                setTextColor(0xFF555555.toInt())
                 textSize = 11f
             }
             itemLayout.addView(descTv)
@@ -359,6 +347,7 @@ class DtcActivity : AppCompatActivity() {
     private fun loadDtcEntry(entry: DtcGuide, showChecklist: Boolean = false) {
         currentEntry      = entry
         currentSlideIndex = 0
+        checkedStepsBySlide.clear()
         currentAnimTime   = 0f
         lockedAnimTime    = 0f
         updateUiState()
@@ -539,10 +528,6 @@ class DtcActivity : AppCompatActivity() {
         binding.btnPrev.isEnabled = isCameraLocked && hasEntry && dtcConfirmedInSession && currentSlideIndex > 0
         binding.btnNext.isEnabled = isCameraLocked && hasEntry && dtcConfirmedInSession && currentSlideIndex < lastSlideIndex
 
-        binding.btnPrev.backgroundTintList = ColorStateList.valueOf(prevButtonColor)
-        binding.btnNext.backgroundTintList = ColorStateList.valueOf(nextButtonColor)
-        binding.btnPrev.setTextColor(0xFFFFFFFF.toInt())
-        binding.btnNext.setTextColor(0xFFFFFFFF.toInt())
         binding.btnPrev.alpha = 1f
         binding.btnNext.alpha = 1f
     }
@@ -554,13 +539,11 @@ class DtcActivity : AppCompatActivity() {
     private fun goToSlide(index: Int, animated: Boolean, applySlideCamera: Boolean = true) {
         val entry = currentEntry ?: return
         val slide = entry.slides[index]
-        val total = entry.slides.size
 
         binding.slideTitle.text   = slide.title
-        binding.slideDesc.text    = "${slide.description} (${index + 1}/$total Done)"
         binding.overlayTitle.text = slide.title
 
-        populateChecklist(slide.steps)
+        populateChecklist(slide, index)
         updateInfoPanel(slide)
 
         if (animated) {
@@ -584,14 +567,36 @@ class DtcActivity : AppCompatActivity() {
         }
     }
 
-    private fun populateChecklist(steps: List<String>) {
+    private fun populateChecklist(slide: DtcSlide, slideIndex: Int) {
         binding.checklistContainer.removeAllViews()
         val inflater = LayoutInflater.from(this)
+        val checkedSteps = checkedStepsBySlide.getOrPut(slideIndex) { mutableSetOf() }
 
-        steps.forEach { step ->
-            val rowBinding = ItemChecklistStepBinding.inflate(inflater, binding.checklistContainer, true)
-            rowBinding.stepLabel.text = step
-            rowBinding.stepCheckboxIcon.setImageResource(R.drawable.checkbox_red_checked)
+        fun updateCompletionText() {
+            binding.slideDesc.text = "${slide.description} (${checkedSteps.size}/${slide.steps.size} Done)"
+        }
+
+        updateCompletionText()
+
+        slide.steps.forEachIndexed { stepIndex, step ->
+            val row = inflater.inflate(R.layout.item_checklist_step, binding.checklistContainer, false)
+            val label = row.findViewById<TextView>(R.id.stepLabel)
+            val checkboxIcon = row.findViewById<ImageView>(R.id.stepCheckboxIcon)
+            label.text = step
+            var isChecked = stepIndex in checkedSteps
+            checkboxIcon.setImageResource(
+                if (isChecked) R.drawable.checkbox_red_checked else R.drawable.checkbox_red_unchecked
+            )
+
+            row.setOnClickListener {
+                isChecked = !isChecked
+                if (isChecked) checkedSteps.add(stepIndex) else checkedSteps.remove(stepIndex)
+                checkboxIcon.setImageResource(
+                    if (isChecked) R.drawable.checkbox_red_checked else R.drawable.checkbox_red_unchecked
+                )
+                updateCompletionText()
+            }
+            binding.checklistContainer.addView(row)
         }
     }
 

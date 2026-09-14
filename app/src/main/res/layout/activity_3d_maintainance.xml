@@ -3,26 +3,31 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0a0a0a">
+    android:background="#ffffff">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="64dp"
+        android:background="#f8f9fa"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/appTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:gravity="center"
             android:text="AutoMekaniko"
-            android:textSize="24sp"
+            android:textSize="22sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0">
+            <!-- "Auto" in white, "Mekaniko" in red — set via SpannableString in Kotlin -->
+        </TextView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -49,7 +54,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:text="Maintainance"
-            android:textColor="#ffffff"
+            android:textColor="#222222"
             android:textSize="22sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@id/backBtn"
@@ -69,7 +74,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="Step-by-Step Guides in a 3D Environment"
-            android:textColor="#888888"
+            android:textColor="#555555"
             android:textSize="12sp"
             app:layout_constraintStart_toStartOf="@id/tvMaintainanceTitle"
             app:layout_constraintTop_toBottomOf="@id/tvMaintainanceTitle" />
@@ -115,7 +120,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="Types of Oil &amp; Recommended"
-            android:textColor="#FFFFFF"
+            android:textColor="#222222"
             android:textSize="18sp"
             android:textStyle="bold"
             android:visibility="gone"
@@ -169,12 +174,12 @@
             android:id="@+id/infoSlidePanel"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="#FF232222"
+            android:background="#ffffff"
             android:elevation="2dp"
             android:padding="16dp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/closeTab"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -190,7 +195,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
                     android:text="Types of Oil &amp; Recommended"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#222222"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -215,7 +220,7 @@
         android:layout_height="96dp"
         android:layout_marginHorizontal="24dp"
         android:layout_marginBottom="16dp"
-        android:background="#202020"
+        android:background="#f8f9fa"
         android:clickable="true"
         android:focusable="true"
         android:paddingStart="0dp"
@@ -249,7 +254,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:text="Lights"
-            android:textColor="#FFFFFF"
+            android:textColor="#222222"
             android:textSize="22sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@id/bottomDrawerArrow"
@@ -261,21 +266,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Check every light both front and back (1/4 Done)"
-            android:textColor="#888888"
+            android:textColor="#555555"
             android:textSize="12sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/slideTitle"
             app:layout_constraintTop_toBottomOf="@id/slideTitle" />
-
-        <View
-            android:id="@+id/progressIndicator"
-            android:layout_width="100dp"
-            android:layout_height="4dp"
-            android:layout_marginTop="8dp"
-            android:background="#e02020"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ivProgressIcon" />
 
         <ScrollView
             android:id="@+id/bottomChecklistScroll"
@@ -314,10 +309,10 @@
             android:layout_height="48dp"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:backgroundTint="#555555"
+            android:backgroundTint="#e0e0e0"
             android:text="Prev"
             android:textAllCaps="false"
-            android:textColor="#FFFFFF"
+            android:textColor="#333333"
             android:textSize="16sp" />
 
         <Button
@@ -361,65 +356,58 @@
         android:id="@+id/bottomBar"
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:background="#0f0f0f"
+        android:background="#f8f9fa"
         android:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <ImageView
+        <TextView
             android:id="@+id/hometxt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:clickable="true"
-            android:focusable="true"
-            android:padding="12dp"
-            android:src="@drawable/ic_home"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/livetxt"
+            android:text="Home"
+            android:textColor="#555555"
+            android:textSize="13sp"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/livetxt"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="#555555" />
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <ImageView
+        <TextView
             android:id="@+id/livetxt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:clickable="true"
-            android:focusable="true"
-            android:padding="12dp"
-            android:src="@drawable/ic_car"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/connecttxt"
+            android:text="Live Data"
+            android:textColor="#555555"
+            android:textSize="13sp"
             app:layout_constraintStart_toEndOf="@id/hometxt"
+            app:layout_constraintEnd_toStartOf="@id/connecttxt"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="#555555" />
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <ImageView
+        <TextView
             android:id="@+id/connecttxt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:clickable="true"
-            android:focusable="true"
-            android:padding="12dp"
-            android:src="@drawable/ic_bluetooth"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/settingtxt"
+            android:text="Guides"
+            android:textColor="#e02020"
+            android:textSize="13sp"
             app:layout_constraintStart_toEndOf="@id/livetxt"
+            app:layout_constraintEnd_toStartOf="@id/settingtxt"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="#e02020" />
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <ImageView
+        <TextView
             android:id="@+id/settingtxt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:clickable="true"
-            android:focusable="true"
-            android:padding="12dp"
-            android:src="@drawable/ic_settings"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:text="Settings"
+            android:textColor="#555555"
+            android:textSize="13sp"
             app:layout_constraintStart_toEndOf="@id/connecttxt"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="#555555" />
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

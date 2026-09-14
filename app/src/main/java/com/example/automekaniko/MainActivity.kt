@@ -19,11 +19,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
 
-        // ── "Auto" white, "Mekaniko" red ──────────────────────────────────────
+        // ── "Auto" dark gray, "Mekaniko" red ──────────────────────────────────────
         val appTitle = findViewById<TextView>(R.id.appTitle)
         val titleText = "AutoMekaniko"
         val spannable = SpannableString(titleText)
-        spannable.setSpan(ForegroundColorSpan(0xFFFFFFFF.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannable.setSpan(ForegroundColorSpan(0xFF222222.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         spannable.setSpan(ForegroundColorSpan(0xFFe02020.toInt()), 4, titleText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         appTitle.text = spannable
         AppNavigation.wire(this)

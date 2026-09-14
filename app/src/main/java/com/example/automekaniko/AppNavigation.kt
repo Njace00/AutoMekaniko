@@ -9,9 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 object AppNavigation {
 
     fun wire(activity: AppCompatActivity) {
-        activity.findOptional<View>(R.id.burger)?.setOnClickListener {
-            activity.finish()
-        }
 
         (activity.findOptional<View>(R.id.connecttxt) as? TextView)?.text = "Guides"
 

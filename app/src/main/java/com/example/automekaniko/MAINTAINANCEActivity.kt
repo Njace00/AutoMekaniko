@@ -18,7 +18,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.lifecycleScope
 import com.example.automekaniko.databinding.Activity3dMaintainanceBinding
-import com.example.automekaniko.databinding.ItemChecklistStepBinding
 import io.github.sceneview.SceneView
 import io.github.sceneview.gesture.CameraGestureDetector
 import io.github.sceneview.loaders.ModelLoader
@@ -65,6 +64,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     private var currentSlides: List<CameraSlide> = emptyList()
     private var currentSlideIndex = 0
     private var isCameraLocked = true
+    private val checkedStepsBySlide = mutableMapOf<Int, MutableSet<Int>>()
 
     private var cameraAnimJob: Job? = null
     private var cameraInfoJob: Job? = null
@@ -96,7 +96,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         // ── "Auto" white, "Mekaniko" red ──────────────────────────────────────
         val titleText = "AutoMekaniko"
         val spannable = SpannableString(titleText)
-        spannable.setSpan(ForegroundColorSpan(0xFFFFFFFF.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannable.setSpan(ForegroundColorSpan(0xFF222222.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         spannable.setSpan(ForegroundColorSpan(0xFFe02020.toInt()), 4, titleText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         binding.appTitle.text = spannable
         AppNavigation.wire(this)
@@ -258,7 +258,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
 
         binding.modelSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                (view as? TextView)?.setTextColor(0xFFFFFFFF.toInt())
+                (view as? TextView)?.setTextColor(0xFF222222.toInt())
                 loadGuide(guideList[position])
             }
             override fun onNothingSelected(parent: AdapterView<*>) = Unit
@@ -269,6 +269,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         currentGuide = guide
         currentSlides = guide.slides
         currentSlideIndex = 0
+        checkedStepsBySlide.clear()
         
         // Use "Maintainance" as the fixed header title per user request
         binding.tvMaintainanceTitle.text = "Maintainance"
@@ -409,19 +410,37 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     private fun goToSlide(index: Int, animated: Boolean, applySlideCamera: Boolean = true) {
         val slide = currentSlides.getOrNull(index) ?: return
         binding.slideTitle.text = slide.title
-        binding.slideDesc.text  = slide.description
-
         // ── Update checklist overlay ──────────────────────────────────────────
         binding.overlayTitle.text = slide.title
         binding.checklistContainer.removeAllViews()
-        slide.steps.forEach { step ->
-            val tv = android.widget.TextView(this).apply {
-                text = "• $step"
-                textSize = 12f
-                setTextColor(0xFFFFFFFF.toInt())
-                setPadding(0, 3, 0, 3)
+        val inflater = LayoutInflater.from(this)
+        val checkedSteps = checkedStepsBySlide.getOrPut(index) { mutableSetOf() }
+
+        fun updateCompletionText() {
+            binding.slideDesc.text = "${slide.description} (${checkedSteps.size}/${slide.steps.size} Done)"
+        }
+
+        updateCompletionText()
+
+        slide.steps.forEachIndexed { stepIndex, step ->
+            val row = inflater.inflate(R.layout.item_checklist_step, binding.checklistContainer, false)
+            val label = row.findViewById<TextView>(R.id.stepLabel)
+            val checkboxIcon = row.findViewById<ImageView>(R.id.stepCheckboxIcon)
+            label.text = step
+            var isChecked = stepIndex in checkedSteps
+            checkboxIcon.setImageResource(
+                if (isChecked) R.drawable.checkbox_red_checked else R.drawable.checkbox_red_unchecked
+            )
+
+            row.setOnClickListener {
+                isChecked = !isChecked
+                if (isChecked) checkedSteps.add(stepIndex) else checkedSteps.remove(stepIndex)
+                checkboxIcon.setImageResource(
+                    if (isChecked) R.drawable.checkbox_red_checked else R.drawable.checkbox_red_unchecked
+                )
+                updateCompletionText()
             }
-            binding.checklistContainer.addView(tv)
+            binding.checklistContainer.addView(row)
         }
 
         updateInfoPanel(slide)
@@ -496,7 +515,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
 
             val titleTv = android.widget.TextView(this).apply {
                 text = item.title
-                setTextColor(0xFFFFFFFF.toInt())
+                setTextColor(0xFF222222.toInt())
                 textSize = 12f
                 setTypeface(null, android.graphics.Typeface.BOLD)
             }
@@ -525,7 +544,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
                     1f
                 )
                 text = item.description
-                setTextColor(0xFFCCCCCC.toInt())
+                setTextColor(0xFF555555.toInt())
                 textSize = 11f
             }
             itemLayout.addView(descTv)
