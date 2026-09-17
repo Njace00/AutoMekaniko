@@ -10,4 +10,6 @@ package com.example.automekaniko
 val maintenanceGuides: List<MaintenanceGuide> = listOf(
     VPMCGuide,
     ChangeOilGuide,
+    AirFilterReplacementGuide,
+    BatteryReplacementGuide,
 )

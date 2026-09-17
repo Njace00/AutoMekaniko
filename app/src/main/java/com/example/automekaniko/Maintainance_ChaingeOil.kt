@@ -26,7 +26,7 @@ val ChangeOilGuide = MaintenanceGuide(
             steps = listOf(
                 "Park on a level surface",
                 "Turn off the engine",
-                "Prepare oil drain pan and tools"
+                "Prepare oil drain pan and tools",
             )
         ),
 

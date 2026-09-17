@@ -12,6 +12,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.SeekBar
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -117,6 +118,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         captureManipulatorOnce()
         setupModelSelector()
         setupControls() // ← wire up tab clicks
+        setupCameraDebug() // ← NEW debug sliders
         setCameraLockState(true)
         startCameraInfoUpdates()
 
@@ -462,6 +464,11 @@ class MAINTAINANCEActivity : AppCompatActivity() {
             }
             applyAnimationTime(slide.animationTime)
         }
+
+        // Sync debug sliders if panel is visible
+        if (binding.debugPanel.visibility == View.VISIBLE) {
+            updateSlidersFromCamera(targetEye, targetLook)
+        }
     }
 
     private fun updateInfoPanel(slide: CameraSlide) {
@@ -584,7 +591,13 @@ class MAINTAINANCEActivity : AppCompatActivity() {
             while (true) {
                 val p   = sceneView.cameraNode.position
                 val cam = Vec3(p.x, p.y, p.z)
-                if (!isCameraLocked) currentCameraEye = cam
+                if (!isCameraLocked) {
+                    currentCameraEye = cam
+                    // Sync sliders while rotating manually if debug panel is open
+                    if (binding.debugPanel.visibility == View.VISIBLE) {
+                        updateSlidersFromCamera(currentCameraEye, currentOrbitTarget)
+                    }
+                }
 
                 val target   = currentOrbitTarget
                 val dx       = cam.x - target.x
@@ -601,6 +614,63 @@ class MAINTAINANCEActivity : AppCompatActivity() {
                 delay(120L)
             }
         }
+    }
+
+    private fun setupCameraDebug() {
+        binding.btnDebugCamera.setOnClickListener {
+            binding.debugPanel.visibility = View.VISIBLE
+            updateSlidersFromCamera(currentCameraEye, currentOrbitTarget)
+        }
+        binding.btnCloseDebug.setOnClickListener {
+            binding.debugPanel.visibility = View.GONE
+        }
+
+        val listener = object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) updateCameraFromSliders()
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        }
+
+        binding.sbEyeX.setOnSeekBarChangeListener(listener)
+        binding.sbEyeY.setOnSeekBarChangeListener(listener)
+        binding.sbEyeZ.setOnSeekBarChangeListener(listener)
+        binding.sbLookAtX.setOnSeekBarChangeListener(listener)
+        binding.sbLookAtY.setOnSeekBarChangeListener(listener)
+        binding.sbLookAtZ.setOnSeekBarChangeListener(listener)
+    }
+
+    private fun updateSlidersFromCamera(eye: Vec3, lookAt: Vec3) {
+        // value = (progress - 500) / 50f  => progress = value * 50 + 500
+        binding.sbEyeX.progress = (eye.x * 50f + 500f).toInt()
+        binding.sbEyeY.progress = (eye.y * 50f + 500f).toInt()
+        binding.sbEyeZ.progress = (eye.z * 50f + 500f).toInt()
+        binding.sbLookAtX.progress = (lookAt.x * 50f + 500f).toInt()
+        binding.sbLookAtY.progress = (lookAt.y * 50f + 500f).toInt()
+        binding.sbLookAtZ.progress = (lookAt.z * 50f + 500f).toInt()
+
+        updateDebugText(eye, lookAt)
+    }
+
+    private fun updateCameraFromSliders() {
+        val eyeX = (binding.sbEyeX.progress - 500) / 50f
+        val eyeY = (binding.sbEyeY.progress - 500) / 50f
+        val eyeZ = (binding.sbEyeZ.progress - 500) / 50f
+        val lookX = (binding.sbLookAtX.progress - 500) / 50f
+        val lookY = (binding.sbLookAtY.progress - 500) / 50f
+        val lookZ = (binding.sbLookAtZ.progress - 500) / 50f
+
+        val newEye = Vec3(eyeX, eyeY, eyeZ)
+        val newLook = Vec3(lookX, lookY, lookZ)
+
+        setCamera(newEye, newLook)
+        updateDebugText(newEye, newLook)
+    }
+
+    private fun updateDebugText(eye: Vec3, lookAt: Vec3) {
+        binding.tvDebugEyeValue.text = "Vec3(%.2ff, %.2ff, %.2ff)".format(eye.x, eye.y, eye.z)
+        binding.tvDebugLookAtValue.text = "Vec3(%.2ff, %.2ff, %.2ff)".format(lookAt.x, lookAt.y, lookAt.z)
     }
 
     private fun lerp(a: Float, b: Float, t: Float) = a + (b - a) * t

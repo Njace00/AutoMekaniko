@@ -108,16 +108,9 @@ class DtcActivity : AppCompatActivity() {
         }
 
         captureManipulatorOnce()
+        setupDtcSelector()
         setupControls()
         setCameraLockState(true)
-
-        // Automatically load the first guide if list is not empty
-        if (dtcList.isNotEmpty()) {
-            dtcConfirmedInSession = true
-            loadDtcEntry(dtcList[0])
-        } else {
-            loadPreviewModel()
-        }
 
         binding.backBtn.setOnClickListener { finish() }
     }
@@ -463,6 +456,33 @@ class DtcActivity : AppCompatActivity() {
     // -------------------------------------------------------------------------
     // Controls
     // -------------------------------------------------------------------------
+
+    private fun setupDtcSelector() {
+        if (dtcList.isEmpty()) {
+            binding.dtcSpinner.adapter = ArrayAdapter(
+                this,
+                android.R.layout.simple_spinner_item,
+                listOf("No DTC guides found")
+            )
+            loadPreviewModel()
+            return
+        }
+
+        binding.dtcSpinner.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            dtcList.map { "${it.code} — ${it.name}" }
+        ).also { it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+
+        binding.dtcSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                (view as? TextView)?.setTextColor(0xFF222222.toInt())
+                dtcConfirmedInSession = true
+                loadDtcEntry(dtcList[position])
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) = Unit
+        }
+    }
 
     private fun setupControls() {
         binding.btnPrev.setOnClickListener {

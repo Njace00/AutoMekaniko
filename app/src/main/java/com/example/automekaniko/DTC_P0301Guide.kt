@@ -60,8 +60,8 @@ val P0301Guide = DtcGuide(
             eye                = Vec3(0.04f, 0.39f, -0.84f),
             lookAt             = Vec3(0.10f, 0.20f,  0.00f),
             animationStartTime = f(1),
-            animationTime      = f(60),
-            animationDurationMs = 650L,
+            animationTime      = f(130),
+            animationDurationMs = 1500L,
             steps              = listOf(
                 "Locate the plastic engine top cover",
                 "Unclip or unscrew the cover retaining bolts",
@@ -81,8 +81,8 @@ val P0301Guide = DtcGuide(
             description        = "Disconnect and remove the ignition coil for cylinder 1.",
             eye                = Vec3(0.04f,  0.33f, -0.7774f),
             lookAt             = Vec3(0.10f,  0.20f,  0.00f),
-            animationStartTime = f(70),
-            animationTime      = f(70),
+            animationStartTime = f(140),
+            animationTime      = f(160),
             animationDurationMs = 650L,
             steps              = listOf(
                 "Locate the ignition coil on cylinder 1",
@@ -98,8 +98,8 @@ val P0301Guide = DtcGuide(
             description        = "Use a spark plug socket to remove the old plug.",
             eye                = Vec3(0.08f,  0.47f, -0.64f),
             lookAt             = Vec3(0.10f, -0.30f,  0.00f),
-            animationStartTime = f(140),
-            animationTime      = f(130),
+            animationStartTime = f(170),
+            animationTime      = f(220),
             animationDurationMs = 650L,
             steps              = listOf(
                 "Attach a spark plug socket (16mm) to an extension bar",
@@ -109,21 +109,6 @@ val P0301Guide = DtcGuide(
         ),
 
 
-        DtcSlide(
-            title              = "Inspect",
-            description        = "Examine the old spark plug for wear, fouling, or damage.",
-            eye                = Vec3(0.04f,  0.33f, -0.7774f),
-            lookAt             = Vec3(0.10f,  0.20f,  0.00f),
-            animationStartTime = f(270),
-            animationTime      = f(200),
-            animationDurationMs = 650L,
-            steps              = listOf(
-                "Check the electrode for excessive wear or erosion",
-                "Look for black carbon deposits (rich mixture) or white residue (lean/overheating)",
-                "Check the gap using a feeler gauge — correct gap is typically 1.0–1.1mm",
-                "Replace the plug if worn, fouled, or gap is out of spec"
-            )
-        ),
 
 
         DtcSlide(
@@ -131,8 +116,8 @@ val P0301Guide = DtcGuide(
             description        = "Install the new spark plug with the correct torque.",
             eye                = Vec3(0.04f,  0.33f, -0.7774f),
             lookAt             = Vec3(0.10f,  0.20f,  0.00f),
-            animationStartTime = f(330),
-            animationTime      = f(250),
+            animationStartTime = f(240),
+            animationTime      = f(300),
             animationDurationMs = 1500L,
             steps              = listOf(
                 "Thread the new spark plug in by hand to avoid cross-threading",
@@ -148,8 +133,8 @@ val P0301Guide = DtcGuide(
             description        = "Reinstall the ignition coil onto cylinder 1.",
             eye                = Vec3(0.04f,  0.33f, -0.7774f),
             lookAt             = Vec3(0.10f,  0.20f,  0.00f),
-            animationStartTime = f(250),
-            animationTime      = f(295),
+            animationStartTime = f(310),
+            animationTime      = f(360),
             animationDurationMs = 650L,
             steps              = listOf(
                 "Lower the ignition coil back into the spark plug well",
@@ -165,8 +150,8 @@ val P0301Guide = DtcGuide(
             description        = "Reinstall the engine cover and verify the repair.",
             eye                = Vec3(0.04f,  0.33f, -0.7774f),
             lookAt             = Vec3(0.10f,  0.20f,  0.00f),
-            animationStartTime = f(300),
-            animationTime      = f(318),
+            animationStartTime = f(370),
+            animationTime      = f(430),
             animationDurationMs = 650L,
             steps              = listOf(
                 "Place the engine top cover back into position",
