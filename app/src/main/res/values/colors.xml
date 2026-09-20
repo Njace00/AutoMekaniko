@@ -2,4 +2,19 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Primary Theme Colors -->
+    <color name="theme_red">#e02020</color>
+    <color name="theme_red_dark">#c01010</color>
+    <color name="theme_blue">#3498db</color>
+    <color name="theme_green">#00E676</color>
+
+    <!-- Semantic Colors (Light Default) -->
+    <color name="app_background">#FFFFFF</color>
+    <color name="app_surface">#f8f9fa</color>
+    <color name="app_text_primary">#222222</color>
+    <color name="app_text_secondary">#555555</color>
+    <color name="app_text_tertiary">#777777</color>
+    <color name="app_divider">#E0E0E0</color>
+    <color name="gauge_track">#E0E0E0</color>
 </resources>

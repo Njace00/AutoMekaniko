@@ -1,233 +1,103 @@
 package com.example.automekaniko
 
-/*
- * MAINTENANCE GUIDE TEMPLATE
- * 
- * Instructions:
- * 1. Rename the 'Template' prefix in aliases and variables to your feature name (e.g., BrakeSlide).
- * 2. Update the 'name' and 'glbFile' in the MaintenanceGuide object.
- * 3. Add your new guide variable to 'maintenanceGuides' in MaintenanceGuideRegistry.kt.
- */
-
-// TODO: Rename these aliases to avoid redeclaration errors (e.g., MyFeatureSlide)
-private typealias ReplaceBatterySlide = MAINTAINANCEActivity.CameraSlide
-private typealias ReplaceBatteryVec3 = MAINTAINANCEActivity.Vec3
-private typealias ReplaceBatteryInfoItem = MAINTAINANCEActivity.InfoItem
+private typealias ReplaceBatterySlide = MaintenanceFragment.CameraSlide
+private typealias ReplaceBatteryVec3 = Vec3
 
 private fun f(frame: Int): Float = frame / 24f
 
-// TODO: Rename this variable (e.g., MyNewMaintenanceGuide)
 val BatteryReplacementGuide = MaintenanceGuide(
-    name = "BatteryReplacement",
+    name = "Battery Replacement",
     glbFile = "BatteryReplacement.glb",
     slides = listOf(
         ReplaceBatterySlide(
             title = "Car Overview",
-            description = "Briefly describe what this step involves.",
-            eye = ReplaceBatteryVec3(-1.50f, 0.80f, -1.40f), // Use the Debug Sliders in-app to find these!
+            description = "Start with a cool engine and safety gear.",
+            eye = ReplaceBatteryVec3(-1.50f, 0.80f, -1.40f),
             lookAt = ReplaceBatteryVec3(0.00f, 0.10f, 0.00f),
             steps = listOf(
-                "First specific action",
-                "Second specific action",
+                GuideStep("Safety First", "Wear protective gloves and eye protection. Batteries contain sulfuric acid and can emit explosive gases."),
+                GuideStep("Engine Off", "Ensure the ignition is off and the key is removed. This prevents electrical spikes during disconnection.")
             ),
             animationStartTime = f(1),
             animationTime = f(1),
-            animationDurationMs = 700L,
+            infoTitle = "Battery 101",
+            infoItems = listOf(
+                InfoItem("What is CCA?", "Cold Cranking Amps measures a battery's ability to start an engine in cold temperatures. Higher is usually better."),
+                InfoItem("Battery Life", "Most car batteries last 3 to 5 years. Heat is actually more damaging to batteries than cold."),
+                InfoItem("Recycling", "Lead-acid batteries are 99% recyclable. Always return your old battery to a parts store for proper disposal.")
+            )
         ),
         ReplaceBatterySlide(
             title = "Open The Hood",
-            description = "Describe where the part is located.",
+            description = "Locate the battery in the engine bay.",
             eye = ReplaceBatteryVec3(0.00f, 0.50f, -1.00f),
             lookAt = ReplaceBatteryVec3(0.00f, 0.20f, 0.00f),
             steps = listOf(
-                "Locate the specific part",
-                "Prepare tools",
+                GuideStep("Pull Release", "Pull the hood release lever inside the cabin (usually located under the dashboard on the driver's side)."),
+                GuideStep("Secure Hood", "Lift the hood and secure it with the prop rod. Ensure it's stable before leaning into the engine bay.")
             ),
+            markerPos = ReplaceBatteryVec3(0.12f, 0.35f, -0.65f),
             animationStartTime = f(1),
             animationTime = f(60),
-            animationDurationMs = 900L,
             infoTitle = "Pro Tip",
             infoItems = listOf(
-                ReplaceBatteryInfoItem("What to Use", "Recommended tool or fluid."),
-                ReplaceBatteryInfoItem("What NOT to Use", "Common mistake to avoid.")
+                InfoItem("Battery Location", "Most batteries are in the engine bay, but some cars hide them in the trunk or under the rear seat!"),
+                InfoItem("Terminal ID", "The Positive (+) terminal is usually red or has a red plastic cover. The Negative (-) is black.")
             )
         ),
-
         ReplaceBatterySlide(
-            title = "Loosen the bolt for the terminal connector",
-            description = "Describe where the part is located.",
+            title = "Remove Negative Terminal",
+            description = "Always disconnect the negative (-) cable first.",
             eye = ReplaceBatteryVec3(-0.12f, 0.34f, -0.56f),
             lookAt = ReplaceBatteryVec3(0.04f, -2.34f, 1.64f),
             steps = listOf(
-                "Locate the specific part",
-                "Prepare tools",
+                GuideStep("Loosen Nut", "Use a 10mm wrench to loosen the nut on the negative (black/minus) terminal. You don't need to remove the nut completely."),
+                GuideStep("Lift Cable", "Wiggle the cable off the terminal. Tuck it away so it cannot accidentally touch any metal part of the car.")
             ),
-            animationStartTime = f(70),
-            animationTime = f(100),
-            animationDurationMs = 900L,
-            infoTitle = "Pro Tip",
-            infoItems = listOf(
-                ReplaceBatteryInfoItem("What to Use", "Recommended tool or fluid."),
-                ReplaceBatteryInfoItem("What NOT to Use", "Common mistake to avoid.")
-            )
-        ),
-
-        ReplaceBatterySlide(
-            title = "Remove the Negative First",
-            description = "Describe where the part is located.",
-            eye = ReplaceBatteryVec3(-0.12f, 0.34f, -0.56f),
-            lookAt = ReplaceBatteryVec3(0.04f, -2.34f, 1.64f),
-            steps = listOf(
-                "Locate the specific part",
-                "Prepare tools",
-            ),
+            markerPos = ReplaceBatteryVec3(0.20f, 0.34f, -0.55f),
             animationStartTime = f(120),
             animationTime = f(180),
-            animationDurationMs = 180L,
-            infoTitle = "Pro Tip",
+            infoTitle = "Safety Knowledge",
             infoItems = listOf(
-                ReplaceBatteryInfoItem("What to Use", "Recommended tool or fluid."),
-                ReplaceBatteryInfoItem("What NOT to Use", "Common mistake to avoid.")
+                InfoItem("Why Negative First?", "If your wrench touches the car's body while loosening the negative, nothing happens. If you did the positive first, it would create a massive spark!"),
+                InfoItem("Memory Saver", "Some modern cars may lose radio presets or clock settings when the battery is disconnected.")
             )
         ),
-
         ReplaceBatterySlide(
-            title = "Loosen the Bolt on of the Positive Terminal",
-            description = "Describe where the part is located.",
+            title = "Remove Positive Terminal",
+            description = "Now disconnect the positive (+) cable.",
             eye = ReplaceBatteryVec3(-0.12f, 0.34f, -0.56f),
             lookAt = ReplaceBatteryVec3(0.04f, -2.34f, 1.64f),
             steps = listOf(
-                "Locate the specific part",
-                "Prepare tools",
+                GuideStep("Flip Cover", "If present, flip back the red plastic protective cover from the positive terminal."),
+                GuideStep("Remove Cable", "Loosen the nut and remove the positive (red/plus) cable from the battery. Avoid letting it touch the negative post.")
             ),
-            animationStartTime = f(190),
-            animationTime = f(220),
-            animationDurationMs = 900L,
-            infoTitle = "Pro Tip",
-            infoItems = listOf(
-                ReplaceBatteryInfoItem("What to Use", "Recommended tool or fluid."),
-                ReplaceBatteryInfoItem("What NOT to Use", "Common mistake to avoid.")
-            )
-        ),
-
-        ReplaceBatterySlide(
-            title = "Then Remove the Positive Terminals",
-            description = "Describe where the part is located.",
-            eye = ReplaceBatteryVec3(-0.12f, 0.34f, -0.56f),
-            lookAt = ReplaceBatteryVec3(0.04f, -2.34f, 1.64f),
-            steps = listOf(
-                "Locate the specific part",
-                "Prepare tools",
-            ),
+            markerPos = ReplaceBatteryVec3(0.05f, 0.34f, -0.55f),
             animationStartTime = f(230),
             animationTime = f(290),
-            animationDurationMs = 900L,
-            infoTitle = "Pro Tip",
+            infoTitle = "Clean Terminals",
             infoItems = listOf(
-                ReplaceBatteryInfoItem("What to Use", "Recommended tool or fluid."),
-                ReplaceBatteryInfoItem("What NOT to Use", "Common mistake to avoid.")
+                InfoItem("Corrosion", "If you see white/blue powder, clean it with a mix of baking soda and water or a wire battery brush."),
+                InfoItem("Terminal Health", "A clean connection ensures the alternator can properly charge the battery while you drive.")
             )
         ),
-
         ReplaceBatterySlide(
-            title = "Remove the Old Battery",
-            description = "Describe where the part is located.",
+            title = "Replace Battery",
+            description = "Swap the old battery with a new one.",
             eye = ReplaceBatteryVec3(-0.12f, 0.34f, -0.56f),
             lookAt = ReplaceBatteryVec3(0.04f, -2.34f, 1.64f),
             steps = listOf(
-                "Locate the specific part",
-                "Prepare tools",
+                GuideStep("Lift Out", "Unbolt the battery hold-down bracket. Carefully lift the heavy battery out of the tray and set it aside."),
+                GuideStep("Place New", "Place the new battery into the tray. Ensure the terminals are facing the same way as the old ones.")
             ),
-            animationStartTime = f(300),
-            animationTime = f(350),
-            animationDurationMs = 900L,
-            infoTitle = "Pro Tip",
-            infoItems = listOf(
-                ReplaceBatteryInfoItem("What to Use", "Recommended tool or fluid."),
-                ReplaceBatteryInfoItem("What NOT to Use", "Common mistake to avoid.")
-            )
-        ),
-
-
-        ReplaceBatterySlide(
-            title = "Replace the Battery with the new One",
-            description = "Describe where the part is located.",
-            eye = ReplaceBatteryVec3(-0.12f, 0.34f, -0.56f),
-            lookAt = ReplaceBatteryVec3(0.04f, -2.34f, 1.64f),
-            steps = listOf(
-                "Locate the specific part",
-                "Prepare tools",
-            ),
+            markerPos = ReplaceBatteryVec3(0.12f, 0.25f, -0.55f),
             animationStartTime = f(360),
             animationTime = f(490),
-            animationDurationMs = 900L,
-            infoTitle = "Pro Tip",
+            infoTitle = "Expert Tip",
             infoItems = listOf(
-                ReplaceBatteryInfoItem("What to Use", "Recommended tool or fluid."),
-                ReplaceBatteryInfoItem("What NOT to Use", "Common mistake to avoid.")
+                InfoItem("Hold-Down", "Never drive without the hold-down bracket secure. Vibration can damage the internal plates of the battery."),
+                InfoItem("Protectors", "Apply a spray-on terminal protector or a thin layer of petroleum jelly to the posts to prevent future corrosion.")
             )
-        ),
-
-        ReplaceBatterySlide(
-            title = "Re-Attach the Positive Terminal",
-            description = "Describe where the part is located.",
-            eye = ReplaceBatteryVec3(-0.12f, 0.34f, -0.56f),
-            lookAt = ReplaceBatteryVec3(0.04f, -2.34f, 1.64f),
-            steps = listOf(
-                "Locate the specific part",
-                "Prepare tools",
-            ),
-            animationStartTime = f(500),
-            animationTime = f(560),
-            animationDurationMs = 900L,
-            infoTitle = "Pro Tip",
-            infoItems = listOf(
-                ReplaceBatteryInfoItem("What to Use", "Recommended tool or fluid."),
-                ReplaceBatteryInfoItem("What NOT to Use", "Common mistake to avoid.")
-            )
-        ),
-
-        ReplaceBatterySlide(
-            title = "Re-Attach the Negative Terminal",
-            description = "Describe where the part is located.",
-            eye = ReplaceBatteryVec3(-0.12f, 0.34f, -0.56f),
-            lookAt = ReplaceBatteryVec3(0.04f, -2.34f, 1.64f),
-            steps = listOf(
-                "Locate the specific part",
-                "Prepare tools",
-            ),
-            animationStartTime = f(570),
-            animationTime = f(630),
-            animationDurationMs = 900L,
-            infoTitle = "Pro Tip",
-            infoItems = listOf(
-                ReplaceBatteryInfoItem("What to Use", "Recommended tool or fluid."),
-                ReplaceBatteryInfoItem("What NOT to Use", "Common mistake to avoid.")
-            )
-        ),
-
-        ReplaceBatterySlide(
-            title = "Tighten Both Terminal's Bolt",
-            description = "Describe where the part is located.",
-            eye = ReplaceBatteryVec3(-0.12f, 0.34f, -0.56f),
-            lookAt = ReplaceBatteryVec3(0.04f, -2.34f, 1.64f),
-            steps = listOf(
-                "Locate the specific part",
-                "Prepare tools",
-            ),
-            animationStartTime = f(640),
-            animationTime = f(670),
-            animationDurationMs = 900L,
-            infoTitle = "Pro Tip",
-            infoItems = listOf(
-                ReplaceBatteryInfoItem("What to Use", "Recommended tool or fluid."),
-                ReplaceBatteryInfoItem("What NOT to Use", "Common mistake to avoid.")
-            )
-        ),
-
-
-
-
-
+        )
     )
 )

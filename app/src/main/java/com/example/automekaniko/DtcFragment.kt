@@ -1,7 +1,6 @@
 package com.example.automekaniko
 
 import android.animation.ValueAnimator
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
@@ -9,16 +8,19 @@ import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.automekaniko.databinding.Activity3dDtcGuideBinding
 import io.github.sceneview.SceneView
@@ -26,18 +28,16 @@ import io.github.sceneview.gesture.CameraGestureDetector
 import io.github.sceneview.loaders.ModelLoader
 import io.github.sceneview.math.Position
 import io.github.sceneview.node.ModelNode
+import io.github.sceneview.node.ViewNode2
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class DtcActivity : AppCompatActivity() {
+class DtcFragment : Fragment() {
 
-    private lateinit var binding: Activity3dDtcGuideBinding
+    private var _binding: Activity3dDtcGuideBinding? = null
+    private val binding get() = _binding!!
     private var dtcList: List<DtcGuide> = dtcGuides
-
-    // -------------------------------------------------------------------------
-    // Views (removed individual view declarations)
-    // -------------------------------------------------------------------------
 
     private lateinit var sceneView:          SceneView
     private lateinit var modelLoader:        ModelLoader
@@ -47,10 +47,6 @@ class DtcActivity : AppCompatActivity() {
     private var dtcConfirmedInSession = false
 
     private val previewGlbFile = "Vehicle Preventive Maintenance Checklist (VPMC).glb"
-
-    // -------------------------------------------------------------------------
-    // State
-    // -------------------------------------------------------------------------
 
     private var currentModelNode:  ModelNode? = null
     private var currentEntry:      DtcGuide?  = null
@@ -64,38 +60,41 @@ class DtcActivity : AppCompatActivity() {
     private var currentCameraEye   = Vec3(0f, 0f, 0f)
     private var currentOrbitTarget = Vec3(0f, 0.5f, 0f)
 
-    private val startEye    = Vec3(0.15f, 0.95f, -2.75f)
-    private val startLookAt = Vec3(0f, 0.30f, 0f)
-
     private var savedManipulator:    CameraGestureDetector.CameraManipulator? = null
     private var manipulatorCaptured: Boolean = false
 
     private var currentAnimTime: Float = 0f
     private var lockedAnimTime:  Float = 0f
     private var isScrubbing:     Boolean = false
+    private var guideLogged = false
+    private var currentMarkerNode: ViewNode2? = null
 
-    // -------------------------------------------------------------------------
-    // Lifecycle
-    // -------------------------------------------------------------------------
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = Activity3dDtcGuideBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableFullscreenChrome()
-        binding = Activity3dDtcGuideBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         val titleText = "AutoMekaniko"
         val spannable = SpannableString(titleText)
-        spannable.setSpan(ForegroundColorSpan(0xFF222222.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        spannable.setSpan(ForegroundColorSpan(0xFFe02020.toInt()), 4, titleText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        val primaryColor = ContextCompat.getColor(requireContext(), R.color.app_text_primary)
+        val redColor = ContextCompat.getColor(requireContext(), R.color.theme_red)
+        
+        spannable.setSpan(ForegroundColorSpan(primaryColor), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannable.setSpan(ForegroundColorSpan(redColor), 4, titleText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         binding.appTitle.text = spannable
-        AppNavigation.wire(this)
 
         sceneView = binding.sceneView
         binding.closeTab.setOnClickListener { toggleInfoPanel() }
         binding.progressSection.setOnClickListener { toggleBottomDrawer() }
 
-        modelLoader = ModelLoader(sceneView.engine, this)
+        modelLoader = ModelLoader(sceneView.engine, requireContext())
 
         sceneView.onFrame = { _ ->
             if (!isScrubbing) {
@@ -112,19 +111,30 @@ class DtcActivity : AppCompatActivity() {
         setupControls()
         setCameraLockState(true)
 
-        binding.backBtn.setOnClickListener { finish() }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        enableFullscreenChrome()
-    }
-
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) {
-            enableFullscreenChrome()
+        if (dtcList.isNotEmpty()) {
+            dtcConfirmedInSession = true
+            loadDtcEntry(dtcList[0])
+        } else {
+            loadPreviewModel()
         }
+
+        binding.backBtn.setOnClickListener { 
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            binding.topBar.setPadding(0, systemBars.top, 0, 0)
+            insets
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        cameraAnimJob?.cancel()
+        animScrubJob?.cancel()
+        currentMarkerNode?.destroy()
+        _binding = null
     }
 
     private fun loadPreviewModel() {
@@ -137,36 +147,9 @@ class DtcActivity : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
-        cameraAnimJob?.cancel()
-        animScrubJob?.cancel()
-        super.onDestroy()
-    }
-
-    @Suppress("DEPRECATION")
-    private fun enableFullscreenChrome() {
-        window.statusBarColor = 0xFF000000.toInt()
-        window.navigationBarColor = 0xFF000000.toInt()
-        window.decorView.systemUiVisibility =
-            View.SYSTEM_UI_FLAG_FULLSCREEN or
-                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-    }
-
-    // -------------------------------------------------------------------------
-    // INFO panel
-    // -------------------------------------------------------------------------
-
     private fun toggleInfoPanel() {
         isInfoOpen = !isInfoOpen
-        if (isInfoOpen) {
-            openInfoPanel()
-        } else {
-            closeInfoPanel()
-        }
+        if (isInfoOpen) openInfoPanel() else closeInfoPanel()
     }
 
     private fun openInfoPanel() {
@@ -249,18 +232,18 @@ class DtcActivity : AppCompatActivity() {
     }
 
     private fun updateInfoPanel(slide: DtcSlide) {
-        val fallbackItems = mutableListOf<MAINTAINANCEActivity.InfoItem>()
+        val fallbackItems = mutableListOf<InfoItem>()
         val guide = currentEntry
         if (slide.infoItems.isEmpty()) {
             guide?.let {
-                fallbackItems.add(MAINTAINANCEActivity.InfoItem("DTC", "${it.code} - ${it.name}"))
-                fallbackItems.add(MAINTAINANCEActivity.InfoItem("Guide", it.description))
+                fallbackItems.add(InfoItem("DTC", "${it.code} - ${it.name}"))
+                fallbackItems.add(InfoItem("Guide", it.description))
                 if (it.parts.isNotEmpty()) {
-                    fallbackItems.add(MAINTAINANCEActivity.InfoItem("Parts", it.parts.joinToString(", ")))
+                    fallbackItems.add(InfoItem("Parts", it.parts.joinToString(", ")))
                 }
             }
             if (slide.steps.isNotEmpty()) {
-                fallbackItems.add(MAINTAINANCEActivity.InfoItem("Current Step", slide.steps.joinToString("\n")))
+                fallbackItems.add(InfoItem("Current Step", slide.steps.joinToString("\n") { it.title }))
             }
         }
 
@@ -269,7 +252,7 @@ class DtcActivity : AppCompatActivity() {
         binding.infoItemsContainer.removeAllViews()
 
         items.forEach { item ->
-            val itemLayout = LinearLayout(this).apply {
+            val itemLayout = LinearLayout(requireContext()).apply {
                 orientation = LinearLayout.HORIZONTAL
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
@@ -279,7 +262,7 @@ class DtcActivity : AppCompatActivity() {
                 }
             }
 
-            val leftContainer = LinearLayout(this).apply {
+            val leftContainer = LinearLayout(requireContext()).apply {
                 orientation = LinearLayout.VERTICAL
                 layoutParams = LinearLayout.LayoutParams(
                     100.toPx(),
@@ -287,16 +270,16 @@ class DtcActivity : AppCompatActivity() {
                 )
             }
 
-            val titleTv = TextView(this).apply {
+            val titleTv = TextView(requireContext()).apply {
                 text = item.title
-                setTextColor(0xFF222222.toInt())
+                setTextColor(ContextCompat.getColor(requireContext(), R.color.app_text_primary))
                 textSize = 12f
                 setTypeface(null, android.graphics.Typeface.BOLD)
             }
             leftContainer.addView(titleTv)
 
             if (item.imageResId != null) {
-                val iv = ImageView(this).apply {
+                val iv = ImageView(requireContext()).apply {
                     layoutParams = LinearLayout.LayoutParams(
                         80.toPx(),
                         80.toPx()
@@ -311,14 +294,14 @@ class DtcActivity : AppCompatActivity() {
 
             itemLayout.addView(leftContainer)
 
-            val descTv = TextView(this).apply {
+            val descTv = TextView(requireContext()).apply {
                 layoutParams = LinearLayout.LayoutParams(
                     0,
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     1f
                 )
                 text = item.description
-                setTextColor(0xFF555555.toInt())
+                setTextColor(ContextCompat.getColor(requireContext(), R.color.app_text_secondary))
                 textSize = 11f
             }
             itemLayout.addView(descTv)
@@ -329,9 +312,67 @@ class DtcActivity : AppCompatActivity() {
 
     private fun Int.toPx(): Int = (this * resources.displayMetrics.density).toInt()
 
-    // -------------------------------------------------------------------------
-    // Load entry
-    // -------------------------------------------------------------------------
+    private fun showMarker(pos: Vec3) {
+        currentMarkerNode?.let {
+            sceneView.removeChildNode(it)
+            it.destroy()
+        }
+
+        val markerView = LayoutInflater.from(requireContext()).inflate(R.layout.layout_3d_marker, null)
+        val markerNode = ViewNode2(
+            engine = sceneView.engine,
+            windowManager = sceneView.viewNodeWindowManager ?: ViewNode2.WindowManager(requireContext()),
+            materialLoader = sceneView.materialLoader,
+            view = markerView,
+            unlit = true
+        ).apply {
+            position = Position(pos.x, pos.y, pos.z)
+        }
+
+        sceneView.addChildNode(markerNode)
+        currentMarkerNode = markerNode
+
+        // Setup pulsing animation
+        val pulseView = markerView.findViewById<View>(R.id.markerPulse)
+        pulseView.animate()
+            .scaleX(1.4f)
+            .scaleY(1.4f)
+            .alpha(0f)
+            .setDuration(1000L)
+            .setInterpolator(android.view.animation.LinearInterpolator())
+            .withEndAction { 
+                pulseView.scaleX = 1f
+                pulseView.scaleY = 1f
+                pulseView.alpha = 1f
+                restartPulse(pulseView)
+            }
+            .start()
+    }
+
+    private fun restartPulse(view: View) {
+        if (_binding == null) return
+        view.animate()
+            .scaleX(1.4f)
+            .scaleY(1.4f)
+            .alpha(0f)
+            .setDuration(1000L)
+            .setInterpolator(android.view.animation.LinearInterpolator())
+            .withEndAction { 
+                view.scaleX = 1f
+                view.scaleY = 1f
+                view.alpha = 1f
+                restartPulse(view)
+            }
+            .start()
+    }
+
+    private fun hideMarker() {
+        currentMarkerNode?.let {
+            sceneView.removeChildNode(it)
+            it.destroy()
+            currentMarkerNode = null
+        }
+    }
 
     private fun loadDtcEntry(entry: DtcGuide) {
         currentEntry      = entry
@@ -339,6 +380,7 @@ class DtcActivity : AppCompatActivity() {
         checkedStepsBySlide.clear()
         currentAnimTime   = 0f
         lockedAnimTime    = 0f
+        guideLogged       = false
         updateUiState()
         loadGlbModel(entry.glbFile) {
             currentSlideIndex = 0
@@ -346,10 +388,6 @@ class DtcActivity : AppCompatActivity() {
             updateUiState()
         }
     }
-
-    // -------------------------------------------------------------------------
-    // Model loading
-    // -------------------------------------------------------------------------
 
     private fun loadGlbModel(fileName: String, onLoaded: (() -> Unit)? = null) {
         lifecycleScope.launch {
@@ -359,21 +397,17 @@ class DtcActivity : AppCompatActivity() {
                 currentModelNode = null
             }
 
-            Log.d("DtcActivity", "Loading GLB: $fileName")
+            Log.d("DtcFragment", "Loading GLB: $fileName")
             val instance = try {
                 modelLoader.createModelInstance(assetFileLocation = fileName)
             } catch (e: Exception) {
-                Log.e("DtcActivity", "Exception loading GLB: $fileName", e)
+                Log.e("DtcFragment", "Exception loading GLB: $fileName", e)
                 null
             }
 
             if (instance == null) {
-                Log.e("DtcActivity", "GLB not found or failed to load: $fileName")
-                Toast.makeText(
-                    this@DtcActivity,
-                    "Could not load model: $fileName\nCheck assets folder.",
-                    Toast.LENGTH_LONG
-                ).show()
+                Log.e("DtcFragment", "GLB not found or failed to load: $fileName")
+                Toast.makeText(requireContext(), "Could not load model: $fileName", Toast.LENGTH_LONG).show()
                 return@launch
             }
 
@@ -394,10 +428,6 @@ class DtcActivity : AppCompatActivity() {
             onLoaded?.invoke()
         }
     }
-
-    // -------------------------------------------------------------------------
-    // Animation
-    // -------------------------------------------------------------------------
 
     private fun applyAnimationTime(time: Float) {
         val animator = currentModelNode?.modelInstance?.animator ?: return
@@ -453,34 +483,19 @@ class DtcActivity : AppCompatActivity() {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Controls
-    // -------------------------------------------------------------------------
-
     private fun setupDtcSelector() {
-        if (dtcList.isEmpty()) {
-            binding.dtcSpinner.adapter = ArrayAdapter(
-                this,
-                android.R.layout.simple_spinner_item,
-                listOf("No DTC guides found")
-            )
-            loadPreviewModel()
-            return
+        val names = dtcList.map { "${it.code} - ${it.name}" }
+        val adapter = ArrayAdapter(requireContext(), R.layout.item_dropdown_menu, names)
+        binding.dtcAutoComplete.setAdapter(adapter)
+
+        // Set initial text and load first guide
+        if (dtcList.isNotEmpty()) {
+            binding.dtcAutoComplete.setText("${dtcList[0].code} - ${dtcList[0].name}", false)
+            loadDtcEntry(dtcList[0])
         }
 
-        binding.dtcSpinner.adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_spinner_item,
-            dtcList.map { "${it.code} — ${it.name}" }
-        ).also { it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
-
-        binding.dtcSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                (view as? TextView)?.setTextColor(0xFF222222.toInt())
-                dtcConfirmedInSession = true
-                loadDtcEntry(dtcList[position])
-            }
-            override fun onNothingSelected(parent: AdapterView<*>) = Unit
+        binding.dtcAutoComplete.setOnItemClickListener { _, _, position, _ ->
+            loadDtcEntry(dtcList[position])
         }
     }
 
@@ -537,16 +552,18 @@ class DtcActivity : AppCompatActivity() {
         binding.btnNext.alpha = 1f
     }
 
-    // -------------------------------------------------------------------------
-    // Slide navigation
-    // -------------------------------------------------------------------------
-
     private fun goToSlide(index: Int, animated: Boolean, applySlideCamera: Boolean = true) {
         val entry = currentEntry ?: return
         val slide = entry.slides[index]
 
         binding.slideTitle.text   = slide.title
-        binding.overlayTitle.text = slide.title
+        
+        // Marker logic
+        if (slide.markerPos != null) {
+            showMarker(slide.markerPos)
+        } else {
+            hideMarker()
+        }
 
         populateChecklist(slide, index)
         updateInfoPanel(slide)
@@ -574,26 +591,42 @@ class DtcActivity : AppCompatActivity() {
 
     private fun populateChecklist(slide: DtcSlide, slideIndex: Int) {
         binding.checklistContainer.removeAllViews()
-        val inflater = LayoutInflater.from(this)
+        val inflater = LayoutInflater.from(requireContext())
         val checkedSteps = checkedStepsBySlide.getOrPut(slideIndex) { mutableSetOf() }
 
         fun updateCompletionText() {
             binding.slideDesc.text = "${slide.description} (${checkedSteps.size}/${slide.steps.size} Done)"
+
+            // Marker visibility logic: hide if all items are checked
+            if (checkedSteps.size == slide.steps.size && slide.steps.isNotEmpty()) {
+                hideMarker()
+            } else if (slide.markerPos != null && currentMarkerNode == null) {
+                showMarker(slide.markerPos)
+            }
         }
 
         updateCompletionText()
 
         slide.steps.forEachIndexed { stepIndex, step ->
             val row = inflater.inflate(R.layout.item_checklist_step, binding.checklistContainer, false)
+            val header = row.findViewById<LinearLayout>(R.id.stepHeader)
             val label = row.findViewById<TextView>(R.id.stepLabel)
+            val desc = row.findViewById<TextView>(R.id.stepDescription)
+            val expandIcon = row.findViewById<ImageView>(R.id.expandIcon)
             val checkboxIcon = row.findViewById<ImageView>(R.id.stepCheckboxIcon)
-            label.text = step
+
+            label.text = step.title
+            if (step.description.isNotEmpty()) {
+                desc.text = step.description
+                expandIcon.visibility = View.VISIBLE
+            }
+
             var isChecked = stepIndex in checkedSteps
             checkboxIcon.setImageResource(
                 if (isChecked) R.drawable.checkbox_red_checked else R.drawable.checkbox_red_unchecked
             )
 
-            row.setOnClickListener {
+            checkboxIcon.setOnClickListener {
                 isChecked = !isChecked
                 if (isChecked) checkedSteps.add(stepIndex) else checkedSteps.remove(stepIndex)
                 checkboxIcon.setImageResource(
@@ -601,13 +634,17 @@ class DtcActivity : AppCompatActivity() {
                 )
                 updateCompletionText()
             }
+
+            header.setOnClickListener {
+                if (step.description.isNotEmpty()) {
+                    val isVisible = desc.visibility == View.VISIBLE
+                    desc.visibility = if (isVisible) View.GONE else View.VISIBLE
+                    expandIcon.animate().rotation(if (isVisible) 0f else 180f).start()
+                }
+            }
             binding.checklistContainer.addView(row)
         }
     }
-
-    // -------------------------------------------------------------------------
-    // Camera helpers
-    // -------------------------------------------------------------------------
 
     private fun captureManipulatorOnce() {
         if (!manipulatorCaptured) {

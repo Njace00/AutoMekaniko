@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Semantic Colors (Dark Overrides) -->
+    <color name="app_background">#121212</color>
+    <color name="app_surface">#1e1e1e</color>
+    <color name="app_text_primary">#E1E1E1</color>
+    <color name="app_text_secondary">#B0B1B2</color>
+    <color name="app_text_tertiary">#888888</color>
+    <color name="app_divider">#2C2C2C</color>
+    <color name="gauge_track">#2C2C2C</color>
+</resources>

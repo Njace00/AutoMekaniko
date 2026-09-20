@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.automekaniko.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_homeFragment_to_obdFragment"
+            app:destination="@id/obdFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_homeFragment_to_guidesFragment"
+            app:destination="@id/guidesFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/obdFragment"
+        android:name="com.example.automekaniko.ObdFragment"
+        android:label="OBD-II Data"
+        tools:layout="@layout/activity_obd_scanner" />
+
+    <fragment
+        android:id="@+id/guidesFragment"
+        android:name="com.example.automekaniko.GuidesFragment"
+        android:label="Guides"
+        tools:layout="@layout/activity_guides" >
+        <action
+            android:id="@+id/action_guidesFragment_to_dtcFragment"
+            app:destination="@id/dtcFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_guidesFragment_to_maintenanceFragment"
+            app:destination="@id/maintenanceFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/dtcFragment"
+        android:name="com.example.automekaniko.DtcFragment"
+        android:label="DTC Guides"
+        tools:layout="@layout/activity_3d_dtc_guide" />
+
+    <fragment
+        android:id="@+id/maintenanceFragment"
+        android:name="com.example.automekaniko.MaintenanceFragment"
+        android:label="Maintenance Guides"
+        tools:layout="@layout/activity_3d_maintainance" />
+
+</navigation>

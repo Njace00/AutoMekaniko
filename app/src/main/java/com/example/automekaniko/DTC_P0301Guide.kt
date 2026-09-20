@@ -1,172 +1,87 @@
 package com.example.automekaniko
 
-// P0301 — Cylinder 1 Misfire Detected
-// GLB: vios_engine-tutor-Wanimation_P0301.glb
-// Total animation duration: 6.25s across 6 tracks (all scrubbed together)
-//
-// HOW TO TUNE PER-SLIDE ANIMATION:
-//   Each slide has two time values:
-//     animationStartTime — the animation instantly jumps HERE when you enter the slide
-//     animationTime      — then scrubs smoothly TO HERE and freezes
-//     animationDurationMs — how long the scrub takes in milliseconds
-//
-//   Use f(frame) to convert frame numbers → seconds (assumes 24 fps).
-//   Example: frame 40 = f(40) = 40 / 24f = 1.667s
-//
-//   To find the right values:
-//     1. Run the app, go to this guide
-//     2. Tap through slides and watch the animation
-//     3. Adjust animationStartTime / animationTime / animationDurationMs, rebuild, repeat
-
 private fun f(frame: Int): Float = frame / 24f
 
 val P0301Guide = DtcGuide(
     code        = "P0301",
     name        = "Cylinder 1 Misfire Detected",
-    description = "A misfire in cylinder 1 means the fuel-air mixture is not igniting " +
-            "correctly. Common causes: faulty spark plug, ignition coil, or injector.",
+    description = "A misfire in cylinder 1 means the fuel-air mixture is not igniting correctly. " +
+            "This can cause engine shaking, power loss, and poor fuel economy.",
     parts       = listOf("Spark plug", "Ignition coil", "Fuel injector", "Coil boot"),
     glbFile     = "DTC P0301 Misfire (SparkPlug Change).glb",
     animationClipStartTimes = listOf(f(0)),
     slides      = listOf(
-
-
         DtcSlide(
             title              = "Overview",
             description        = "Full view of the engine before any parts are removed.",
             eye                = Vec3(-1.57f, 0.77f, -1.34f),
             lookAt             = Vec3(0.00f,  0.10f,  0.00f),
-            animationStartTime = f(0),
-            animationTime      = f(0),
-            animationDurationMs = 650L,
             steps              = listOf(
-                "Ensure the engine is cool and the ignition is off",
-                "Open the hood and visually inspect the engine bay",
-                "Locate cylinder 1 — the first cylinder nearest the front of the engine"
+                GuideStep("Cool Down", "Ensure the engine is cool to the touch (wait at least 30 mins) before starting work to avoid burns."),
+                GuideStep("Safety Gear", "Wear protective gloves and eye protection. Ignition systems carry high voltage.")
             ),
-            infoTitle = "Cylinder 1 Misfire",
+            infoTitle = "Misfire Basics",
             infoItems = listOf(
-                MAINTAINANCEActivity.InfoItem("What to Use", "Use a high-quality OBD2 scanner and specialized spark plug tools."),
-                MAINTAINANCEActivity.InfoItem("What NOT to Use", "Do not handle ignition components with wet hands or while the engine is hot."),
-                MAINTAINANCEActivity.InfoItem("Diagnostic", "Check for physical damage to the ignition coil and wiring harness."),
-                MAINTAINANCEActivity.InfoItem("Safety", "Always disconnect the battery before working on electrical components.")
+                InfoItem("What is P0301?", "The '1' in P0301 identifies the specific cylinder. On inline 4-cylinder engines, cylinder 1 is usually closest to the drive belts."),
+                InfoItem("Common Causes", "Faulty spark plugs are the #1 cause. Other issues include weak ignition coils or clogged fuel injectors."),
+                InfoItem("Diagnostic Tip", "Swap the coil from cylinder 1 to cylinder 2. If the code changes to P0302, your coil is definitely bad.")
             )
         ),
-
-
         DtcSlide(
             title              = "Remove Engine Top Cover",
             description        = "Remove the plastic top cover to access the ignition coils.",
             eye                = Vec3(0.04f, 0.39f, -0.84f),
             lookAt             = Vec3(0.10f, 0.20f,  0.00f),
+            steps              = listOf(
+                GuideStep("Find Bolts", "Locate the 10mm bolts or plastic clips holding the engine cover in place."),
+                GuideStep("Lift Carefully", "Lift the cover straight up. If it resists, check for hidden vacuum hoses or wiring attached to it.")
+            ),
+            markerPos = Vec3(0.10f, 0.45f, -0.50f),
             animationStartTime = f(1),
             animationTime      = f(130),
-            animationDurationMs = 1500L,
-            steps              = listOf(
-                "Locate the plastic engine top cover",
-                "Unclip or unscrew the cover retaining bolts",
-                "Lift and set the cover aside in a safe place"
-            ),
-            infoTitle = "Engine Cover Removal",
+            infoTitle = "Tool Knowledge",
             infoItems = listOf(
-                MAINTAINANCEActivity.InfoItem("What to Use", "Use a 10mm socket or screwdriver depending on your model."),
-                MAINTAINANCEActivity.InfoItem("What NOT to Use", "Do not force the cover; if it's stuck, check for hidden bolts or clips."),
-                MAINTAINANCEActivity.InfoItem("Tip", "Place all bolts in a magnetic tray so you don't lose them.")
+                InfoItem("Wrench Size", "A standard 10mm socket or nut driver is the most common tool for engine covers."),
+                InfoItem("Organization", "Place your bolts in a magnetic tray. These small bolts are easily lost in the engine bay.")
             )
         ),
-
-
         DtcSlide(
             title              = "Remove Ignition Coil",
-            description        = "Disconnect and remove the ignition coil for cylinder 1.",
+            description        = "Disconnect and remove the coil to reach the spark plug.",
             eye                = Vec3(0.04f,  0.33f, -0.7774f),
             lookAt             = Vec3(0.10f,  0.20f,  0.00f),
+            steps              = listOf(
+                GuideStep("Unplug Connector", "Press the release tab on the wiring harness and pull it away from the coil."),
+                GuideStep("Unbolt Coil", "Use an 8mm or 10mm socket to remove the single bolt holding the coil down."),
+                GuideStep("Pull Coil", "Gently pull the ignition coil straight up. You may need to wiggle it slightly to break the seal.")
+            ),
+            markerPos = Vec3(0.15f, 0.35f, -0.55f),
             animationStartTime = f(140),
             animationTime      = f(160),
-            animationDurationMs = 650L,
-            steps              = listOf(
-                "Locate the ignition coil on cylinder 1",
-                "Press the tab and disconnect the electrical connector",
-                "Remove the coil retaining bolt using an 8mm socket",
-                "Pull the coil straight up and out of the spark plug well"
+            infoTitle = "Coil Inspection",
+            infoItems = listOf(
+                InfoItem("Visual Check", "Look for cracks in the plastic body of the coil or signs of burning (carbon tracking)."),
+                InfoItem("The Boot", "Inspect the rubber boot at the bottom. If it's torn or brittle, spark energy can leak to the engine block.")
             )
         ),
-
-
         DtcSlide(
-            title              = "Remove Spark Plug",
-            description        = "Use a spark plug socket to remove the old plug.",
+            title              = "Replace Spark Plug",
+            description        = "Remove the old plug and install a new one.",
             eye                = Vec3(0.08f,  0.47f, -0.64f),
             lookAt             = Vec3(0.10f, -0.30f,  0.00f),
+            steps              = listOf(
+                GuideStep("Loosen Plug", "Use a 5/8\" (16mm) spark plug socket with an extension to turn the plug counter-clockwise."),
+                GuideStep("New Plug", "Thread the new plug in by hand first! Never use a wrench until it's seated to avoid cross-threading."),
+                GuideStep("Torque", "Tighten to approximately 18-22 Nm. Do not overtighten, as you could damage the aluminum cylinder head.")
+            ),
+            markerPos = Vec3(0.15f, 0.25f, -0.55f),
             animationStartTime = f(170),
             animationTime      = f(220),
-            animationDurationMs = 650L,
-            steps              = listOf(
-                "Attach a spark plug socket (16mm) to an extension bar",
-                "Insert it into the spark plug well and turn counter-clockwise",
-                "Carefully remove the spark plug and set it aside for inspection"
-            )
-        ),
-
-
-
-
-        DtcSlide(
-            title              = "Replace with the new one",
-            description        = "Install the new spark plug with the correct torque.",
-            eye                = Vec3(0.04f,  0.33f, -0.7774f),
-            lookAt             = Vec3(0.10f,  0.20f,  0.00f),
-            animationStartTime = f(240),
-            animationTime      = f(300),
-            animationDurationMs = 1500L,
-            steps              = listOf(
-                "Thread the new spark plug in by hand to avoid cross-threading",
-                "Tighten with a spark plug socket to 18–25 Nm (do not overtighten)",
-                "Verify the plug is seated flush and secure",
-                "Apply a small amount of dielectric grease inside the coil boot (optional)"
-            )
-        ),
-
-
-        DtcSlide(
-            title              = "Put back the Ignition Coil",
-            description        = "Reinstall the ignition coil onto cylinder 1.",
-            eye                = Vec3(0.04f,  0.33f, -0.7774f),
-            lookAt             = Vec3(0.10f,  0.20f,  0.00f),
-            animationStartTime = f(310),
-            animationTime      = f(360),
-            animationDurationMs = 650L,
-            steps              = listOf(
-                "Lower the ignition coil back into the spark plug well",
-                "Press it firmly until it seats onto the plug",
-                "Reinstall and tighten the retaining bolt",
-                "Reconnect the electrical connector until it clicks"
-            )
-        ),
-
-
-        DtcSlide(
-            title              = "Assemble the Engine Top Cover Again",
-            description        = "Reinstall the engine cover and verify the repair.",
-            eye                = Vec3(0.04f,  0.33f, -0.7774f),
-            lookAt             = Vec3(0.10f,  0.20f,  0.00f),
-            animationStartTime = f(370),
-            animationTime      = f(430),
-            animationDurationMs = 650L,
-            steps              = listOf(
-                "Place the engine top cover back into position",
-                "Clip or bolt it down securely",
-                "Start the engine and listen for smooth idle",
-                "Use an OBD scanner to clear the P0301 code and confirm no reoccurrence"
-            ),
-            infoTitle = "Lighting System",
+            infoTitle = "Expert Tip",
             infoItems = listOf(
-                MAINTAINANCEActivity.InfoItem("What to Use", "Use high-quality halogen or LED bulbs matching your vehicle's specifications. Wear gloves."),
-                MAINTAINANCEActivity.InfoItem("What NOT to Use", "Do not touch the glass part of a new halogen bulb with bare fingers; oils can cause it to burst."),
-                MAINTAINANCEActivity.InfoItem("Headlights", "Check both low and high beams. Dim lights may indicate a failing bulb or battery."),
-                MAINTAINANCEActivity.InfoItem("Signals", "Ensure all 4 turn signals blink at a normal rate. Fast blinking means a bulb is out.")
+                InfoItem("Gap Check", "Even 'pre-gapped' plugs should be checked. The standard gap is usually 1.1mm (0.044 inches)."),
+                InfoItem("Dielectric Grease", "Apply a tiny dab of dielectric grease inside the coil boot. This prevents the rubber from sticking to the porcelain next time.")
             )
         )
-
     )
 )

@@ -1,11 +1,18 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.AutoMekaniko" parent="Theme.Material3.Light.NoActionBar">
-        <item name="android:windowBackground">#FFFFFF</item>
-        <item name="android:forceDarkAllowed">false</item>
-        <item name="android:navigationBarColor">#F8F9FA</item>
-        <item name="android:statusBarColor">#F8F9FA</item>
-        <item name="android:windowLightNavigationBar">true</item>
-        <item name="android:windowLightStatusBar">true</item>
+    <style name="Base.Theme.AutoMekaniko" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/app_background</item>
+        <item name="android:navigationBarColor">@color/app_surface</item>
+        <item name="android:statusBarColor">@color/app_surface</item>
+
+        <!-- Main colors -->
+        <item name="colorPrimary">@color/theme_red</item>
+        <item name="colorSurface">@color/app_surface</item>
+        <item name="android:textColorPrimary">@color/app_text_primary</item>
+        <item name="android:textColorSecondary">@color/app_text_secondary</item>
+
+        <!-- Dark mode specific -->
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>

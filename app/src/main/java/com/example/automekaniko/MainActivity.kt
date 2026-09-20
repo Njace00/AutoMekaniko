@@ -1,55 +1,69 @@
 package com.example.automekaniko
 
-import android.content.Intent
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.style.ForegroundColorSpan
-import android.widget.Button
-import android.widget.TextView
+import android.view.View
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.navigation.fragment.NavHostFragment
+import com.example.automekaniko.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        enableEdgeToEdge()
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, 0, 0, 0) // We handle internal padding manually
+            
+            // Apply bottom padding to the bottomBar specifically for system nav
+            binding.bottomBar.setPadding(
+                binding.bottomBar.paddingLeft,
+                binding.bottomBar.paddingTop,
+                binding.bottomBar.paddingRight,
+                systemBars.bottom
+            )
+            insets
+        }
 
-        // ── "Auto" dark gray, "Mekaniko" red ──────────────────────────────────────
-        val appTitle = findViewById<TextView>(R.id.appTitle)
-        val titleText = "AutoMekaniko"
-        val spannable = SpannableString(titleText)
-        spannable.setSpan(ForegroundColorSpan(0xFF222222.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        spannable.setSpan(ForegroundColorSpan(0xFFe02020.toInt()), 4, titleText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        appTitle.text = spannable
-        AppNavigation.wire(this)
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val navController = navHostFragment.navController
 
-        // Cards (the visible clickable areas)
-        val card3D   = findViewById<CardView>(R.id.card3D)
-        val cardLive = findViewById<CardView>(R.id.cardLive)
+        // Sync bottom bar (manual handling for now since we use custom TextViews)
+        binding.hometxt.setOnClickListener {
+            navController.popBackStack(R.id.homeFragment, false)
+        }
+        
+        binding.settingtxt.setOnClickListener {
+            // Future settings fragment
+        }
 
-        // Hidden buttons kept for backward compat — wire them too just in case
-        val viewBtn = findViewById<Button>(R.id.viewbtn)
-        val liveBtn = findViewById<Button>(R.id.livebtn)
-
-        // Cards
-        card3D.setOnClickListener   { go(GuidesActivity::class.java) }
-        cardLive.setOnClickListener { go(OBDActivity::class.java) }
-
-        // Hidden buttons (fallback)
-        viewBtn.setOnClickListener { go(GuidesActivity::class.java) }
-        liveBtn.setOnClickListener { go(OBDActivity::class.java) }
-
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                R.id.homeFragment, R.id.guidesFragment, R.id.obdFragment -> {
+                    binding.bottomBar.visibility = View.VISIBLE
+                    updateBottomBarHighlight(destination.id)
+                }
+                else -> {
+                    binding.bottomBar.visibility = View.GONE
+                }
+            }
+        }
     }
 
-    private fun <T : Any> go(target: Class<T>) {
-        startActivity(Intent(this, target).apply {
-            flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-        })
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+    private fun updateBottomBarHighlight(destinationId: Int) {
+        val activeColor = 0xFFe02020.toInt()
+        val inactiveColor = 0xFF555555.toInt()
+        
+        binding.hometxt.setTextColor(if (destinationId == R.id.homeFragment) activeColor else inactiveColor)
+        // Add more highlights as needed
     }
 }
