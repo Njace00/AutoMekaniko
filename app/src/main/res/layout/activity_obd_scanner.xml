@@ -4,14 +4,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ffffff">
+    android:background="@color/background_primary">
 
     <!-- TOP BAR -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="64dp"
-        android:background="#f8f9fa"
+        android:background="@color/background_secondary"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
@@ -63,7 +63,15 @@
             android:clipToPadding="false">
 
 
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="CORE ENGINE DATA" android:textColor="#e02020" android:textSize="11sp" android:letterSpacing="0.12" android:layout_marginBottom="8dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+                <View android:layout_width="4dp" android:layout_height="12dp" android:background="@color/theme_red"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CORE ENGINE DATA" android:textColor="@color/text_primary" android:textSize="11sp" android:textStyle="bold" android:letterSpacing="0.1" android:layout_marginStart="8dp"/>
+            </LinearLayout>
 
             <GridLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:columnCount="2" android:rowCount="3" android:useDefaultMargins="false" android:layout_marginBottom="12dp">
                 <include android:id="@+id/cardRpm"      layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
@@ -73,7 +81,16 @@
                 <include android:id="@+id/cardLoad"     layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
             </GridLayout>
 
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="LIVE OBD-II SENSORS" android:textColor="#e02020" android:textSize="11sp" android:letterSpacing="0.12" android:layout_marginBottom="8dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp">
+                <View android:layout_width="4dp" android:layout_height="12dp" android:background="@color/theme_red"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="LIVE OBD-II SENSORS" android:textColor="@color/text_primary" android:textSize="11sp" android:textStyle="bold" android:letterSpacing="0.1" android:layout_marginStart="8dp"/>
+            </LinearLayout>
 
             <GridLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:columnCount="2" android:rowCount="3" android:useDefaultMargins="false" android:layout_marginBottom="12dp">
                 <include android:id="@+id/cardMaf"       layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
@@ -84,7 +101,16 @@
                 <include android:id="@+id/cardFuelLevel" layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
             </GridLayout>
 
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="FUEL TRIM &amp; TIMING" android:textColor="#e02020" android:textSize="11sp" android:letterSpacing="0.12" android:layout_marginBottom="8dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp">
+                <View android:layout_width="4dp" android:layout_height="12dp" android:background="@color/theme_red"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="FUEL TRIM &amp; TIMING" android:textColor="@color/text_primary" android:textSize="11sp" android:textStyle="bold" android:letterSpacing="0.1" android:layout_marginStart="8dp"/>
+            </LinearLayout>
 
             <GridLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:columnCount="2" android:rowCount="2" android:useDefaultMargins="false" android:layout_marginBottom="12dp">
                 <include android:id="@+id/cardStft"   layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
@@ -93,7 +119,16 @@
                 <include android:id="@+id/cardBaro"   layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
             </GridLayout>
 
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="CATALYST &amp; ELECTRICAL" android:textColor="#e02020" android:textSize="11sp" android:letterSpacing="0.12" android:layout_marginBottom="8dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp">
+                <View android:layout_width="4dp" android:layout_height="12dp" android:background="@color/theme_red"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CATALYST &amp; ELECTRICAL" android:textColor="@color/text_primary" android:textSize="11sp" android:textStyle="bold" android:letterSpacing="0.1" android:layout_marginStart="8dp"/>
+            </LinearLayout>
 
             <GridLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:columnCount="2" android:rowCount="2" android:useDefaultMargins="false" android:layout_marginBottom="12dp">
                 <include android:id="@+id/cardCat1"       layout="@layout/obd_sensor_card" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:layout_margin="4dp"/>
@@ -113,7 +148,7 @@
         android:orientation="horizontal"
         android:paddingHorizontal="12dp"
         android:paddingVertical="8dp"
-        android:background="#f8f9fa"
+        android:background="@color/background_secondary"
         android:elevation="4dp"
         app:layout_constraintBottom_toTopOf="@id/bottomBar">
 
@@ -123,7 +158,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="● DISCONNECTED"
-            android:textColor="#FFFF5555"
+            android:textColor="@color/theme_red"
             android:textSize="11sp"
             android:textStyle="bold"
             android:paddingEnd="10dp" />
@@ -136,7 +171,7 @@
             android:layout_weight="1"
             android:gravity="center_vertical"
             android:text="Tap Connect to scan for ELM327 adapter"
-            android:textColor="#555555"
+            android:textColor="@color/text_secondary"
             android:textSize="11sp"
             android:ellipsize="end"
             android:maxLines="2"
@@ -147,49 +182,19 @@
             android:layout_width="120dp"
             android:layout_height="match_parent"
             android:text="CONNECT"
-            android:textColor="#ffffff"
+            android:textColor="@color/white"
             android:textSize="12sp"
             android:textStyle="bold"
-            android:backgroundTint="#e02020"
+            android:backgroundTint="@color/theme_red"
             android:stateListAnimator="@null"/>
 
     </LinearLayout>
 
     <!-- BOTTOM BAR -->
-    <!-- BOTTOM BAR -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/bottomBar"
+    <include
+        layout="@layout/layout_bottom_nav"
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:background="#f8f9fa"
-        android:elevation="8dp"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <TextView
-            android:id="@+id/hometxt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Home"
-            android:textColor="#555555"
-            android:textSize="13sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/settingtxt"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-
-        <TextView
-            android:id="@+id/settingtxt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Settings"
-            android:textColor="#555555"
-            android:textSize="13sp"
-            app:layout_constraintStart_toEndOf="@id/hometxt"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

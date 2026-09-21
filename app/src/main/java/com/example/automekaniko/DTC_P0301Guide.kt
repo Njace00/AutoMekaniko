@@ -1,22 +1,6 @@
 package com.example.automekaniko
 
 // P0301 — Cylinder 1 Misfire Detected
-// GLB: vios_engine-tutor-Wanimation_P0301.glb
-// Total animation duration: 6.25s across 6 tracks (all scrubbed together)
-//
-// HOW TO TUNE PER-SLIDE ANIMATION:
-//   Each slide has two time values:
-//     animationStartTime — the animation instantly jumps HERE when you enter the slide
-//     animationTime      — then scrubs smoothly TO HERE and freezes
-//     animationDurationMs — how long the scrub takes in milliseconds
-//
-//   Use f(frame) to convert frame numbers → seconds (assumes 24 fps).
-//   Example: frame 40 = f(40) = 40 / 24f = 1.667s
-//
-//   To find the right values:
-//     1. Run the app, go to this guide
-//     2. Tap through slides and watch the animation
-//     3. Adjust animationStartTime / animationTime / animationDurationMs, rebuild, repeat
 
 private fun f(frame: Int): Float = frame / 24f
 
@@ -40,9 +24,9 @@ val P0301Guide = DtcGuide(
             animationTime      = f(0),
             animationDurationMs = 650L,
             steps              = listOf(
-                "Ensure the engine is cool and the ignition is off",
-                "Open the hood and visually inspect the engine bay",
-                "Locate cylinder 1 — the first cylinder nearest the front of the engine"
+                ChecklistStep("Ensure the engine is cool and the ignition is off", "Working on a hot engine can cause severe burns. Wait at least 30 minutes."),
+                ChecklistStep("Open the hood and visually inspect the engine bay", "Look for loose wires, signs of rodents, or obvious fluid leaks."),
+                ChecklistStep("Locate cylinder 1 — the first cylinder nearest the front of the engine", "Cylinder 1 is almost always the one closest to the drive belt/pulley side.")
             ),
             infoTitle = "Cylinder 1 Misfire",
             infoItems = listOf(
@@ -63,9 +47,9 @@ val P0301Guide = DtcGuide(
             animationTime      = f(130),
             animationDurationMs = 1500L,
             steps              = listOf(
-                "Locate the plastic engine top cover",
-                "Unclip or unscrew the cover retaining bolts",
-                "Lift and set the cover aside in a safe place"
+                ChecklistStep("Locate the plastic engine top cover", "This is the large plastic shroud on top of the actual engine."),
+                ChecklistStep("Unclip or unscrew the cover retaining bolts", "Usually 10mm bolts or simple push-clips."),
+                ChecklistStep("Lift and set the cover aside in a safe place", "Avoid placing it on the ground where it can be stepped on.")
             ),
             infoTitle = "Engine Cover Removal",
             infoItems = listOf(
@@ -85,10 +69,10 @@ val P0301Guide = DtcGuide(
             animationTime      = f(160),
             animationDurationMs = 650L,
             steps              = listOf(
-                "Locate the ignition coil on cylinder 1",
-                "Press the tab and disconnect the electrical connector",
-                "Remove the coil retaining bolt using an 8mm socket",
-                "Pull the coil straight up and out of the spark plug well"
+                ChecklistStep("Locate the ignition coil on cylinder 1", "It's the component connected to the electrical wire going into the engine head."),
+                ChecklistStep("Press the tab and disconnect the electrical connector", "Be gentle; these plastic tabs can become brittle and break easily."),
+                ChecklistStep("Remove the coil retaining bolt using an 8mm socket", "Keep the bolt with the coil so it doesn't get mixed up."),
+                ChecklistStep("Pull the coil straight up and out of the spark plug well", "You might feel some resistance from the rubber boot; just pull steadily.")
             )
         ),
 
@@ -102,9 +86,9 @@ val P0301Guide = DtcGuide(
             animationTime      = f(220),
             animationDurationMs = 650L,
             steps              = listOf(
-                "Attach a spark plug socket (16mm) to an extension bar",
-                "Insert it into the spark plug well and turn counter-clockwise",
-                "Carefully remove the spark plug and set it aside for inspection"
+                ChecklistStep("Attach a spark plug socket (16mm) to an extension bar", "The socket should have a rubber insert or magnet to hold the plug."),
+                ChecklistStep("Insert it into the spark plug well and turn counter-clockwise", "If it's very tight, use a bit of penetrating oil and wait."),
+                ChecklistStep("Carefully remove the spark plug and set it aside for inspection", "Check the tip for soot, oil, or melted electrodes.")
             )
         ),
 
@@ -120,10 +104,10 @@ val P0301Guide = DtcGuide(
             animationTime      = f(300),
             animationDurationMs = 1500L,
             steps              = listOf(
-                "Thread the new spark plug in by hand to avoid cross-threading",
-                "Tighten with a spark plug socket to 18–25 Nm (do not overtighten)",
-                "Verify the plug is seated flush and secure",
-                "Apply a small amount of dielectric grease inside the coil boot (optional)"
+                ChecklistStep("Thread the new spark plug in by hand to avoid cross-threading", "You should be able to turn it several times without any tools."),
+                ChecklistStep("Tighten with a spark plug socket to 18–25 Nm (do not overtighten)", "Overtightening can strip the threads in the aluminum engine head."),
+                ChecklistStep("Verify the plug is seated flush and secure", "It should feel solid and not wiggle at all."),
+                ChecklistStep("Apply a small amount of dielectric grease inside the coil boot (optional)", "This helps prevent moisture entry and makes future removal easier.")
             )
         ),
 
@@ -137,10 +121,10 @@ val P0301Guide = DtcGuide(
             animationTime      = f(360),
             animationDurationMs = 650L,
             steps              = listOf(
-                "Lower the ignition coil back into the spark plug well",
-                "Press it firmly until it seats onto the plug",
-                "Reinstall and tighten the retaining bolt",
-                "Reconnect the electrical connector until it clicks"
+                ChecklistStep("Lower the ignition coil back into the spark plug well", "Align it with the hole and the bolt mounting point."),
+                ChecklistStep("Press it firmly until it seats onto the plug", "You should feel a slight 'click' as the boot engages the plug top."),
+                ChecklistStep("Reinstall and tighten the retaining bolt", "Just snug it up; no need to overtighten an 8mm bolt."),
+                ChecklistStep("Reconnect the electrical connector until it clicks", "The click ensures the locking tab is engaged.")
             )
         ),
 
@@ -154,17 +138,15 @@ val P0301Guide = DtcGuide(
             animationTime      = f(430),
             animationDurationMs = 650L,
             steps              = listOf(
-                "Place the engine top cover back into position",
-                "Clip or bolt it down securely",
-                "Start the engine and listen for smooth idle",
-                "Use an OBD scanner to clear the P0301 code and confirm no reoccurrence"
+                ChecklistStep("Place the engine top cover back into position", "Ensure it's oriented correctly (logo facing up)."),
+                ChecklistStep("Clip or bolt it down securely", "Make sure no wires are pinched under the cover."),
+                ChecklistStep("Start the engine and listen for smooth idle", "The misfire (shaking) should be gone now."),
+                ChecklistStep("Use an OBD scanner to clear the P0301 code and confirm no reoccurrence", "Clear the code and drive for 10 minutes to see if the check engine light returns.")
             ),
-            infoTitle = "Lighting System",
+            infoTitle = "P0301 Final Check",
             infoItems = listOf(
-                MAINTAINANCEActivity.InfoItem("What to Use", "Use high-quality halogen or LED bulbs matching your vehicle's specifications. Wear gloves."),
-                MAINTAINANCEActivity.InfoItem("What NOT to Use", "Do not touch the glass part of a new halogen bulb with bare fingers; oils can cause it to burst."),
-                MAINTAINANCEActivity.InfoItem("Headlights", "Check both low and high beams. Dim lights may indicate a failing bulb or battery."),
-                MAINTAINANCEActivity.InfoItem("Signals", "Ensure all 4 turn signals blink at a normal rate. Fast blinking means a bulb is out.")
+                MAINTAINANCEActivity.InfoItem("Tip", "If the code returns, try swapping the coil from cylinder 1 to cylinder 2 to see if the code changes to P0302."),
+                MAINTAINANCEActivity.InfoItem("Note", "Always use the exact spark plug model recommended by your car manufacturer.")
             )
         )
 

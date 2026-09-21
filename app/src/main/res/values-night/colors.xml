@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Semantic Colors (Dark) -->
+    <color name="background_primary">#121212</color>
+    <color name="background_secondary">#1E1E1E</color>
+    <color name="surface_card">#1E1E1E</color>
+    <color name="text_primary">#E1E1E1</color>
+    <color name="text_secondary">#B0B1B1</color>
+    <color name="text_tertiary">#888888</color>
+
+    <!-- Aliases for compatibility -->
+    <color name="app_background">@color/background_secondary</color>
+    <color name="app_surface">@color/surface_card</color>
+    <color name="app_text_primary">@color/text_primary</color>
+    <color name="app_text_secondary">@color/text_secondary</color>
+
+    <color name="theme_red">#FF4D4D</color>
+    <color name="theme_red_light">#2A1A1A</color>
+    <color name="divider">#333333</color>
+    <color name="nav_bar_bg">#1E1E1E</color>
+</resources>

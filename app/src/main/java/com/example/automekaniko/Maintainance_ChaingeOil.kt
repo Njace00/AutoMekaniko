@@ -4,9 +4,6 @@ private typealias ChangeOilSlide = MAINTAINANCEActivity.CameraSlide
 private typealias ChangeOilVec3 = MAINTAINANCEActivity.Vec3
 
 // CHANGE OIL - Engine Oil Maintenance
-// GLB: vios_engine-tutor-Wanimation_ChangeOil.glb
-//
-// General maintenance guide for Toyota Vios engine oil replacement.
 
 private fun f(frame: Int): Float = frame / 24f
 
@@ -24,9 +21,9 @@ val ChangeOilGuide = MaintenanceGuide(
             animationTime = f(0),
             animationDurationMs = 700L,
             steps = listOf(
-                "Park on a level surface",
-                "Turn off the engine",
-                "Prepare oil drain pan and tools",
+                ChecklistStep("Park on a level surface", "Ensures accurate oil level reading and vehicle stability."),
+                ChecklistStep("Turn off the engine", "Let it cool for at least 15 minutes to avoid burns from hot oil."),
+                ChecklistStep("Prepare oil drain pan and tools", "You will need a socket wrench (usually 14mm), filter wrench, and gloves."),
             )
         ),
 
@@ -39,9 +36,9 @@ val ChangeOilGuide = MaintenanceGuide(
             animationTime = f(45),
             animationDurationMs = 900L,
             steps = listOf(
-                "Lift the vehicle safely if necessary",
-                "Place oil drain pan underneath",
-                "Locate the drain plug on the oil pan"
+                ChecklistStep("Lift the vehicle safely if necessary", "Use jack stands if you are going fully underneath; never trust a jack alone."),
+                ChecklistStep("Place oil drain pan underneath", "Position it slightly forward of the plug to catch the initial splash."),
+                ChecklistStep("Locate the drain plug on the oil pan", "It is the single bolt on the lowest part of the engine block.")
             )
         ),
 
@@ -54,9 +51,9 @@ val ChangeOilGuide = MaintenanceGuide(
             animationTime = f(95),
             animationDurationMs = 1200L,
             steps = listOf(
-                "Loosen the drain plug carefully",
-                "Allow old oil to fully drain",
-                "Inspect the drain plug and washer"
+                ChecklistStep("Loosen the drain plug carefully", "Use the wrench to break it loose, then unscrew by hand."),
+                ChecklistStep("Allow old oil to fully drain", "Wait until the steady stream turns into slow drips."),
+                ChecklistStep("Inspect the drain plug and washer", "The crush washer should ideally be replaced every time.")
             )
         ),
 
@@ -69,9 +66,9 @@ val ChangeOilGuide = MaintenanceGuide(
             animationTime = f(150),
             animationDurationMs = 1000L,
             steps = listOf(
-                "Remove the old oil filter",
-                "Apply fresh oil to new filter gasket",
-                "Install the new oil filter securely"
+                ChecklistStep("Remove the old oil filter", "Expect some oil to leak out when you loosen it."),
+                ChecklistStep("Apply fresh oil to new filter gasket", "Smear a bit of new oil on the rubber ring to ensure a good seal."),
+                ChecklistStep("Install the new oil filter securely", "Tighten by hand only; do not use a tool to tighten it.")
             )
         ),
 
@@ -84,9 +81,9 @@ val ChangeOilGuide = MaintenanceGuide(
             animationTime = f(190),
             animationDurationMs = 700L,
             steps = listOf(
-                "Install new drain plug washer if needed",
-                "Thread the drain plug carefully",
-                "Tighten to proper torque specification"
+                ChecklistStep("Install new drain plug washer if needed", "Ensures a leak-free seal on the oil pan."),
+                ChecklistStep("Thread the drain plug carefully", "Always start by hand to avoid stripping the threads."),
+                ChecklistStep("Tighten to proper torque specification", "Snug it up firmly with the wrench (approx 30-40 Nm).")
             )
         ),
 
@@ -99,9 +96,9 @@ val ChangeOilGuide = MaintenanceGuide(
             animationTime = f(245),
             animationDurationMs = 1000L,
             steps = listOf(
-                "Open the oil filler cap",
-                "Pour the correct amount of oil",
-                "Check oil level using dipstick"
+                ChecklistStep("Open the oil filler cap", "Located on top of the engine valve cover."),
+                ChecklistStep("Pour the correct amount of oil", "Check your manual; usually between 3.3L to 4.0L for a Vios."),
+                ChecklistStep("Check oil level using dipstick", "Pull it out, wipe, reinsert, and check it's at the 'Full' mark.")
             ),
             infoTitle = "Types of Oil & Recommended",
             infoItems = listOf(
@@ -122,10 +119,10 @@ val ChangeOilGuide = MaintenanceGuide(
             animationTime = f(300),
             animationDurationMs = 1200L,
             steps = listOf(
-                "Start the engine",
-                "Inspect for oil leaks",
-                "Recheck oil level after a few minutes",
-                "Dispose of old oil properly"
+                ChecklistStep("Start the engine", "Let it run for a minute to circulate the new oil through the filter."),
+                ChecklistStep("Inspect for oil leaks", "Check around the drain plug and the new filter for any drips."),
+                ChecklistStep("Recheck oil level after a few minutes", "Oil level drops slightly after the filter fills up."),
+                ChecklistStep("Dispose of old oil properly", "Bring it to a local auto parts store or recycling center.")
             )
         )
     )

@@ -4,14 +4,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ffffff">
+    android:background="@color/background_primary">
 
     <!-- TOP BAR -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="64dp"
-        android:background="#f8f9fa"
+        android:background="@color/background_secondary"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
@@ -60,7 +60,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="What would you like to do?"
-            android:textColor="#555555"
+            android:textColor="@color/text_secondary"
             android:textSize="13sp"
             android:letterSpacing="0.03"
             android:layout_marginBottom="28dp"/>
@@ -68,31 +68,32 @@
         <!-- 3D VIEW BUTTON -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_marginBottom="14dp"
+            android:layout_height="110dp"
+            android:layout_marginBottom="18dp"
             android:clickable="true"
             android:focusable="true"
             android:id="@+id/card3D"
             android:foreground="?android:attr/selectableItemBackground"
-            app:cardBackgroundColor="#ffffff"
-            app:cardCornerRadius="14dp"
-            app:cardElevation="3dp">
+            app:cardBackgroundColor="@color/surface_card"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="4dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingHorizontal="20dp">
+                android:paddingHorizontal="24dp">
 
-                <TextView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:gravity="center"
-                    android:text=""
-                    android:textSize="20sp"
-                    android:background="#fff0f0"
-                    android:layout_marginEnd="16dp"/>
+                <ImageView
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_car"
+                    android:contentDescription="3D Guides Icon"
+                    android:background="@drawable/info_tab_bg"
+                    android:backgroundTint="@color/theme_red_light"
+                    android:layout_marginEnd="20dp"/>
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -111,17 +112,17 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="3D Guides"
-                        android:textColor="#222222"
-                        android:textSize="15sp"
+                        android:textColor="@color/text_primary"
+                        android:textSize="17sp"
                         android:textStyle="bold"/>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Maintenance · DTC repair"
-                        android:textColor="#e02020"
-                        android:textSize="11sp"
-                        android:layout_marginTop="2dp"/>
+                        android:textColor="@color/theme_red"
+                        android:textSize="12sp"
+                        android:layout_marginTop="4dp"/>
 
                 </LinearLayout>
 
@@ -129,8 +130,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="›"
-                    android:textColor="#e02020"
-                    android:textSize="26sp"/>
+                    android:textColor="@color/theme_red"
+                    android:textSize="32sp"/>
 
             </LinearLayout>
 
@@ -139,30 +140,31 @@
         <!-- LIVE DATA BUTTON -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="80dp"
+            android:layout_height="110dp"
             android:clickable="true"
             android:focusable="true"
             android:id="@+id/cardLive"
             android:foreground="?android:attr/selectableItemBackground"
-            app:cardBackgroundColor="#ffffff"
-            app:cardCornerRadius="14dp"
-            app:cardElevation="3dp">
+            app:cardBackgroundColor="@color/surface_card"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="4dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingHorizontal="20dp">
+                android:paddingHorizontal="24dp">
 
-                <TextView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:gravity="center"
-                    android:text=""
-                    android:textSize="20sp"
-                    android:background="#f8f9fa"
-                    android:layout_marginEnd="16dp"/>
+                <ImageView
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_sensors"
+                    android:contentDescription="Live Data Icon"
+                    android:background="@drawable/info_tab_bg"
+                    android:backgroundTint="@color/background_secondary"
+                    android:layout_marginEnd="20dp"/>
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -181,17 +183,17 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Live Data"
-                        android:textColor="#222222"
-                        android:textSize="15sp"
+                        android:textColor="@color/text_primary"
+                        android:textSize="17sp"
                         android:textStyle="bold"/>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="OBD-II · Real-time sensors"
-                        android:textColor="#555555"
-                        android:textSize="11sp"
-                        android:layout_marginTop="2dp"/>
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp"
+                        android:layout_marginTop="4dp"/>
 
                 </LinearLayout>
 
@@ -199,8 +201,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="›"
-                    android:textColor="#555555"
-                    android:textSize="26sp"/>
+                    android:textColor="@color/text_secondary"
+                    android:textSize="32sp"/>
 
             </LinearLayout>
 
@@ -210,39 +212,10 @@
 
 
     <!-- BOTTOM BAR -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/bottomBar"
+    <include
+        layout="@layout/layout_bottom_nav"
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:background="#f8f9fa"
-        android:elevation="8dp"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <TextView
-            android:id="@+id/hometxt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Home"
-            android:textColor="#e02020"
-            android:textSize="13sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/settingtxt"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-
-        <TextView
-            android:id="@+id/settingtxt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Settings"
-            android:textColor="#555555"
-            android:textSize="13sp"
-            app:layout_constraintStart_toEndOf="@id/hometxt"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

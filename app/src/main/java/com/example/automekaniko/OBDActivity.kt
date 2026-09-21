@@ -19,6 +19,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -48,6 +49,9 @@ private val PID_NEVER_BLACKLIST = setOf("010B", "012F", "015E")
 
 @SuppressLint("MissingPermission")
 class OBDActivity : AppCompatActivity() {
+
+    private var isMetric = true
+    private var rpmRedline = 6500
 
     private lateinit var tvBleStatus:  TextView
     private lateinit var tvStatusMsg:  TextView
@@ -104,20 +108,26 @@ class OBDActivity : AppCompatActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        loadSettings()
         setContentView(R.layout.activity_obd_scanner)
         bindViews()
         setupCardLabels()
         setupFuelLevelCardLongPress()
         btnConnect.setOnClickListener { onConnectClicked() }
 
-        // ── "Auto" white, "Mekaniko" red ──────────────────────────────────────
-        val appTitle = findViewById<TextView>(R.id.appTitle)
-        val titleText = "AutoMekaniko"
-        val spannable = SpannableString(titleText)
-        spannable.setSpan(ForegroundColorSpan(0xFF222222.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        spannable.setSpan(ForegroundColorSpan(0xFFe02020.toInt()), 4, titleText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        appTitle.text = spannable
+        if (getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE).getBoolean(SettingsActivity.KEY_KEEP_SCREEN_ON, false)) {
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+
+        // ── Header Branding ──────────────────────────────────────────────────
+        AppNavigation.setupBrandedTitle(this, findViewById(R.id.appTitle))
         AppNavigation.wire(this)
+    }
+
+    private fun loadSettings() {
+        val sp = getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE)
+        isMetric = sp.getBoolean(SettingsActivity.KEY_UNITS_METRIC, true)
+        rpmRedline = sp.getInt(SettingsActivity.KEY_REDLINE, 6500)
     }
 
     override fun onDestroy() {
@@ -149,30 +159,59 @@ class OBDActivity : AppCompatActivity() {
     private fun cardValue(id: Int): TextView = findViewById<View>(id).findViewById(R.id.cardValue)
     private fun cardLabel(id: Int): TextView = findViewById<View>(id).findViewById(R.id.cardLabel)
     private fun cardUnit(id: Int):  TextView = findViewById<View>(id).findViewById(R.id.cardUnit)
+    private fun cardGauge(id: Int): ProgressBar = findViewById<View>(id).findViewById(R.id.gaugeProgress)
+
+    private fun updateGauge(cardId: Int, value: String?, max: Float, colorLogic: ((Float) -> Int)? = null) {
+        val progress = cardGauge(cardId)
+        val floatVal = value?.replace(Regex("[^0-9.]"), "")?.toFloatOrNull() ?: 0f
+        val pct = ((floatVal / max) * 100).toInt().coerceIn(0, 100)
+        progress.progress = pct
+        
+        colorLogic?.let {
+            val color = it(floatVal)
+            progress.progressDrawable.setTint(color)
+        }
+    }
+
+    private fun getRpmColor(rpm: Float): Int {
+        return when {
+            rpm < rpmRedline * 0.45f -> 0xFF00E676.toInt() // Green
+            rpm < rpmRedline * 0.85f -> 0xFFFFD600.toInt() // Yellow/Amber
+            else -> 0xFFe02020.toInt()                     // Red
+        }
+    }
+
+    private fun getTempColor(temp: Float): Int {
+        return when {
+            temp < 40  -> 0xFF2196F3.toInt() // Blue (Cold)
+            temp < 100 -> 0xFF00E676.toInt() // Green (Normal)
+            else -> 0xFFe02020.toInt()       // Red (Hot)
+        }
+    }
 
     private fun setupCardLabels() {
-        data class Meta(val id: Int, val l: String, val u: String)
+        data class Meta(val id: Int, val l: String, val uMetric: String, val uImperial: String)
         listOf(
-            Meta(R.id.cardRpm,        "RPM",             "rpm"),
-            Meta(R.id.cardSpeed,      "Speed",           "km/h"),
-            Meta(R.id.cardCoolant,    "Coolant Temp",    "°C"),
-            Meta(R.id.cardThrottle,   "Throttle",        "%"),
-            Meta(R.id.cardLoad,       "Engine Load",     "%"),
-            Meta(R.id.cardMaf,        "Mass Air Flow",   "g/s"),
-            Meta(R.id.cardIat,        "Intake Air Temp", "°C"),
-            Meta(R.id.cardO2s1,       "O2 Sensor 1",     "V"),
-            Meta(R.id.cardO2s2,       "O2 Sensor 2",     "V"),
-            Meta(R.id.cardMap,        "MAP",              "kPa"),
-            Meta(R.id.cardFuelLevel,  "Fuel Level",       "%"),
-            Meta(R.id.cardStft,       "Short Fuel Trim",  "%"),
-            Meta(R.id.cardLtft,       "Long Fuel Trim",   "%"),
-            Meta(R.id.cardTiming,     "Timing Advance",   "°"),
-            Meta(R.id.cardBaro,       "Baro Pressure",    "kPa"),
-            Meta(R.id.cardCat1,       "Catalyst T1",      "°C"),
-            Meta(R.id.cardCat2,       "Catalyst T2",      "°C"),
-            Meta(R.id.cardModVoltage, "Module Voltage",   "V"),
-            Meta(R.id.cardFuelRate,   "Fuel Rate",        "L/h")
-        ).forEach { cardLabel(it.id).text = it.l; cardUnit(it.id).text = it.u }
+            Meta(R.id.cardRpm,        "RPM",             "rpm",   "rpm"),
+            Meta(R.id.cardSpeed,      "Speed",           "km/h",  "mph"),
+            Meta(R.id.cardCoolant,    "Coolant Temp",    "°C",    "°F"),
+            Meta(R.id.cardThrottle,   "Throttle",        "%",     "%"),
+            Meta(R.id.cardLoad,       "Engine Load",     "%",     "%"),
+            Meta(R.id.cardMaf,        "Mass Air Flow",   "g/s",   "lb/m"),
+            Meta(R.id.cardIat,        "Intake Air Temp", "°C",    "°F"),
+            Meta(R.id.cardO2s1,       "O2 Sensor 1",     "V",     "V"),
+            Meta(R.id.cardO2s2,       "O2 Sensor 2",     "V",     "V"),
+            Meta(R.id.cardMap,        "MAP",              "kPa",   "psi"),
+            Meta(R.id.cardFuelLevel,  "Fuel Level",       "%",     "%"),
+            Meta(R.id.cardStft,       "Short Fuel Trim",  "%",     "%"),
+            Meta(R.id.cardLtft,       "Long Fuel Trim",   "%",     "%"),
+            Meta(R.id.cardTiming,     "Timing Advance",   "°",     "°"),
+            Meta(R.id.cardBaro,       "Baro Pressure",    "kPa",   "psi"),
+            Meta(R.id.cardCat1,       "Catalyst T1",      "°C",    "°F"),
+            Meta(R.id.cardCat2,       "Catalyst T2",      "°C",    "°F"),
+            Meta(R.id.cardModVoltage, "Module Voltage",   "V",     "V"),
+            Meta(R.id.cardFuelRate,   "Fuel Rate",        "L/h",   "g/h")
+        ).forEach { cardLabel(it.id).text = it.l; cardUnit(it.id).text = if (isMetric) it.uMetric else it.uImperial }
     }
 
     private fun hasPermission(p: String) =
@@ -407,11 +446,26 @@ class OBDActivity : AppCompatActivity() {
                     val load = parsePerc(send("0104"), "04")
 
                     runOnUiThread {
-                        rpm?.let  { rpmVal.text      = it }
-                        spd?.let  { speedVal.text    = it }
-                        cool?.let { coolantVal.text  = it }
-                        thr?.let  { throttleVal.text = it }
-                        load?.let { loadVal.text     = it }
+                        rpm?.let  { 
+                            rpmVal.text = it
+                            updateGauge(R.id.cardRpm, it, 8000f, ::getRpmColor)
+                        }
+                        spd?.let  { 
+                            speedVal.text = it
+                            updateGauge(R.id.cardSpeed, it, 240f)
+                        }
+                        cool?.let { 
+                            coolantVal.text = it
+                            updateGauge(R.id.cardCoolant, it, 130f, ::getTempColor)
+                        }
+                        thr?.let  { 
+                            throttleVal.text = it
+                            updateGauge(R.id.cardThrottle, it, 100f)
+                        }
+                        load?.let { 
+                            loadVal.text = it
+                            updateGauge(R.id.cardLoad, it, 100f)
+                        }
                     }
 
                     // Extended sensors: every 3rd core cycle — they change slowly
@@ -476,20 +530,20 @@ class OBDActivity : AppCompatActivity() {
         val modV  = parseVolt(q("0142"))
 
         runOnUiThread {
-            maf?.let      { vMaf.text        = it }
-            iat?.let      { vIat.text        = it }
-            o2s1?.let     { vO2s1.text       = it }
-            o2s2?.let     { vO2s2.text       = it }
-            map?.let      { vMap.text        = it }
-            fuel?.let     { vFuelLevel.text  = it }
-            stft?.let     { vStft.text       = it }
-            ltft?.let     { vLtft.text       = it }
-            timing?.let   { vTiming.text     = it }
-            baro?.let     { vBaro.text       = it }
-            cat1?.let     { vCat1.text       = it }
-            cat2?.let     { vCat2.text       = it }
-            modV?.let     { vModVoltage.text = it }
-            fuelR?.let    { vFuelRate.text   = it }
+            maf?.let      { vMaf.text        = it; updateGauge(R.id.cardMaf, it, 100f) }
+            iat?.let      { vIat.text        = it; updateGauge(R.id.cardIat, it, 100f, ::getTempColor) }
+            o2s1?.let     { vO2s1.text       = it; updateGauge(R.id.cardO2s1, it, 1.2f) }
+            o2s2?.let     { vO2s2.text       = it; updateGauge(R.id.cardO2s2, it, 1.2f) }
+            map?.let      { vMap.text        = it; updateGauge(R.id.cardMap, it, 255f) }
+            fuel?.let     { vFuelLevel.text  = it; updateGauge(R.id.cardFuelLevel, it, 100f) }
+            stft?.let     { vStft.text       = it; updateGauge(R.id.cardStft, it, 100f) }
+            ltft?.let     { vLtft.text       = it; updateGauge(R.id.cardLtft, it, 100f) }
+            timing?.let   { vTiming.text     = it; updateGauge(R.id.cardTiming, it, 60f) }
+            baro?.let     { vBaro.text       = it; updateGauge(R.id.cardBaro, it, 110f) }
+            cat1?.let     { vCat1.text       = it; updateGauge(R.id.cardCat1, it, 1000f) }
+            cat2?.let     { vCat2.text       = it; updateGauge(R.id.cardCat2, it, 1000f) }
+            modV?.let     { vModVoltage.text = it; updateGauge(R.id.cardModVoltage, it, 16f) }
+            fuelR?.let    { vFuelRate.text   = it; updateGauge(R.id.cardFuelRate, it, 50f) }
             setStatus("Connected. Polling…")
         }
     }
@@ -696,15 +750,20 @@ class OBDActivity : AppCompatActivity() {
     private fun parseSpeed(r: String): String? {
         if (isErr(r)) return null
         val b = getB(r)
-        for (i in 0..b.size - 3) if (b[i] == "41" && b[i+1] == "0D") return b[i+2].toInt(16).toString()
+        for (i in 0..b.size - 3) if (b[i] == "41" && b[i+1] == "0D") {
+            val kmh = b[i+2].toInt(16)
+            return if (isMetric) kmh.toString() else (kmh * 0.621371f).toInt().toString()
+        }
         return null
     }
 
     private fun parseTemp(r: String, pid: String): String? {
         if (isErr(r)) return null
         val b = getB(r); val p = pid.uppercase().takeLast(2)
-        for (i in 0..b.size - 3) if (b[i] == "41" && b[i+1] == p)
-            return (b[i+2].toInt(16) - 40).toString()
+        for (i in 0..b.size - 3) if (b[i] == "41" && b[i+1] == p) {
+            val c = b[i+2].toInt(16) - 40
+            return if (isMetric) c.toString() else (c * 9/5 + 32).toString()
+        }
         return null
     }
 
@@ -762,15 +821,20 @@ class OBDActivity : AppCompatActivity() {
     private fun parseBaro(r: String): String? {
         if (isErr(r)) return null
         val b = getB(r)
-        for (i in 0..b.size - 3) if (b[i] == "41" && b[i+1] == "33") return b[i+2].toInt(16).toString()
+        for (i in 0..b.size - 3) if (b[i] == "41" && b[i+1] == "33") {
+            val kpa = b[i+2].toInt(16)
+            return if (isMetric) kpa.toString() else "%.1f".format(kpa * 0.145038f)
+        }
         return null
     }
 
     private fun parseCatTemp(r: String, pid: String): String? {
         if (isErr(r)) return null
         val b = getB(r); val p = pid.uppercase().takeLast(2)
-        for (i in 0..b.size - 4) if (b[i] == "41" && b[i+1] == p)
-            return "%.1f".format((b[i+2].toInt(16) * 256 + b[i+3].toInt(16)) / 10.0 - 40.0)
+        for (i in 0..b.size - 4) if (b[i] == "41" && b[i+1] == p) {
+            val c = (b[i+2].toInt(16) * 256 + b[i+3].toInt(16)) / 10.0 - 40.0
+            return if (isMetric) "%.1f".format(c) else "%.1f".format(c * 9/5 + 32)
+        }
         return null
     }
 

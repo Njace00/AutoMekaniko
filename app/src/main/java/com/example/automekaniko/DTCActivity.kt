@@ -80,20 +80,18 @@ class DtcActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableFullscreenChrome()
         binding = Activity3dDtcGuideBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val titleText = "AutoMekaniko"
-        val spannable = SpannableString(titleText)
-        spannable.setSpan(ForegroundColorSpan(0xFF222222.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        spannable.setSpan(ForegroundColorSpan(0xFFe02020.toInt()), 4, titleText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        binding.appTitle.text = spannable
+        // ── Header Branding ──────────────────────────────────────────────────
+        AppNavigation.setupBrandedTitle(this, binding.appTitle)
         AppNavigation.wire(this)
 
         sceneView = binding.sceneView
         binding.closeTab.setOnClickListener { toggleInfoPanel() }
         binding.progressSection.setOnClickListener { toggleBottomDrawer() }
+        binding.btnInfoModern.setOnClickListener { toggleInfoPanel() }
+        binding.btnCloseInfo.setOnClickListener { closeInfoPanel() }
 
         modelLoader = ModelLoader(sceneView.engine, this)
 
@@ -117,14 +115,11 @@ class DtcActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        enableFullscreenChrome()
+        goToSlide(currentSlideIndex, animated = false, applySlideCamera = false)
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) {
-            enableFullscreenChrome()
-        }
     }
 
     private fun loadPreviewModel() {
@@ -143,18 +138,7 @@ class DtcActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    @Suppress("DEPRECATION")
-    private fun enableFullscreenChrome() {
-        window.statusBarColor = 0xFF000000.toInt()
-        window.navigationBarColor = 0xFF000000.toInt()
-        window.decorView.systemUiVisibility =
-            View.SYSTEM_UI_FLAG_FULLSCREEN or
-                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-    }
+
 
     // -------------------------------------------------------------------------
     // INFO panel
@@ -170,51 +154,32 @@ class DtcActivity : AppCompatActivity() {
     }
 
     private fun openInfoPanel() {
-        val slideWidth = binding.mainCard.width.takeIf { it > 0 } ?: binding.root.width
-        binding.tvTabText.text = "CLOSE"
         binding.infoSlidePanel.animate().cancel()
-        binding.closeTab.animate().cancel()
-        binding.infoSlidePanel.translationX = slideWidth.toFloat()
+        binding.infoSlidePanel.scaleX = 0.8f
+        binding.infoSlidePanel.scaleY = 0.8f
         binding.infoSlidePanel.alpha = 0f
         binding.infoSlidePanel.visibility = View.VISIBLE
         binding.infoSlidePanel.animate()
-            .translationX(0f)
+            .scaleX(1f)
+            .scaleY(1f)
             .alpha(1f)
             .setDuration(260L)
             .setInterpolator(DecelerateInterpolator())
             .start()
-        binding.closeTab.animate()
-            .translationX(-6f)
-            .setDuration(260L)
-            .setInterpolator(DecelerateInterpolator())
-            .start()
-        binding.ivTabArrowTop.animate().rotation(180f).setDuration(220L).start()
-        binding.ivTabArrowBottom.animate().rotation(180f).setDuration(220L).start()
     }
 
     private fun closeInfoPanel() {
-        val slideWidth = binding.mainCard.width.takeIf { it > 0 } ?: binding.root.width
-        binding.tvTabText.text = "INFO"
         binding.infoSlidePanel.animate().cancel()
-        binding.closeTab.animate().cancel()
         binding.infoSlidePanel.animate()
-            .translationX(slideWidth.toFloat())
+            .scaleX(0.8f)
+            .scaleY(0.8f)
             .alpha(0f)
             .setDuration(220L)
             .setInterpolator(DecelerateInterpolator())
             .withEndAction {
                 binding.infoSlidePanel.visibility = View.GONE
-                binding.infoSlidePanel.translationX = 0f
-                binding.infoSlidePanel.alpha = 1f
             }
             .start()
-        binding.closeTab.animate()
-            .translationX(0f)
-            .setDuration(220L)
-            .setInterpolator(DecelerateInterpolator())
-            .start()
-        binding.ivTabArrowTop.animate().rotation(0f).setDuration(180L).start()
-        binding.ivTabArrowBottom.animate().rotation(0f).setDuration(180L).start()
     }
 
     private fun toggleBottomDrawer() {
@@ -251,6 +216,10 @@ class DtcActivity : AppCompatActivity() {
     private fun updateInfoPanel(slide: DtcSlide) {
         val fallbackItems = mutableListOf<MAINTAINANCEActivity.InfoItem>()
         val guide = currentEntry
+        
+        // For DTC, we almost always want info visible (fallback to code info)
+        binding.btnInfoModern.visibility = View.VISIBLE
+
         if (slide.infoItems.isEmpty()) {
             guide?.let {
                 fallbackItems.add(MAINTAINANCEActivity.InfoItem("DTC", "${it.code} - ${it.name}"))
@@ -260,7 +229,8 @@ class DtcActivity : AppCompatActivity() {
                 }
             }
             if (slide.steps.isNotEmpty()) {
-                fallbackItems.add(MAINTAINANCEActivity.InfoItem("Current Step", slide.steps.joinToString("\n")))
+                val stepsText = slide.steps.joinToString("\n") { it.label }
+                fallbackItems.add(MAINTAINANCEActivity.InfoItem("Current Step", stepsText))
             }
         }
 
@@ -459,28 +429,29 @@ class DtcActivity : AppCompatActivity() {
 
     private fun setupDtcSelector() {
         if (dtcList.isEmpty()) {
-            binding.dtcSpinner.adapter = ArrayAdapter(
-                this,
-                android.R.layout.simple_spinner_item,
-                listOf("No DTC guides found")
-            )
+            binding.dtcAutoComplete.setText("No DTC guides found")
             loadPreviewModel()
             return
         }
 
-        binding.dtcSpinner.adapter = ArrayAdapter(
+        val adapter = ArrayAdapter(
             this,
-            android.R.layout.simple_spinner_item,
+            R.layout.item_dropdown_guide,
             dtcList.map { "${it.code} — ${it.name}" }
-        ).also { it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+        )
+        binding.dtcAutoComplete.setAdapter(adapter)
 
-        binding.dtcSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                (view as? TextView)?.setTextColor(0xFF222222.toInt())
-                dtcConfirmedInSession = true
-                loadDtcEntry(dtcList[position])
-            }
-            override fun onNothingSelected(parent: AdapterView<*>) = Unit
+        binding.dtcAutoComplete.setOnItemClickListener { _, _, position, _ ->
+            dtcConfirmedInSession = true
+            loadDtcEntry(dtcList[position])
+        }
+
+        // Auto-load the first DTC guide (P0301) on startup
+        if (!dtcConfirmedInSession && dtcList.isNotEmpty()) {
+            val firstGuide = dtcList[0]
+            binding.dtcAutoComplete.setText("${firstGuide.code} — ${firstGuide.name}", false)
+            dtcConfirmedInSession = true
+            loadDtcEntry(firstGuide)
         }
     }
 
@@ -546,7 +517,10 @@ class DtcActivity : AppCompatActivity() {
         val slide = entry.slides[index]
 
         binding.slideTitle.text   = slide.title
-        binding.overlayTitle.text = slide.title
+        
+        // Update Progress Bar
+        val progress = ((index + 1).toFloat() / entry.slides.size * 100).toInt()
+        binding.stepProgressBar.setProgress(progress, animated)
 
         populateChecklist(slide, index)
         updateInfoPanel(slide)
@@ -581,28 +555,56 @@ class DtcActivity : AppCompatActivity() {
             binding.slideDesc.text = "${slide.description} (${checkedSteps.size}/${slide.steps.size} Done)"
         }
 
-        updateCompletionText()
+        val checklistPrefs = getSharedPreferences(MAINTAINANCEActivity.PREFS_CHECKLIST, MODE_PRIVATE)
 
         slide.steps.forEachIndexed { stepIndex, step ->
             val row = inflater.inflate(R.layout.item_checklist_step, binding.checklistContainer, false)
             val label = row.findViewById<TextView>(R.id.stepLabel)
             val checkboxIcon = row.findViewById<ImageView>(R.id.stepCheckboxIcon)
-            label.text = step
-            var isChecked = stepIndex in checkedSteps
+            val infoText = row.findViewById<TextView>(R.id.stepInfoText)
+            val infoBtn = row.findViewById<ImageView>(R.id.btnStepInfo)
+
+            label.text = step.label
+            if (!step.info.isNullOrEmpty()) {
+                infoBtn.visibility = View.VISIBLE
+                infoText.text = step.info
+
+                val autoExpand = getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE)
+                    .getBoolean(SettingsActivity.KEY_AUTO_EXPAND, false)
+                if (autoExpand) {
+                    infoText.visibility = View.VISIBLE
+                    infoBtn.rotation = 180f
+                }
+            }
+
+            val stepKey = MAINTAINANCEActivity.getStepKey(currentEntry?.code ?: "", slideIndex, stepIndex)
+            var isChecked = checklistPrefs.getBoolean(stepKey, false)
+            if (isChecked) checkedSteps.add(stepIndex) else checkedSteps.remove(stepIndex)
+
             checkboxIcon.setImageResource(
                 if (isChecked) R.drawable.checkbox_red_checked else R.drawable.checkbox_red_unchecked
             )
 
             row.setOnClickListener {
                 isChecked = !isChecked
+                checklistPrefs.edit().putBoolean(stepKey, isChecked).apply()
                 if (isChecked) checkedSteps.add(stepIndex) else checkedSteps.remove(stepIndex)
                 checkboxIcon.setImageResource(
                     if (isChecked) R.drawable.checkbox_red_checked else R.drawable.checkbox_red_unchecked
                 )
                 updateCompletionText()
             }
+
+            infoBtn.setOnClickListener {
+                val isVisible = infoText.visibility == View.VISIBLE
+                infoText.visibility = if (isVisible) View.GONE else View.VISIBLE
+                infoBtn.animate().rotation(if (isVisible) 0f else 180f).setDuration(200L).start()
+            }
+
             binding.checklistContainer.addView(row)
         }
+
+        updateCompletionText()
     }
 
     // -------------------------------------------------------------------------

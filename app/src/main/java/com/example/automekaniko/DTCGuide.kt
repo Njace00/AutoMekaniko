@@ -11,7 +11,7 @@ data class DtcSlide(
     val description: String,
     val eye: Vec3,
     val lookAt: Vec3,
-    val steps: List<String> = emptyList(),
+    val steps: List<ChecklistStep> = emptyList(),
     val animationStartTime: Float = 0f,
     val animationTime: Float = 0f,
     val animationDurationMs: Long = 650L,

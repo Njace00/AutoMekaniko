@@ -19,13 +19,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
 
-        // ── "Auto" dark gray, "Mekaniko" red ──────────────────────────────────────
-        val appTitle = findViewById<TextView>(R.id.appTitle)
-        val titleText = "AutoMekaniko"
-        val spannable = SpannableString(titleText)
-        spannable.setSpan(ForegroundColorSpan(0xFF222222.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        spannable.setSpan(ForegroundColorSpan(0xFFe02020.toInt()), 4, titleText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        appTitle.text = spannable
+        // ── Header Branding ──────────────────────────────────────────────────
+        AppNavigation.setupBrandedTitle(this, findViewById(R.id.appTitle))
         AppNavigation.wire(this)
 
         // Cards (the visible clickable areas)

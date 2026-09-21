@@ -15,12 +15,8 @@ class GuidesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_guides)
 
-        val appTitle = findViewById<TextView>(R.id.appTitle)
-        val titleText = "AutoMekaniko"
-        val spannable = SpannableString(titleText)
-        spannable.setSpan(ForegroundColorSpan(0xFF222222.toInt()), 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        spannable.setSpan(ForegroundColorSpan(0xFFe02020.toInt()), 4, titleText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        appTitle.text = spannable
+        // ── Header Branding ──────────────────────────────────────────────────
+        AppNavigation.setupBrandedTitle(this, findViewById(R.id.appTitle))
         AppNavigation.wire(this)
 
         findViewById<CardView>(R.id.cardDtc).setOnClickListener {

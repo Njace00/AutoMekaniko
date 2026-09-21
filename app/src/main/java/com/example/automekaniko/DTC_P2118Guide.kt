@@ -1,17 +1,6 @@
 package com.example.automekaniko
 
 // P2118 — Throttle Actuator Control Motor Current Range / Performance
-// GLB: vios_engine-tutor-Wanimation_P2118.glb
-// Total animation duration: 7.50s across multiple tracks
-//
-// HOW TO TUNE PER-SLIDE ANIMATION:
-//   Each slide has two time values:
-//     animationStartTime — the animation instantly jumps HERE when you enter the slide
-//     animationTime      — then scrubs smoothly TO HERE and freezes
-//     animationDurationMs — how long the scrub takes in milliseconds
-//
-//   Use f(frame) to convert frame numbers → seconds (assumes 24 fps).
-//   Example: frame 48 = f(48) = 48 / 24f = 2.0s
 
 private fun f(frame: Int): Float = frame / 24f
 
@@ -41,9 +30,9 @@ val P2118Guide = DtcGuide(
             animationTime       = f(0),
             animationDurationMs = 700L,
             steps               = listOf(
-                "Open the hood safely",
-                "Locate the throttle body near the intake hose",
-                "Inspect for visible damage or loose connectors"
+                ChecklistStep("Open the hood safely", "Ensure the car is on level ground and the parking brake is set."),
+                ChecklistStep("Locate the throttle body near the intake hose", "It's a large aluminum component connected to the air intake filter box."),
+                ChecklistStep("Inspect for visible damage or loose connectors", "Check if the 6-pin connector is securely pushed in.")
             )
         ),
 
@@ -56,9 +45,9 @@ val P2118Guide = DtcGuide(
             animationTime       = f(55),
             animationDurationMs = 800L,
             steps               = listOf(
-                "Loosen the intake hose clamp",
-                "Disconnect vacuum lines if needed",
-                "Carefully pull the intake hose away"
+                ChecklistStep("Loosen the intake hose clamp", "Use a 10mm socket or a large flat-head screwdriver."),
+                ChecklistStep("Disconnect vacuum lines if needed", "Pull them gently; if they are stuck, use a small pick to loosen the rubber."),
+                ChecklistStep("Carefully pull the intake hose away", "Move it aside to clear a path to the throttle body entrance.")
             )
         ),
 
@@ -71,9 +60,9 @@ val P2118Guide = DtcGuide(
             animationTime       = f(95),
             animationDurationMs = 700L,
             steps               = listOf(
-                "Press the connector lock tab",
-                "Gently disconnect the connector",
-                "Inspect terminals for corrosion or damage"
+                ChecklistStep("Press the connector lock tab", "Push the tab down until you feel a click before pulling."),
+                ChecklistStep("Gently disconnect the connector", "Do not pull by the wires! Pull only by the plastic housing."),
+                ChecklistStep("Inspect terminals for corrosion or damage", "Look for green crust or bent pins inside the connector.")
             )
         ),
 
@@ -86,9 +75,9 @@ val P2118Guide = DtcGuide(
             animationTime       = f(150),
             animationDurationMs = 900L,
             steps               = listOf(
-                "Remove the mounting bolts",
-                "Carefully pull out the throttle body",
-                "Remove the old gasket if necessary"
+                ChecklistStep("Remove the mounting bolts", "Usually four 10mm or 12mm bolts. Loosen them in a cross pattern."),
+                ChecklistStep("Carefully pull out the throttle body", "Be aware that some coolant may leak if it has coolant bypass lines."),
+                ChecklistStep("Remove the old gasket if necessary", "Scrape off any remaining rubber bits from the intake manifold.")
             )
         ),
 
@@ -101,10 +90,10 @@ val P2118Guide = DtcGuide(
             animationTime       = f(210),
             animationDurationMs = 1200L,
             steps               = listOf(
-                "Inspect throttle plate movement",
-                "Clean carbon deposits carefully",
-                "Check for sticking or motor failure",
-                "Replace throttle body if defective"
+                ChecklistStep("Inspect throttle plate movement", "It should be spring-loaded and not feel gritty when moved by hand."),
+                ChecklistStep("Clean carbon deposits carefully", "Use a dedicated throttle body cleaner and a soft toothbrush."),
+                ChecklistStep("Check for sticking or motor failure", "If it's stuck open or shut, the internal motor gears are likely stripped."),
+                ChecklistStep("Replace throttle body if defective", "Cleaning doesn't fix a dead motor; if P2118 persists, replace it.")
             )
         ),
 
@@ -117,9 +106,9 @@ val P2118Guide = DtcGuide(
             animationTime       = f(270),
             animationDurationMs = 1000L,
             steps               = listOf(
-                "Install new gasket",
-                "Position the new throttle body",
-                "Tighten mounting bolts evenly"
+                ChecklistStep("Install new gasket", "Never reuse an old gasket; it will cause a vacuum leak and high idle."),
+                ChecklistStep("Position the new throttle body", "Make sure the orientation matches the one you removed."),
+                ChecklistStep("Tighten mounting bolts evenly", "Snug them all up first, then torque to around 10-15 Nm.")
             )
         ),
 
@@ -132,9 +121,9 @@ val P2118Guide = DtcGuide(
             animationTime       = f(320),
             animationDurationMs = 800L,
             steps               = listOf(
-                "Reconnect the throttle connector",
-                "Reinstall intake hose",
-                "Secure all hose clamps properly"
+                ChecklistStep("Reconnect the throttle connector", "Push it in until you hear a distinct click."),
+                ChecklistStep("Reinstall intake hose", "Ensure it is seated fully over the throttle body mouth."),
+                ChecklistStep("Secure all hose clamps properly", "A loose clamp after the MAF sensor causes lean codes.")
             )
         ),
 
@@ -147,10 +136,10 @@ val P2118Guide = DtcGuide(
             animationTime       = f(360),
             animationDurationMs = 1500L,
             steps               = listOf(
-                "Reconnect battery if disconnected",
-                "Start the engine and let it idle",
-                "Clear the DTC using an OBD2 scanner",
-                "Verify that P2118 does not return"
+                ChecklistStep("Reconnect battery if disconnected", "Ensure terminals are clean and tight."),
+                ChecklistStep("Start the engine and let it idle", "Do not touch the gas pedal for at least 5 minutes."),
+                ChecklistStep("Clear the DTC using an OBD2 scanner", "Delete the code and wait for the dashboard light to go out."),
+                ChecklistStep("Verify that P2118 does not return", "Take a short test drive and check for normal throttle response.")
             )
         )
 

@@ -1,44 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- res/layout/obd_sensor_card.xml
-     A single reusable sensor tile for the OBD-II grid.
-     The host Activity sets label, value, and unit via view-binding on the included ID. -->
-<LinearLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="10dp"
+    android:padding="8dp"
     android:background="@drawable/obd_card_bg"
-    android:minHeight="68dp">
+    android:minHeight="120dp">
 
     <TextView
         android:id="@+id/cardLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="LABEL"
-        android:textColor="#555555"
+        android:textColor="@color/text_secondary"
         android:textSize="9sp"
         android:letterSpacing="0.08"
-        android:textAllCaps="true"/>
+        android:textAllCaps="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-    <TextView
-        android:id="@+id/cardValue"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="—"
-        android:textColor="#222222"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:layout_marginTop="2dp"/>
+    <FrameLayout
+        android:id="@+id/gaugeContainer"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="6dp"
+        app:layout_constraintTop_toBottomOf="@id/cardLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <TextView
-        android:id="@+id/cardUnit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="unit"
-        android:textColor="#777777"
-        android:textSize="9sp"
-        android:letterSpacing="0.04"
-        android:layout_marginTop="1dp"/>
+        <ProgressBar
+            android:id="@+id/gaugeBg"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:progress="100"
+            android:progressDrawable="@drawable/gauge_ring_bg" />
 
-</LinearLayout>
+        <ProgressBar
+            android:id="@+id/gaugeProgress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:max="100"
+            android:progress="0"
+            android:progressDrawable="@drawable/gauge_progress_drawable" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/cardValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="—"
+                android:textColor="@color/text_primary"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/cardUnit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="unit"
+                android:textColor="@color/text_tertiary"
+                android:textSize="8sp"
+                android:letterSpacing="0.04"/>
+
+        </LinearLayout>
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -7,7 +7,7 @@ private typealias AirFilterInfoItem = MAINTAINANCEActivity.InfoItem
 private fun f(frame: Int): Float = frame / 24f
 
 val AirFilterReplacementGuide = MaintenanceGuide(
-    name = "AirFilter Replacement",
+    name = "Air Filter Replacement",
     glbFile = "Engine Air Filter Replacement.glb",
     slides = listOf(
         AirFilterSlide(
@@ -16,9 +16,9 @@ val AirFilterReplacementGuide = MaintenanceGuide(
             eye = AirFilterVec3(-1.57f, 0.77f, -1.34f),
             lookAt = AirFilterVec3(0.00f, 0.10f, 0.00f),
             steps = listOf(
-                "Park on level ground and turn off the engine",
-                "Let the engine bay cool down",
-                "Locate the air intake hose and air filter box"
+                ChecklistStep("Park on level ground and turn off the engine", "Prevents the vehicle from rolling and ensures safety during inspection."),
+                ChecklistStep("Let the engine bay cool down", "The intake area can get hot; wait at least 15-20 minutes."),
+                ChecklistStep("Locate the air intake hose and air filter box", "Look for a large black plastic box connected to a thick rubber hose.")
             ),
             animationStartTime = f(1),
             animationTime = f(1),
@@ -30,9 +30,9 @@ val AirFilterReplacementGuide = MaintenanceGuide(
             eye = AirFilterVec3(-0.01f, 0.55f, -1.65f),
             lookAt = AirFilterVec3(-0.01f, 0.10f, 0.00f),
             steps = listOf(
-                "Trace the intake hose from the throttle body",
-                "Find the air filter box near the fender",
-                "Check surrounding clips and hose clamps"
+                ChecklistStep("Trace the intake hose from the throttle body", "Follow the thick hose back from the engine to the plastic box."),
+                ChecklistStep("Find the air filter box near the fender", "It is usually located on the driver or passenger side corner of the engine bay."),
+                ChecklistStep("Check surrounding clips and hose clamps", "Identify how the lid is secured—usually by 2 to 4 metal or plastic clips.")
             ),
             animationStartTime = f(1),
             animationTime = f(60),
@@ -44,10 +44,10 @@ val AirFilterReplacementGuide = MaintenanceGuide(
             eye = AirFilterVec3(-0.080f, 0.42f, -0.74f),
             lookAt = AirFilterVec3(-0.26f, -0.42f, 0.24f),
             steps = listOf(
-                "Unclip or unscrew the air box latches",
-                "Disconnect any sensor wiring on the cover",
-                "Lift the cover away from the housing",
-                "Set the cover aside without straining the hose"
+                ChecklistStep("Unclip or unscrew the air box latches", "Use your hands for metal clips or a screwdriver for screw-type fasteners."),
+                ChecklistStep("Disconnect any sensor wiring on the cover", "If there is a wire going into the box, press the tab and pull it out gently."),
+                ChecklistStep("Lift the cover away from the housing", "You may need to pull it up and slightly sideways to clear the internal hinges."),
+                ChecklistStep("Set the cover aside without straining the hose", "Rest it against a stable part of the engine bay if it's still attached to the hose.")
             ),
             animationStartTime = f(70),
             animationTime = f(125),
@@ -66,10 +66,10 @@ val AirFilterReplacementGuide = MaintenanceGuide(
             eye = AirFilterVec3(-0.080f, 0.42f, -0.74f),
             lookAt = AirFilterVec3(-0.26f, -0.42f, 0.24f),
             steps = listOf(
-                "Lift the old filter straight out of the housing",
-                "Check for dirt, debris, or discoloration",
-                "Hold it up to light to check airflow blockage",
-                "Wipe out any dust left inside the housing"
+                ChecklistStep("Lift the old filter straight out of the housing", "Note which side is facing up so you install the new one correctly."),
+                ChecklistStep("Check for dirt, debris, or discoloration", "Leaves, bugs, or gray/black soot mean the filter is clogged."),
+                ChecklistStep("Hold it up to light to check airflow blockage", "If you can't see light through the pleats, it's time for a change."),
+                ChecklistStep("Wipe out any dust left inside the housing", "Use a damp cloth to clean the bottom part of the box where the fresh air enters.")
             ),
             animationStartTime = f(140),
             animationTime = f(310),
@@ -88,10 +88,10 @@ val AirFilterReplacementGuide = MaintenanceGuide(
             eye = AirFilterVec3(-0.080f, 0.42f, -0.74f),
             lookAt = AirFilterVec3(-0.26f, -0.42f, 0.24f),
             steps = listOf(
-                "Check the new filter's orientation before placing it",
-                "Set the new filter squarely into the housing",
-                "Ensure the rubber edge forms a complete seal",
-                "Confirm it sits flush with no gaps"
+                ChecklistStep("Check the new filter's orientation before placing it", "The rubber seal usually faces upward or fits into a specific groove."),
+                ChecklistStep("Set the new filter squarely into the housing", "Make sure the corners match the shape of the box."),
+                ChecklistStep("Ensure the rubber edge forms a complete seal", "There should be no gaps where unfiltered air could leak past."),
+                ChecklistStep("Confirm it sits flush with no gaps", "Press down on the edges to seat the gasket firmly.")
             ),
             animationStartTime = f(315),
             animationTime = f(360),
@@ -111,10 +111,10 @@ val AirFilterReplacementGuide = MaintenanceGuide(
             eye = AirFilterVec3(-0.080f, 0.42f, -0.74f),
             lookAt = AirFilterVec3(-0.26f, -0.42f, 0.24f),
             steps = listOf(
-                "Place the cover back onto the housing",
-                "Reconnect any sensor wiring",
-                "Re-clip or re-screw the latches shut",
-                "Start the engine and check for unusual intake noise"
+                ChecklistStep("Place the cover back onto the housing", "Align the hinge tabs first before lowering the front of the lid."),
+                ChecklistStep("Reconnect any sensor wiring", "Push the connector in until it clicks to ensure a solid connection."),
+                ChecklistStep("Re-clip or re-screw the latches shut", "The clips should require a bit of force to snap over the lid."),
+                ChecklistStep("Start the engine and check for unusual intake noise", "Listen for whistling or sucking sounds that might indicate a leak.")
             ),
             animationStartTime = f(360),
             animationTime = f(380),
