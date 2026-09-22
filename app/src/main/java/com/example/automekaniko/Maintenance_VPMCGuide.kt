@@ -9,6 +9,14 @@ private fun f(frame: Int): Float = frame / 24f
 val VPMCGuide = MaintenanceGuide(
     name = "Vehicle Preventive Maintenance Checklist (VPMC)",
     glbFile = "VPMC(Vehicle Preventive Maintainance Checklist).glb",
+    requiredTools = listOf("Tire Pressure Gauge", "Tread Depth Tool / Penny", "Dipstick Rag", "Flashlight"),
+    estimatedTime = "15–20 mins",
+    difficulty = "Easy",
+    prerequisites = listOf(
+        "Park vehicle on flat, level ground",
+        "Set emergency parking brake",
+        "Turn off engine and let it cool for 15 minutes before checking oil"
+    ),
     slides = listOf(
         MaintenanceSlide(
             title = "Vehicle Overview",

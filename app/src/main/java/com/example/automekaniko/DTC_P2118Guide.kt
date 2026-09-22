@@ -19,6 +19,14 @@ val P2118Guide = DtcGuide(
     ),
     glbFile     = "vios_engine-tutor-Wanimation_P2118.glb",
     animationClipStartTimes = listOf(f(0)),
+    requiredTools = listOf("10mm & 12mm Sockets", "Throttle Body Cleaner", "Soft Toothbrush", "New Throttle Gasket", "Digital Multimeter"),
+    estimatedTime = "40–60 mins",
+    difficulty  = "Moderate",
+    prerequisites = listOf(
+        "Disconnect battery negative terminal to reset ECM throttle learn values",
+        "Never spray cleaner directly into the electronic motor connector",
+        "Handle throttle plate gently without forcing metal internal gears"
+    ),
     slides      = listOf(
 
         DtcSlide(
@@ -33,6 +41,13 @@ val P2118Guide = DtcGuide(
                 ChecklistStep("Open the hood safely", "Ensure the car is on level ground and the parking brake is set."),
                 ChecklistStep("Locate the throttle body near the intake hose", "It's a large aluminum component connected to the air intake filter box."),
                 ChecklistStep("Inspect for visible damage or loose connectors", "Check if the 6-pin connector is securely pushed in.")
+            ),
+            infoTitle = "P2118 Throttle Actuator Diagnostics",
+            infoItems = listOf(
+                MAINTAINANCEActivity.InfoItem("Failure Symptoms", "Vehicle enters Limp Home Mode (max 15 mph), pedal non-responsive, harsh idle surge, check engine & VSC lights on."),
+                MAINTAINANCEActivity.InfoItem("Motor Resistance Test", "Measure resistance between actuator terminals 1 & 2. Spec is 0.3–100 Ω at 20°C. Open circuit (∞ Ω) indicates burned motor coils."),
+                MAINTAINANCEActivity.InfoItem("ETCS Fuse Check", "Inspect 10A ETCS fuse in engine bay fuse box. A blown fuse cuts power to throttle motor."),
+                MAINTAINANCEActivity.InfoItem("Throttle Relearn", "After cleaning or replacement, disconnect battery (-) for 10 mins, then idle engine for 15 mins with A/C off so ECM relearns throttle stops.")
             )
         ),
 
@@ -59,6 +74,8 @@ val P2118Guide = DtcGuide(
             animationStartTime  = f(60),
             animationTime       = f(95),
             animationDurationMs = 700L,
+            removeFirst         = "Air Intake Hose & Clamps",
+            teardownPath        = "Air Filter Box ➔ Air Intake Duct ➔ Electrical Harness ➔ Throttle Body",
             steps               = listOf(
                 ChecklistStep("Press the connector lock tab", "Push the tab down until you feel a click before pulling."),
                 ChecklistStep("Gently disconnect the connector", "Do not pull by the wires! Pull only by the plastic housing."),
@@ -74,6 +91,8 @@ val P2118Guide = DtcGuide(
             animationStartTime  = f(100),
             animationTime       = f(150),
             animationDurationMs = 900L,
+            removeFirst         = "Electrical Harness & Coolant Bypass Hoses",
+            teardownPath        = "Intake Hose ➔ Electrical Harness ➔ 4x 10mm Mounting Bolts ➔ Throttle Body",
             steps               = listOf(
                 ChecklistStep("Remove the mounting bolts", "Usually four 10mm or 12mm bolts. Loosen them in a cross pattern."),
                 ChecklistStep("Carefully pull out the throttle body", "Be aware that some coolant may leak if it has coolant bypass lines."),

@@ -107,6 +107,7 @@ class DtcActivity : AppCompatActivity() {
 
         captureManipulatorOnce()
         setupDtcSelector()
+        setupVehicleHeaderButton()
         setupControls()
         setCameraLockState(true)
 
@@ -154,6 +155,7 @@ class DtcActivity : AppCompatActivity() {
     }
 
     private fun openInfoPanel() {
+        binding.btnInfoModern.visibility = View.GONE
         binding.infoSlidePanel.animate().cancel()
         binding.infoSlidePanel.scaleX = 0.8f
         binding.infoSlidePanel.scaleY = 0.8f
@@ -178,6 +180,7 @@ class DtcActivity : AppCompatActivity() {
             .setInterpolator(DecelerateInterpolator())
             .withEndAction {
                 binding.infoSlidePanel.visibility = View.GONE
+                binding.btnInfoModern.visibility = View.VISIBLE
             }
             .start()
     }
@@ -303,18 +306,88 @@ class DtcActivity : AppCompatActivity() {
     // Load entry
     // -------------------------------------------------------------------------
 
+    private fun setupVehicleHeaderButton() {
+        val btnHeaderVehicle = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnHeaderVehicle)
+        fun updateButtonText() {
+            val vehicle = VehicleManager.getActiveVehicle(this)
+            btnHeaderVehicle?.text = "🚘 ${vehicle.name.replace("Toyota ", "")}"
+        }
+        updateButtonText()
+        btnHeaderVehicle?.setOnClickListener {
+            VehicleManager.showSelectorDialog(this) {
+                updateButtonText()
+                currentEntry?.let { entry -> loadDtcEntry(entry) }
+            }
+        }
+    }
+
     private fun loadDtcEntry(entry: DtcGuide) {
         currentEntry      = entry
         currentSlideIndex = 0
         checkedStepsBySlide.clear()
         currentAnimTime   = 0f
         lockedAnimTime    = 0f
+
+        // Update Meta Bar
+        binding.chipDifficulty.text = entry.difficulty
+        binding.tvEstTime.text = "⏱ ${entry.estimatedTime}"
+        binding.btnToolsPrep.setOnClickListener {
+            showToolsPrepDialog(entry.requiredTools, entry.estimatedTime, entry.difficulty, entry.prerequisites)
+        }
+
         updateUiState()
         loadGlbModel(entry.glbFile) {
             currentSlideIndex = 0
             goToSlide(0, animated = false, applySlideCamera = true)
             updateUiState()
         }
+    }
+
+    private fun showToolsPrepDialog(
+        tools: List<String>,
+        time: String,
+        difficulty: String,
+        prereqs: List<String>
+    ) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_tools_prep, null)
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        dialogView.findViewById<TextView>(R.id.tvDialogDifficulty).text = "Difficulty: $difficulty"
+        dialogView.findViewById<TextView>(R.id.tvDialogTime).text = "⏱ Est. Time: $time"
+
+        val cgTools = dialogView.findViewById<com.google.android.material.chip.ChipGroup>(R.id.cgTools)
+        cgTools.removeAllViews()
+        tools.forEach { tool ->
+            val chip = com.google.android.material.chip.Chip(this).apply {
+                text = tool
+                isClickable = false
+                isCheckable = false
+                setChipBackgroundColorResource(R.color.theme_red_light)
+                setTextColor(androidx.core.content.ContextCompat.getColor(this@DtcActivity, R.color.theme_red))
+            }
+            cgTools.addView(chip)
+        }
+
+        val containerPrereqs = dialogView.findViewById<LinearLayout>(R.id.containerPrereqs)
+        containerPrereqs.removeAllViews()
+        prereqs.forEach { prereq ->
+            val cb = androidx.appcompat.widget.AppCompatCheckBox(this).apply {
+                text = prereq
+                setTextColor(androidx.core.content.ContextCompat.getColor(this@DtcActivity, R.color.text_primary))
+                textSize = 13f
+                setPadding(12, 12, 12, 12)
+            }
+            containerPrereqs.addView(cb)
+        }
+
+        dialogView.findViewById<View>(R.id.btnCloseDialog).setOnClickListener { dialog.dismiss() }
+        dialogView.findViewById<View>(R.id.btnConfirmPrep).setOnClickListener { dialog.dismiss() }
+
+        dialog.show()
     }
 
     // -------------------------------------------------------------------------
@@ -429,21 +502,24 @@ class DtcActivity : AppCompatActivity() {
 
     private fun setupDtcSelector() {
         if (dtcList.isEmpty()) {
-            binding.dtcAutoComplete.setText("No DTC guides found")
+            binding.dtcAutoComplete.setText("No DTC guides found", false)
             loadPreviewModel()
             return
         }
 
-        val adapter = ArrayAdapter(
-            this,
-            R.layout.item_dropdown_guide,
-            dtcList.map { "${it.code} — ${it.name}" }
-        )
-        binding.dtcAutoComplete.setAdapter(adapter)
+        binding.dtcAutoComplete.setSimpleItems(dtcList.map { "${it.code} — ${it.name}" }.toTypedArray())
+
+        val openDropdown = {
+            binding.dtcAutoComplete.showDropDown()
+        }
+        binding.dtcAutoComplete.setOnClickListener { openDropdown() }
+        binding.menuDtc.setOnClickListener { openDropdown() }
 
         binding.dtcAutoComplete.setOnItemClickListener { _, _, position, _ ->
+            val selectedText = binding.dtcAutoComplete.adapter.getItem(position)?.toString()
+            val entry = dtcList.find { "${it.code} — ${it.name}" == selectedText } ?: dtcList.getOrNull(position) ?: dtcList[0]
             dtcConfirmedInSession = true
-            loadDtcEntry(dtcList[position])
+            loadDtcEntry(entry)
         }
 
         // Auto-load the first DTC guide (P0301) on startup
@@ -522,6 +598,26 @@ class DtcActivity : AppCompatActivity() {
         val progress = ((index + 1).toFloat() / entry.slides.size * 100).toInt()
         binding.stepProgressBar.setProgress(progress, animated)
 
+        // ── 3D HUD Part Badge Callout ─────────────────────────────────────────
+        if (!slide.targetPartName.isNullOrEmpty()) {
+            binding.hudPartBadge.visibility = View.VISIBLE
+            binding.tvHudPartName.text = "📍 ${slide.targetPartName}"
+            if (!slide.targetPartLocationNote.isNullOrEmpty()) {
+                binding.tvHudPartNote.text = slide.targetPartLocationNote
+                binding.tvHudPartNote.visibility = View.VISIBLE
+            } else {
+                binding.tvHudPartNote.visibility = View.GONE
+            }
+            binding.hudPartBadge.setOnClickListener {
+                if (!slide.targetPartLocationNote.isNullOrEmpty()) {
+                    val isVis = binding.tvHudPartNote.visibility == View.VISIBLE
+                    binding.tvHudPartNote.visibility = if (isVis) View.GONE else View.VISIBLE
+                }
+            }
+        } else {
+            binding.hudPartBadge.visibility = View.GONE
+        }
+
         populateChecklist(slide, index)
         updateInfoPanel(slide)
 
@@ -548,11 +644,36 @@ class DtcActivity : AppCompatActivity() {
 
     private fun populateChecklist(slide: DtcSlide, slideIndex: Int) {
         binding.checklistContainer.removeAllViews()
+
+        // ── Dependency & Teardown Path Callouts ──────────────────────────────
+        if (!slide.removeFirst.isNullOrEmpty()) {
+            val tagView = TextView(this).apply {
+                text = "🔒 REMOVE FIRST: ${slide.removeFirst}"
+                setTextColor(androidx.core.content.ContextCompat.getColor(this@DtcActivity, R.color.theme_red))
+                textSize = 12f
+                setTypeface(null, android.graphics.Typeface.BOLD)
+                setPadding(0, 0, 0, 8.toPx())
+            }
+            binding.checklistContainer.addView(tagView)
+        }
+
+        if (!slide.teardownPath.isNullOrEmpty()) {
+            val pathView = TextView(this).apply {
+                text = "🛤 Sequence: ${slide.teardownPath}"
+                setTextColor(androidx.core.content.ContextCompat.getColor(this@DtcActivity, R.color.text_secondary))
+                textSize = 11f
+                setPadding(0, 0, 0, 16.toPx())
+            }
+            binding.checklistContainer.addView(pathView)
+        }
+
         val inflater = LayoutInflater.from(this)
         val checkedSteps = checkedStepsBySlide.getOrPut(slideIndex) { mutableSetOf() }
 
         fun updateCompletionText() {
-            binding.slideDesc.text = "${slide.description} (${checkedSteps.size}/${slide.steps.size} Done)"
+            val desc = slide.description
+            val prep = if (!slide.removeFirst.isNullOrEmpty()) " [🔒 ${slide.removeFirst}]" else ""
+            binding.slideDesc.text = "$desc$prep (${checkedSteps.size}/${slide.steps.size} Done)"
         }
 
         val checklistPrefs = getSharedPreferences(MAINTAINANCEActivity.PREFS_CHECKLIST, MODE_PRIVATE)
@@ -562,9 +683,15 @@ class DtcActivity : AppCompatActivity() {
             val label = row.findViewById<TextView>(R.id.stepLabel)
             val checkboxIcon = row.findViewById<ImageView>(R.id.stepCheckboxIcon)
             val infoText = row.findViewById<TextView>(R.id.stepInfoText)
+            val warningText = row.findViewById<TextView>(R.id.stepWarningText)
             val infoBtn = row.findViewById<ImageView>(R.id.btnStepInfo)
 
             label.text = step.label
+            if (!step.warning.isNullOrEmpty()) {
+                warningText.visibility = View.VISIBLE
+                warningText.text = "⚠️ ${step.warning}"
+            }
+
             if (!step.info.isNullOrEmpty()) {
                 infoBtn.visibility = View.VISIBLE
                 infoText.text = step.info

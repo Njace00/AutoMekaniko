@@ -126,8 +126,9 @@ class OBDActivity : AppCompatActivity() {
 
     private fun loadSettings() {
         val sp = getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE)
+        val activeVehicle = VehicleManager.getActiveVehicle(this)
         isMetric = sp.getBoolean(SettingsActivity.KEY_UNITS_METRIC, true)
-        rpmRedline = sp.getInt(SettingsActivity.KEY_REDLINE, 6500)
+        rpmRedline = sp.getInt(SettingsActivity.KEY_REDLINE, activeVehicle.defaultRedline)
     }
 
     override fun onDestroy() {

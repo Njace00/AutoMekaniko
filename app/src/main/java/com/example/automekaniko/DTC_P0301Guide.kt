@@ -12,6 +12,14 @@ val P0301Guide = DtcGuide(
     parts       = listOf("Spark plug", "Ignition coil", "Fuel injector", "Coil boot"),
     glbFile     = "DTC P0301 Misfire (SparkPlug Change).glb",
     animationClipStartTimes = listOf(f(0)),
+    requiredTools = listOf("OBD2 Scanner", "10mm Socket", "5/8 Spark Plug Socket & Extension", "Torque Wrench", "Dielectric Grease"),
+    estimatedTime = "30–40 mins",
+    difficulty  = "Moderate",
+    prerequisites = listOf(
+        "Allow engine to cool down to ambient temperature to prevent thread damage",
+        "Disconnect negative battery cable before touching ignition harness",
+        "Keep area around spark plug wells free of dirt and debris"
+    ),
     slides      = listOf(
 
 
@@ -28,12 +36,13 @@ val P0301Guide = DtcGuide(
                 ChecklistStep("Open the hood and visually inspect the engine bay", "Look for loose wires, signs of rodents, or obvious fluid leaks."),
                 ChecklistStep("Locate cylinder 1 — the first cylinder nearest the front of the engine", "Cylinder 1 is almost always the one closest to the drive belt/pulley side.")
             ),
-            infoTitle = "Cylinder 1 Misfire",
+            infoTitle = "P0301 Diagnostic Encyclopedia",
             infoItems = listOf(
-                MAINTAINANCEActivity.InfoItem("What to Use", "Use a high-quality OBD2 scanner and specialized spark plug tools."),
-                MAINTAINANCEActivity.InfoItem("What NOT to Use", "Do not handle ignition components with wet hands or while the engine is hot."),
-                MAINTAINANCEActivity.InfoItem("Diagnostic", "Check for physical damage to the ignition coil and wiring harness."),
-                MAINTAINANCEActivity.InfoItem("Safety", "Always disconnect the battery before working on electrical components.")
+                MAINTAINANCEActivity.InfoItem("Symptoms", "Flashing Check Engine Light, engine vibration at idle, hesitation during acceleration, smell of unburnt fuel from exhaust."),
+                MAINTAINANCEActivity.InfoItem("Coil Swap Test", "Swap Coil #1 with Coil #2. Clear DTC and test drive. If code changes to P0302, Coil #1 is bad! If it stays P0301, check spark plug/injector."),
+                MAINTAINANCEActivity.InfoItem("Multimeter Spec", "Coil Primary Resistance: 0.5–1.2 Ω across terminals 1 & 2. Secondary: 10k–16k Ω. Replace if out of range."),
+                MAINTAINANCEActivity.InfoItem("Plug Gap & Torque", "Set gap to 1.1mm (0.044 in) with wire gauge. Torque plug to 18–25 Nm (13–18 lb-ft) into aluminum cylinder head."),
+                MAINTAINANCEActivity.InfoItem("Safety Warning", "Never remove spark plugs from a warm aluminum head to prevent thread stripping.")
             )
         ),
 
@@ -46,6 +55,8 @@ val P0301Guide = DtcGuide(
             animationStartTime = f(1),
             animationTime      = f(130),
             animationDurationMs = 1500L,
+            targetPartName     = "Engine Beauty Cover",
+            targetPartLocationNote = "Black plastic shroud directly over the cylinder head",
             steps              = listOf(
                 ChecklistStep("Locate the plastic engine top cover", "This is the large plastic shroud on top of the actual engine."),
                 ChecklistStep("Unclip or unscrew the cover retaining bolts", "Usually 10mm bolts or simple push-clips."),
@@ -68,9 +79,11 @@ val P0301Guide = DtcGuide(
             animationStartTime = f(140),
             animationTime      = f(160),
             animationDurationMs = 650L,
+            targetPartName     = "Ignition Coil #1",
+            targetPartLocationNote = "Front-most coil pack secured with 8mm bolt",
             steps              = listOf(
                 ChecklistStep("Locate the ignition coil on cylinder 1", "It's the component connected to the electrical wire going into the engine head."),
-                ChecklistStep("Press the tab and disconnect the electrical connector", "Be gentle; these plastic tabs can become brittle and break easily."),
+                ChecklistStep("Press the tab and disconnect the electrical connector", "Be gentle; these plastic tabs can become brittle and break easily.", warning = "Pull only by the plastic housing, never pull directly on the wires!"),
                 ChecklistStep("Remove the coil retaining bolt using an 8mm socket", "Keep the bolt with the coil so it doesn't get mixed up."),
                 ChecklistStep("Pull the coil straight up and out of the spark plug well", "You might feel some resistance from the rubber boot; just pull steadily.")
             )
@@ -85,9 +98,11 @@ val P0301Guide = DtcGuide(
             animationStartTime = f(170),
             animationTime      = f(220),
             animationDurationMs = 650L,
+            targetPartName     = "Spark Plug #1",
+            targetPartLocationNote = "Deep inside the cylinder 1 spark plug well",
             steps              = listOf(
                 ChecklistStep("Attach a spark plug socket (16mm) to an extension bar", "The socket should have a rubber insert or magnet to hold the plug."),
-                ChecklistStep("Insert it into the spark plug well and turn counter-clockwise", "If it's very tight, use a bit of penetrating oil and wait."),
+                ChecklistStep("Insert it into the spark plug well and turn counter-clockwise", "If it's very tight, use a bit of penetrating oil and wait.", warning = "Do not force if stuck cold! Allow engine to cool or spray penetrating lube to avoid snapping the plug."),
                 ChecklistStep("Carefully remove the spark plug and set it aside for inspection", "Check the tip for soot, oil, or melted electrodes.")
             )
         ),
