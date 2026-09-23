@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#B3FFFFFF" /> <!-- 70% opacity white -->
+    <solid android:color="#F8FFFFFF" /> <!-- High opacity light surface -->
     <corners android:radius="24dp" />
-    <stroke android:width="1dp" android:color="#40FFFFFF" />
+    <stroke android:width="1dp" android:color="#E0E0E0" />
 </shape>

@@ -24,51 +24,49 @@
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0">
+            app:layout_constraintTop_toTopOf="parent">
             <!-- "Auto" in white, "Mekaniko" in red — set via SpannableString in Kotlin -->
         </TextView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-    <!-- SCROLLABLE CARDS -->
+    <!-- SCROLLABLE CARDS WITH FILL VIEWPORT -->
     <ScrollView
         android:id="@+id/scrollContent"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:fillViewport="true"
         android:clipToPadding="false"
-        android:paddingBottom="8dp"
         app:layout_constraintTop_toBottomOf="@id/topBar"
         app:layout_constraintBottom_toTopOf="@id/bottomBar">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical"
-            android:paddingHorizontal="12dp"
-            android:paddingTop="8dp">
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="14dp">
 
-            <!-- ── CARD 1: DTC CODES ───────────────────────────────────── -->
+            <!-- ── CARD 1: DTC CODES (STRETCHED VERTICALLY) ─────────────── -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardDtc"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginBottom="14dp"
                 android:foreground="?android:attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
                 app:cardBackgroundColor="@color/surface_card"
-                app:cardCornerRadius="10dp"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="3dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:orientation="vertical"
-                    android:padding="14dp">
+                    android:padding="20dp">
 
                     <!-- Header row -->
                     <LinearLayout
@@ -78,15 +76,15 @@
                         android:gravity="center_vertical">
 
                         <!-- Icon box -->
-                        <TextView
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:gravity="center"
-                            android:text="⚠"
-                            android:textSize="22sp"
-                            android:textColor="@color/theme_red"
-                            android:background="@color/theme_red_light"
-                            android:layout_marginEnd="12dp"/>
+                        <ImageView
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
+                            android:padding="12dp"
+                            android:src="@drawable/ic_sensors"
+                            android:contentDescription="DTC Sensors Icon"
+                            app:tint="@color/theme_red"
+                            android:background="@drawable/bg_chip_red_light"
+                            android:layout_marginEnd="14dp"/>
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -99,15 +97,15 @@
                                 android:layout_height="wrap_content"
                                 android:text="DTC Codes"
                                 android:textColor="@color/text_primary"
-                                android:textSize="18sp"
+                                android:textSize="19sp"
                                 android:textStyle="bold"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Step-by-Step Repair to Fix DTC error codes"
+                                android:text="Step-by-Step Repair to Fix DTC Error Codes"
                                 android:textColor="@color/text_secondary"
-                                android:textSize="11sp"
+                                android:textSize="12sp"
                                 android:layout_marginTop="3dp"/>
 
                         </LinearLayout>
@@ -117,7 +115,7 @@
                             android:layout_height="wrap_content"
                             android:text="›"
                             android:textColor="@color/theme_red"
-                            android:textSize="26sp"
+                            android:textSize="28sp"
                             android:paddingStart="8dp"/>
 
                     </LinearLayout>
@@ -127,66 +125,203 @@
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="@color/divider"
-                        android:layout_marginTop="12dp"
-                        android:layout_marginBottom="12dp"/>
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"/>
 
-                    <!-- Mini sensor cards: row 1 -->
+                    <!-- Top Spacer pushing middle content block downwards -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+
+                    <!-- Section Title: Trouble Codes -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ACTIVE &amp; COMMON TROUBLE CODES"
+                        android:textColor="@color/theme_red"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08"
+                        android:layout_marginBottom="10dp"/>
+
+                    <!-- DTC Code Badges Container -->
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="none"
+                        android:overScrollMode="never"
+                        android:layout_marginBottom="14dp">
+
+                        <LinearLayout
+                            android:id="@+id/containerDtcCodes"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <!-- Code Item 1 -->
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:background="@drawable/bg_chip_red_light"
+                                android:paddingHorizontal="12dp"
+                                android:paddingVertical="10dp"
+                                android:layout_marginEnd="10dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="P0301"
+                                    android:textColor="@color/theme_red"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Cylinder 1 Misfire"
+                                    android:textColor="@color/text_primary"
+                                    android:textSize="12sp"
+                                    android:layout_marginTop="3dp"/>
+                            </LinearLayout>
+
+                            <!-- Code Item 2 -->
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:background="@drawable/bg_chip_neutral"
+                                android:paddingHorizontal="12dp"
+                                android:paddingVertical="10dp"
+                                android:layout_marginEnd="10dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="P2118"
+                                    android:textColor="@color/theme_red"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Throttle Control"
+                                    android:textColor="@color/text_primary"
+                                    android:textSize="12sp"
+                                    android:layout_marginTop="3dp"/>
+                            </LinearLayout>
+
+                            <!-- Code Item 3 -->
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:background="@drawable/bg_chip_neutral"
+                                android:paddingHorizontal="12dp"
+                                android:paddingVertical="10dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="P0100"
+                                    android:textColor="@color/theme_red"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="MAF Sensor Circuit"
+                                    android:textColor="@color/text_primary"
+                                    android:textSize="12sp"
+                                    android:layout_marginTop="3dp"/>
+                            </LinearLayout>
+
+                        </LinearLayout>
+                    </HorizontalScrollView>
+
+                    <!-- Feature Tags Row -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginBottom="8dp">
+                        android:gravity="center_vertical">
 
-                        <include android:id="@+id/dtcCard1" layout="@layout/obd_sensor_card"
-                            android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:layout_marginEnd="6dp"/>
-                        <include android:id="@+id/dtcCard2" layout="@layout/obd_sensor_card"
-                            android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:layout_marginEnd="6dp"/>
-                        <include android:id="@+id/dtcCard3" layout="@layout/obd_sensor_card"
-                            android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="3D Model"
+                            android:textSize="12sp"
+                            android:textColor="@color/text_secondary"
+                            android:background="@drawable/bg_chip_neutral"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="5dp"
+                            android:layout_marginEnd="8dp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Root Cause"
+                            android:textSize="12sp"
+                            android:textColor="@color/text_secondary"
+                            android:background="@drawable/bg_chip_neutral"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="5dp"
+                            android:layout_marginEnd="8dp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Step-by-Step Fix"
+                            android:textSize="12sp"
+                            android:textColor="@color/text_secondary"
+                            android:background="@drawable/bg_chip_neutral"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="5dp"/>
 
                     </LinearLayout>
 
-                    <!-- Mini sensor cards: row 2 (partial) -->
-                    <LinearLayout
+                    <!-- Bottom Spacer pushing summary to the very bottom -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+
+                    <!-- Summary Badge Footnote (Pushed to bottom) -->
+                    <TextView
+                        android:id="@+id/tvDtcSummary"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <include android:id="@+id/dtcCard4" layout="@layout/obd_sensor_card"
-                            android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:layout_marginEnd="6dp"/>
-
-                        <!-- Empty spacers to keep card size consistent -->
-                        <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" android:layout_marginEnd="6dp"/>
-                        <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>
-
-                    </LinearLayout>
+                        android:text="3 Interactive Diagnostic Repair Guides Available • Tap to open"
+                        android:textColor="@color/theme_red"
+                        android:textSize="12sp"
+                        android:textStyle="italic"
+                        android:layout_marginTop="12dp"/>
 
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>
 
-            <!-- ── CARD 2: MAINTENANCE ─────────────────────────────────── -->
+            <!-- ── CARD 2: MAINTENANCE (STRETCHED VERTICALLY) ──────────── -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardMaintenance"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:foreground="?android:attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
                 app:cardBackgroundColor="@color/surface_card"
-                app:cardCornerRadius="10dp"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="3dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:orientation="vertical"
-                    android:padding="14dp">
+                    android:padding="20dp">
 
                     <!-- Header row -->
                     <LinearLayout
@@ -196,15 +331,15 @@
                         android:gravity="center_vertical">
 
                         <!-- Icon box -->
-                        <TextView
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:gravity="center"
-                            android:text="🔧"
-                            android:textSize="22sp"
-                            android:textColor="@color/theme_red"
-                            android:background="@color/theme_red_light"
-                            android:layout_marginEnd="12dp"/>
+                        <ImageView
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
+                            android:padding="12dp"
+                            android:src="@drawable/ic_settings"
+                            android:contentDescription="Maintenance Settings Icon"
+                            app:tint="@color/theme_red"
+                            android:background="@drawable/bg_chip_red_light"
+                            android:layout_marginEnd="14dp"/>
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -217,15 +352,15 @@
                                 android:layout_height="wrap_content"
                                 android:text="Maintenance"
                                 android:textColor="@color/text_primary"
-                                android:textSize="18sp"
+                                android:textSize="19sp"
                                 android:textStyle="bold"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Step-by-Step Repair Guides and Checklist"
+                                android:text="Step-by-Step Repair Guides &amp; Checklist"
                                 android:textColor="@color/text_secondary"
-                                android:textSize="11sp"
+                                android:textSize="12sp"
                                 android:layout_marginTop="3dp"/>
 
                         </LinearLayout>
@@ -235,7 +370,7 @@
                             android:layout_height="wrap_content"
                             android:text="›"
                             android:textColor="@color/theme_red"
-                            android:textSize="26sp"
+                            android:textSize="28sp"
                             android:paddingStart="8dp"/>
 
                     </LinearLayout>
@@ -245,42 +380,165 @@
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="@color/divider"
-                        android:layout_marginTop="12dp"
-                        android:layout_marginBottom="12dp"/>
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"/>
 
-                    <!-- Mini sensor cards: row 1 -->
+                    <!-- Top Spacer pushing middle content block downwards -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+
+                    <!-- Section Title: Maintenance Procedures -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="GUIDED CARE &amp; MAINTENANCE PROCEDURES"
+                        android:textColor="@color/theme_red"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08"
+                        android:layout_marginBottom="10dp"/>
+
+                    <!-- Maintenance Procedure Chips Container -->
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="none"
+                        android:overScrollMode="never"
+                        android:layout_marginBottom="14dp">
+
+                        <LinearLayout
+                            android:id="@+id/containerMaintGuides"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Oil &amp; Filter"
+                                android:textColor="@color/text_primary"
+                                android:textSize="13sp"
+                                android:background="@drawable/bg_chip_neutral"
+                                android:paddingHorizontal="12dp"
+                                android:paddingVertical="8dp"
+                                android:layout_marginEnd="8dp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Air Filter"
+                                android:textColor="@color/text_primary"
+                                android:textSize="13sp"
+                                android:background="@drawable/bg_chip_neutral"
+                                android:paddingHorizontal="12dp"
+                                android:paddingVertical="8dp"
+                                android:layout_marginEnd="8dp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Battery Replace"
+                                android:textColor="@color/text_primary"
+                                android:textSize="13sp"
+                                android:background="@drawable/bg_chip_neutral"
+                                android:paddingHorizontal="12dp"
+                                android:paddingVertical="8dp"
+                                android:layout_marginEnd="8dp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Care Checklist"
+                                android:textColor="@color/text_primary"
+                                android:textSize="13sp"
+                                android:background="@drawable/bg_chip_neutral"
+                                android:paddingHorizontal="12dp"
+                                android:paddingVertical="8dp"/>
+
+                        </LinearLayout>
+                    </HorizontalScrollView>
+
+                    <!-- Section Title: Required Toolkit Preview -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="PREPARE YOUR TOOLKIT"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08"
+                        android:layout_marginBottom="8dp"/>
+
+                    <!-- Tool Kit Badges Row -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginBottom="8dp">
+                        android:gravity="center_vertical">
 
-                        <include android:id="@+id/maintCard1" layout="@layout/obd_sensor_card"
-                            android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:layout_marginEnd="6dp"/>
-                        <include android:id="@+id/maintCard2" layout="@layout/obd_sensor_card"
-                            android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:layout_marginEnd="6dp"/>
-                        <include android:id="@+id/maintCard3" layout="@layout/obd_sensor_card"
-                            android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Wrench Set"
+                            android:textSize="12sp"
+                            android:textColor="@color/theme_red"
+                            android:background="@drawable/bg_chip_red_light"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="5dp"
+                            android:layout_marginEnd="8dp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Jack Stand"
+                            android:textSize="12sp"
+                            android:textColor="@color/theme_red"
+                            android:background="@drawable/bg_chip_red_light"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="5dp"
+                            android:layout_marginEnd="8dp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Screwdriver"
+                            android:textSize="12sp"
+                            android:textColor="@color/theme_red"
+                            android:background="@drawable/bg_chip_red_light"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="5dp"
+                            android:layout_marginEnd="8dp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Gloves"
+                            android:textSize="12sp"
+                            android:textColor="@color/theme_red"
+                            android:background="@drawable/bg_chip_red_light"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="5dp"/>
 
                     </LinearLayout>
 
-                    <!-- Mini sensor cards: row 2 (partial) -->
-                    <LinearLayout
+                    <!-- Bottom Spacer pushing summary to the very bottom -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+
+                    <!-- Summary Footnote (Pushed to bottom) -->
+                    <TextView
+                        android:id="@+id/tvMaintSummary"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <include android:id="@+id/maintCard4" layout="@layout/obd_sensor_card"
-                            android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:layout_marginEnd="6dp"/>
-
-                        <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" android:layout_marginEnd="6dp"/>
-                        <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>
-
-                    </LinearLayout>
+                        android:text="5 Preventive Maintenance Guides with Tool Lists &amp; Checklists • Tap to open"
+                        android:textColor="@color/theme_red"
+                        android:textSize="12sp"
+                        android:textStyle="italic"
+                        android:layout_marginTop="12dp"/>
 
                 </LinearLayout>
 

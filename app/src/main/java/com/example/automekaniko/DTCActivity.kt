@@ -135,9 +135,22 @@ class DtcActivity : AppCompatActivity() {
         }
     }
 
+    override fun onPause() {
+        cameraAnimJob?.cancel()
+        animScrubJob?.cancel()
+        super.onPause()
+    }
+
     override fun onDestroy() {
         cameraAnimJob?.cancel()
         animScrubJob?.cancel()
+        currentModelNode?.let {
+            runCatching {
+                sceneView.removeChildNode(it)
+                it.destroy()
+            }
+            currentModelNode = null
+        }
         super.onDestroy()
     }
 
@@ -243,6 +256,9 @@ class DtcActivity : AppCompatActivity() {
         binding.tvInfoPanelTitle.text = slide.infoTitle ?: "Recommended Info"
         binding.infoItemsContainer.removeAllViews()
 
+        val primaryTextColor = androidx.core.content.ContextCompat.getColor(this, R.color.text_primary)
+        val secondaryTextColor = androidx.core.content.ContextCompat.getColor(this, R.color.text_secondary)
+
         items.forEach { item ->
             val itemLayout = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
@@ -264,8 +280,8 @@ class DtcActivity : AppCompatActivity() {
 
             val titleTv = TextView(this).apply {
                 text = item.title
-                setTextColor(0xFF222222.toInt())
-                textSize = 12f
+                setTextColor(primaryTextColor)
+                textSize = 13f
                 setTypeface(null, android.graphics.Typeface.BOLD)
             }
             leftContainer.addView(titleTv)
@@ -293,8 +309,9 @@ class DtcActivity : AppCompatActivity() {
                     1f
                 )
                 text = item.description
-                setTextColor(0xFF555555.toInt())
-                textSize = 11f
+                setTextColor(secondaryTextColor)
+                textSize = 12f
+                setLineSpacing(0f, 1.15f)
             }
             itemLayout.addView(descTv)
 
@@ -690,6 +707,8 @@ class DtcActivity : AppCompatActivity() {
         }
 
         val checklistPrefs = getSharedPreferences(MAINTAINANCEActivity.PREFS_CHECKLIST, MODE_PRIVATE)
+        val autoExpand = getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE)
+            .getBoolean(SettingsActivity.KEY_AUTO_EXPAND, false)
 
         slide.steps.forEachIndexed { stepIndex, step ->
             val row = inflater.inflate(R.layout.item_checklist_step, binding.checklistContainer, false)
@@ -708,9 +727,6 @@ class DtcActivity : AppCompatActivity() {
             if (!step.info.isNullOrEmpty()) {
                 infoBtn.visibility = View.VISIBLE
                 infoText.text = step.info
-
-                val autoExpand = getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE)
-                    .getBoolean(SettingsActivity.KEY_AUTO_EXPAND, false)
                 if (autoExpand) {
                     infoText.visibility = View.VISIBLE
                     infoBtn.rotation = 180f

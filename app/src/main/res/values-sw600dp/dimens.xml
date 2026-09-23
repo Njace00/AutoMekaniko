@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen Paddings & Margins for Large Displays / Tablets -->
+    <dimen name="screen_padding_horizontal">32dp</dimen>
+    <dimen name="screen_padding_vertical">24dp</dimen>
+    <dimen name="section_margin_bottom">28dp</dimen>
+    <dimen name="item_margin_small">12dp</dimen>
+    <dimen name="item_margin_medium">18dp</dimen>
+    <dimen name="item_margin_large">24dp</dimen>
+
+    <!-- Card Properties -->
+    <dimen name="card_corner_radius">20dp</dimen>
+    <dimen name="card_elevation">4dp</dimen>
+    <dimen name="card_padding">24dp</dimen>
+    <dimen name="card_padding_compact">18dp</dimen>
+
+    <!-- Icon Sizes -->
+    <dimen name="icon_size_small">22dp</dimen>
+    <dimen name="icon_size_medium">30dp</dimen>
+    <dimen name="icon_size_large">52dp</dimen>
+    <dimen name="icon_size_xlarge">64dp</dimen>
+    <dimen name="icon_box_size">64dp</dimen>
+
+    <!-- Font Sizes (sp) -->
+    <dimen name="text_size_caption">13sp</dimen>
+    <dimen name="text_size_body_small">14sp</dimen>
+    <dimen name="text_size_body">15sp</dimen>
+    <dimen name="text_size_body_large">16sp</dimen>
+    <dimen name="text_size_subtitle">18sp</dimen>
+    <dimen name="text_size_title">22sp</dimen>
+    <dimen name="text_size_header">26sp</dimen>
+
+    <!-- Button Heights -->
+    <dimen name="button_height_standard">58dp</dimen>
+    <dimen name="button_height_compact">48dp</dimen>
+    <dimen name="bottom_nav_height">88dp</dimen>
+</resources>

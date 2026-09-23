@@ -140,12 +140,27 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         setupVehicleHeaderButton()
         refreshGuideListForActiveVehicle()
         goToSlide(currentSlideIndex, animated = false, applySlideCamera = false)
+        startCameraInfoUpdates()
+    }
+
+    override fun onPause() {
+        cameraAnimJob?.cancel()
+        cameraInfoJob?.cancel()
+        animScrubJob?.cancel()
+        super.onPause()
     }
 
     override fun onDestroy() {
         cameraAnimJob?.cancel()
         cameraInfoJob?.cancel()
         animScrubJob?.cancel()
+        currentModelNode?.let {
+            runCatching {
+                sceneView.removeChildNode(it)
+                it.destroy()
+            }
+            currentModelNode = null
+        }
         super.onDestroy()
     }
 
@@ -543,6 +558,8 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         }
 
         val checklistPrefs = getSharedPreferences(PREFS_CHECKLIST, MODE_PRIVATE)
+        val autoExpand = getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE)
+            .getBoolean(SettingsActivity.KEY_AUTO_EXPAND, false)
 
         slide.steps.forEachIndexed { stepIndex, step ->
             val row = inflater.inflate(R.layout.item_checklist_step, binding.checklistContainer, false)
@@ -561,9 +578,6 @@ class MAINTAINANCEActivity : AppCompatActivity() {
             if (!step.info.isNullOrEmpty()) {
                 infoBtn.visibility = View.VISIBLE
                 infoText.text = step.info
-                
-                val autoExpand = getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE)
-                    .getBoolean(SettingsActivity.KEY_AUTO_EXPAND, false)
                 if (autoExpand) {
                     infoText.visibility = View.VISIBLE
                     infoBtn.rotation = 180f
@@ -642,6 +656,9 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         binding.tvInfoPanelTitle.text = slide.infoTitle ?: "Recommended Info"
         binding.infoItemsContainer.removeAllViews()
 
+        val primaryTextColor = androidx.core.content.ContextCompat.getColor(this, R.color.text_primary)
+        val secondaryTextColor = androidx.core.content.ContextCompat.getColor(this, R.color.text_secondary)
+
         slide.infoItems.forEach { item ->
             val itemLayout = android.widget.LinearLayout(this).apply {
                 orientation = android.widget.LinearLayout.HORIZONTAL
@@ -663,8 +680,8 @@ class MAINTAINANCEActivity : AppCompatActivity() {
 
             val titleTv = android.widget.TextView(this).apply {
                 text = item.title
-                setTextColor(0xFF222222.toInt())
-                textSize = 12f
+                setTextColor(primaryTextColor)
+                textSize = 13f
                 setTypeface(null, android.graphics.Typeface.BOLD)
             }
             leftContainer.addView(titleTv)
@@ -692,8 +709,9 @@ class MAINTAINANCEActivity : AppCompatActivity() {
                     1f
                 )
                 text = item.description
-                setTextColor(0xFF555555.toInt())
-                textSize = 11f
+                setTextColor(secondaryTextColor)
+                textSize = 12f
+                setLineSpacing(0f, 1.15f)
             }
             itemLayout.addView(descTv)
 

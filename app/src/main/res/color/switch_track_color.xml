@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- ON: Soft red tinted track -->
+    <item android:state_checked="true" android:color="#80E02020" />
+    <!-- OFF: Medium gray visible track -->
+    <item android:state_checked="false" android:color="#555555" />
+</selector>
