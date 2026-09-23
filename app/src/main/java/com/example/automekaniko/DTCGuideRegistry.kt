@@ -12,9 +12,14 @@ val dtcGuides: List<DtcGuide> = listOf(
 
     P0301Guide,
     P2118Guide,
+    WigoP0100Guide,
 
     // P0420Guide,   // uncomment when you create P0420Guide.kt
     // P0171Guide,
     // P0300Guide,
 
 )
+
+fun getDtcGuidesForVehicle(vehicleId: String): List<DtcGuide> {
+    return dtcGuides.filter { it.vehicleId.equals(vehicleId, ignoreCase = true) }
+}

@@ -40,7 +40,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     }
 
     private lateinit var binding: Activity3dMaintainanceBinding
-    private val guideList = maintenanceGuides
+    private var guideList: List<MaintenanceGuide> = emptyList()
 
     data class Vec3(val x: Float, val y: Float, val z: Float)
 
@@ -137,6 +137,8 @@ class MAINTAINANCEActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        setupVehicleHeaderButton()
+        refreshGuideListForActiveVehicle()
         goToSlide(currentSlideIndex, animated = false, applySlideCamera = false)
     }
 
@@ -232,13 +234,6 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     }
 
     private fun setupModelSelector() {
-        if (guideList.isEmpty()) {
-            binding.guideAutoComplete.setText("No maintenance guides found", false)
-            return
-        }
-
-        binding.guideAutoComplete.setSimpleItems(guideList.map { it.name }.toTypedArray())
-
         val openDropdown = {
             binding.guideAutoComplete.showDropDown()
         }
@@ -247,14 +242,36 @@ class MAINTAINANCEActivity : AppCompatActivity() {
 
         binding.guideAutoComplete.setOnItemClickListener { _, _, position, _ ->
             val selectedName = binding.guideAutoComplete.adapter.getItem(position)?.toString()
-            val guide = guideList.find { it.name == selectedName } ?: guideList.getOrNull(position) ?: guideList[0]
-            loadGuide(guide)
+            val guide = guideList.find { it.name == selectedName } ?: guideList.getOrNull(position) ?: guideList.firstOrNull()
+            if (guide != null) {
+                loadGuide(guide)
+            }
         }
 
-        // Initial Selection
-        if (guideList.isNotEmpty()) {
-            binding.guideAutoComplete.setText(guideList[0].name, false)
-            loadGuide(guideList[0])
+        refreshGuideListForActiveVehicle()
+    }
+
+    private fun refreshGuideListForActiveVehicle() {
+        val activeVehicle = VehicleManager.getActiveVehicle(this)
+        guideList = getMaintenanceGuidesForVehicle(activeVehicle.id)
+
+        if (guideList.isEmpty()) {
+            binding.guideAutoComplete.setSimpleItems(emptyArray())
+            binding.guideAutoComplete.setText("No maintenance guides for ${activeVehicle.name.replace("Toyota ", "")}", false)
+            currentGuide = null
+            currentSlides = emptyList()
+            currentSlideIndex = 0
+            return
+        }
+
+        binding.guideAutoComplete.setSimpleItems(guideList.map { it.name }.toTypedArray())
+
+        val currentMatchesVehicle = currentGuide?.vehicleId?.equals(activeVehicle.id, ignoreCase = true) == true
+
+        if (currentGuide == null || !currentMatchesVehicle) {
+            val firstGuide = guideList[0]
+            binding.guideAutoComplete.setText(firstGuide.name, false)
+            loadGuide(firstGuide)
         }
     }
 
@@ -268,7 +285,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         btnHeaderVehicle?.setOnClickListener {
             VehicleManager.showSelectorDialog(this) {
                 updateButtonText()
-                currentGuide?.let { guide -> loadGuide(guide) }
+                refreshGuideListForActiveVehicle()
             }
         }
     }

@@ -12,6 +12,7 @@ val P0301Guide = DtcGuide(
     parts       = listOf("Spark plug", "Ignition coil", "Fuel injector", "Coil boot"),
     glbFile     = "DTC P0301 Misfire (SparkPlug Change).glb",
     animationClipStartTimes = listOf(f(0)),
+    vehicleId   = VehicleManager.VIOS.id,
     requiredTools = listOf("OBD2 Scanner", "10mm Socket", "5/8 Spark Plug Socket & Extension", "Torque Wrench", "Dielectric Grease"),
     estimatedTime = "30–40 mins",
     difficulty  = "Moderate",

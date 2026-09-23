@@ -12,4 +12,9 @@ val maintenanceGuides: List<MaintenanceGuide> = listOf(
     ChangeOilGuide,
     AirFilterReplacementGuide,
     BatteryReplacementGuide,
+    WigoVPMCGuide,
 )
+
+fun getMaintenanceGuidesForVehicle(vehicleId: String): List<MaintenanceGuide> {
+    return maintenanceGuides.filter { it.vehicleId.equals(vehicleId, ignoreCase = true) }
+}

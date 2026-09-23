@@ -19,6 +19,7 @@ val P2118Guide = DtcGuide(
     ),
     glbFile     = "vios_engine-tutor-Wanimation_P2118.glb",
     animationClipStartTimes = listOf(f(0)),
+    vehicleId   = VehicleManager.VIOS.id,
     requiredTools = listOf("10mm & 12mm Sockets", "Throttle Body Cleaner", "Soft Toothbrush", "New Throttle Gasket", "Digital Multimeter"),
     estimatedTime = "40–60 mins",
     difficulty  = "Moderate",

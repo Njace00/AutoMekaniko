@@ -31,5 +31,6 @@ data class DtcGuide(
     val requiredTools: List<String> = listOf("OBD2 Scanner", "10mm Socket / Wrench", "Safety Gloves"),
     val estimatedTime: String = "30–45 mins",
     val difficulty: String = "Moderate",
-    val prerequisites: List<String> = listOf("Set parking brake firmly", "Turn off ignition completely", "Disconnect negative battery terminal if working near electrical parts")
+    val prerequisites: List<String> = listOf("Set parking brake firmly", "Turn off ignition completely", "Disconnect negative battery terminal if working near electrical parts"),
+    val vehicleId: String = VehicleManager.VIOS.id
 )

@@ -9,6 +9,7 @@ private fun f(frame: Int): Float = frame / 24f
 val AirFilterReplacementGuide = MaintenanceGuide(
     name = "Air Filter Replacement",
     glbFile = "Engine Air Filter Replacement.glb",
+    vehicleId = VehicleManager.VIOS.id,
     requiredTools = listOf("10mm Socket / Flathead Screwdriver", "New Engine Air Filter", "Clean Shop Towel"),
     estimatedTime = "10–15 mins",
     difficulty = "Easy",

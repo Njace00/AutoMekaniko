@@ -116,6 +116,8 @@ class DtcActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        setupVehicleHeaderButton()
+        refreshDtcListForActiveVehicle()
         goToSlide(currentSlideIndex, animated = false, applySlideCamera = false)
     }
 
@@ -316,7 +318,7 @@ class DtcActivity : AppCompatActivity() {
         btnHeaderVehicle?.setOnClickListener {
             VehicleManager.showSelectorDialog(this) {
                 updateButtonText()
-                currentEntry?.let { entry -> loadDtcEntry(entry) }
+                refreshDtcListForActiveVehicle()
             }
         }
     }
@@ -501,14 +503,6 @@ class DtcActivity : AppCompatActivity() {
     // -------------------------------------------------------------------------
 
     private fun setupDtcSelector() {
-        if (dtcList.isEmpty()) {
-            binding.dtcAutoComplete.setText("No DTC guides found", false)
-            loadPreviewModel()
-            return
-        }
-
-        binding.dtcAutoComplete.setSimpleItems(dtcList.map { "${it.code} — ${it.name}" }.toTypedArray())
-
         val openDropdown = {
             binding.dtcAutoComplete.showDropDown()
         }
@@ -517,13 +511,32 @@ class DtcActivity : AppCompatActivity() {
 
         binding.dtcAutoComplete.setOnItemClickListener { _, _, position, _ ->
             val selectedText = binding.dtcAutoComplete.adapter.getItem(position)?.toString()
-            val entry = dtcList.find { "${it.code} — ${it.name}" == selectedText } ?: dtcList.getOrNull(position) ?: dtcList[0]
-            dtcConfirmedInSession = true
-            loadDtcEntry(entry)
+            val entry = dtcList.find { "${it.code} — ${it.name}" == selectedText } ?: dtcList.getOrNull(position) ?: dtcList.firstOrNull()
+            if (entry != null) {
+                dtcConfirmedInSession = true
+                loadDtcEntry(entry)
+            }
         }
 
-        // Auto-load the first DTC guide (P0301) on startup
-        if (!dtcConfirmedInSession && dtcList.isNotEmpty()) {
+        refreshDtcListForActiveVehicle()
+    }
+
+    private fun refreshDtcListForActiveVehicle() {
+        val activeVehicle = VehicleManager.getActiveVehicle(this)
+        dtcList = getDtcGuidesForVehicle(activeVehicle.id)
+
+        if (dtcList.isEmpty()) {
+            binding.dtcAutoComplete.setSimpleItems(emptyArray())
+            binding.dtcAutoComplete.setText("No DTC guides for ${activeVehicle.name.replace("Toyota ", "")}", false)
+            loadPreviewModel()
+            return
+        }
+
+        binding.dtcAutoComplete.setSimpleItems(dtcList.map { "${it.code} — ${it.name}" }.toTypedArray())
+
+        val currentMatchesVehicle = currentEntry?.vehicleId?.equals(activeVehicle.id, ignoreCase = true) == true
+
+        if (currentEntry == null || !currentMatchesVehicle || !dtcConfirmedInSession) {
             val firstGuide = dtcList[0]
             binding.dtcAutoComplete.setText("${firstGuide.code} — ${firstGuide.name}", false)
             dtcConfirmedInSession = true

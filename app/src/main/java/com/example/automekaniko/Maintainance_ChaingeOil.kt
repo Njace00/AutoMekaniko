@@ -10,6 +10,7 @@ private fun f(frame: Int): Float = frame / 24f
 val ChangeOilGuide = MaintenanceGuide(
     name = "Engine Oil Change",
     glbFile = "vios_engine-tutor-Wanimation_ChangeOil.glb",
+    vehicleId = VehicleManager.VIOS.id,
     requiredTools = listOf("Oil Wrench", "14mm Socket & Ratchet", "Oil Drain Pan", "Funnel", "New Filter & Fresh Oil"),
     estimatedTime = "30–45 mins",
     difficulty = "Moderate",

@@ -9,6 +9,7 @@ private fun f(frame: Int): Float = frame / 24f
 val BatteryReplacementGuide = MaintenanceGuide(
     name = "Battery Replacement",
     glbFile = "BatteryReplacement.glb",
+    vehicleId = VehicleManager.VIOS.id,
     requiredTools = listOf("10mm & 12mm Wrench / Sockets", "Wire Terminal Brush", "Safety Goggles & Gloves", "New 12V Battery"),
     estimatedTime = "20–25 mins",
     difficulty = "Moderate",
