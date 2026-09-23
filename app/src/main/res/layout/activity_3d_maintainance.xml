@@ -238,6 +238,23 @@
             android:focusable="true"
             android:visibility="visible" />
 
+        <!-- FLOATING CAMERA TUNER BUTTON -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCamTuner"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_gravity="top|start"
+            android:layout_margin="12dp"
+            android:elevation="6dp"
+            android:paddingHorizontal="10dp"
+            android:text="📷 Tuner"
+            android:textColor="@color/theme_red"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/surface_card"
+            app:cornerRadius="12dp" />
+
         <!-- MODERN INFO BUTTON -->
         <ImageButton
             android:id="@+id/btnInfoModern"
@@ -249,6 +266,229 @@
             android:elevation="4dp"
             android:src="@drawable/ic_info_modern"
             app:tint="@color/theme_red" />
+
+        <!-- CAMERA TUNER OVERLAY PANEL -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/panelCamTuner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_margin="8dp"
+            android:elevation="12dp"
+            android:visibility="gone"
+            app:cardBackgroundColor="#F21A1A1A"
+            app:cardCornerRadius="16dp"
+            app:strokeColor="@color/theme_red"
+            app:strokeWidth="1dp"
+            tools:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <!-- Header bar -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="📷 Camera Pose Tuner"
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnCopyCamCode"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:paddingHorizontal="6dp"
+                        android:text="📋 Copy Vec3"
+                        android:textColor="@color/theme_red"
+                        android:textSize="10sp"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:id="@+id/btnCloseCamTuner"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:padding="2dp"
+                        android:src="@drawable/ic_back_red"
+                        android:rotation="270"
+                        app:tint="#AAAAAA" />
+                </LinearLayout>
+
+                <!-- Live Camera Values -->
+                <TextView
+                    android:id="@+id/tvLiveEye"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:fontFamily="monospace"
+                    android:text="eye = Vec3(0.00f, 0.00f, 0.00f)"
+                    android:textColor="#FF6666"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvLiveLookAt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:fontFamily="monospace"
+                    android:text="lookAt = Vec3(0.00f, 0.00f, 0.00f)"
+                    android:textColor="#66B2FF"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <!-- Eye Sliders -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="6dp">
+
+                    <TextView
+                        android:layout_width="45dp"
+                        android:layout_height="wrap_content"
+                        android:text="Eye X"
+                        android:textColor="#FF9999"
+                        android:textSize="10sp" />
+
+                    <SeekBar
+                        android:id="@+id/seekEyeX"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:max="1000"
+                        android:progress="500" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="45dp"
+                        android:layout_height="wrap_content"
+                        android:text="Eye Y"
+                        android:textColor="#FF9999"
+                        android:textSize="10sp" />
+
+                    <SeekBar
+                        android:id="@+id/seekEyeY"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:max="1000"
+                        android:progress="500" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="45dp"
+                        android:layout_height="wrap_content"
+                        android:text="Eye Z"
+                        android:textColor="#FF9999"
+                        android:textSize="10sp" />
+
+                    <SeekBar
+                        android:id="@+id/seekEyeZ"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:max="1000"
+                        android:progress="500" />
+                </LinearLayout>
+
+                <!-- LookAt Sliders -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="4dp">
+
+                    <TextView
+                        android:layout_width="45dp"
+                        android:layout_height="wrap_content"
+                        android:text="Look X"
+                        android:textColor="#99CCFF"
+                        android:textSize="10sp" />
+
+                    <SeekBar
+                        android:id="@+id/seekLookX"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:max="1000"
+                        android:progress="500" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="45dp"
+                        android:layout_height="wrap_content"
+                        android:text="Look Y"
+                        android:textColor="#99CCFF"
+                        android:textSize="10sp" />
+
+                    <SeekBar
+                        android:id="@+id/seekLookY"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:max="1000"
+                        android:progress="500" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="45dp"
+                        android:layout_height="wrap_content"
+                        android:text="Look Z"
+                        android:textColor="#99CCFF"
+                        android:textSize="10sp" />
+
+                    <SeekBar
+                        android:id="@+id/seekLookZ"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:max="1000"
+                        android:progress="500" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- CAMERA INFO (DEBUG) -->
         <TextView

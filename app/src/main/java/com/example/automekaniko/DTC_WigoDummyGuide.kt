@@ -10,7 +10,7 @@ val WigoP0100Guide = DtcGuide(
     description = "Mass or Volume Air Flow Circuit Malfunction on Toyota Wigo 1.0L. " +
             "Inspect intake ducting, sensor connector, and clean MAF sensor element.",
     parts       = listOf("MAF Sensor", "Intake Hose", "Air Filter Box", "Wiring Connector"),
-    glbFile     = "Vehicle Preventive Maintenance Checklist (VPMC).glb",
+    glbFile     = "wigo.glb",
     animationClipStartTimes = listOf(f(0)),
     vehicleId   = VehicleManager.WIGO.id,
     requiredTools = listOf("OBD2 Scanner", "10mm Socket", "MAF Cleaner Spray", "Microfiber Cloth"),
@@ -24,8 +24,8 @@ val WigoP0100Guide = DtcGuide(
         DtcSlide(
             title              = "Wigo Engine Bay Overview",
             description        = "Overview of Toyota Wigo 1.0L 1KR-VE engine bay and MAF sensor position.",
-            eye                = Vec3(-1.57f, 0.77f, -1.34f),
-            lookAt             = Vec3(0.00f,  0.10f,  0.00f),
+            eye                = Vec3(-0.14f, 0.47f, 1.60f),
+            lookAt             = Vec3(0.26f,  0.29f,  -5.00f),
             animationStartTime = f(0),
             animationTime      = f(0),
             animationDurationMs = 650L,

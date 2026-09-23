@@ -75,6 +75,8 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     private var currentSlides: List<CameraSlide> = emptyList()
     private var currentSlideIndex = 0
     private var isCameraLocked = true
+    private var isCamTunerOpen = false
+    private var isUpdatingSlidersFromCode = false
     private val checkedStepsBySlide = mutableMapOf<Int, MutableSet<Int>>()
 
     private var cameraAnimJob: Job? = null
@@ -121,12 +123,16 @@ class MAINTAINANCEActivity : AppCompatActivity() {
             if (!isScrubbing) {
                 applyAnimationTime(lockedAnimTime)
             }
+            if (isCamTunerOpen && !isCameraLocked) {
+                updateCameraTunerDisplaysAndSliders()
+            }
         }
 
         captureManipulatorOnce()
         setupModelSelector()
         setupVehicleHeaderButton()
         setupControls() // ← wire up tab clicks
+        setupCameraTunerUi()
         setCameraLockState(true)
         startCameraInfoUpdates()
 
@@ -782,4 +788,95 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     private fun easeInOutCubic(t: Float) =
         if (t < 0.5f) 4f * t * t * t
         else 1f - ((-2f * t + 2f).let { it * it * it } / 2f)
+
+    // -------------------------------------------------------------------------
+    // Camera Pose Tuner HUD
+    // -------------------------------------------------------------------------
+
+    private fun setupCameraTunerUi() {
+        binding.btnCamTuner.setOnClickListener {
+            isCamTunerOpen = !isCamTunerOpen
+            binding.panelCamTuner.visibility = if (isCamTunerOpen) View.VISIBLE else View.GONE
+            if (isCamTunerOpen) {
+                updateCameraTunerDisplaysAndSliders()
+            }
+        }
+
+        binding.btnCloseCamTuner.setOnClickListener {
+            isCamTunerOpen = false
+            binding.panelCamTuner.visibility = View.GONE
+        }
+
+        val sliderChangeListener = object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser && !isUpdatingSlidersFromCode) {
+                    val eyeX = progressToFloat(binding.seekEyeX.progress)
+                    val eyeY = progressToFloat(binding.seekEyeY.progress)
+                    val eyeZ = progressToFloat(binding.seekEyeZ.progress)
+
+                    val lookX = progressToFloat(binding.seekLookX.progress)
+                    val lookY = progressToFloat(binding.seekLookY.progress)
+                    val lookZ = progressToFloat(binding.seekLookZ.progress)
+
+                    val newEye = Vec3(eyeX, eyeY, eyeZ)
+                    val newLook = Vec3(lookX, lookY, lookZ)
+
+                    setCamera(newEye, newLook)
+                    updateLiveCameraTexts(newEye, newLook)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
+        }
+
+        binding.seekEyeX.setOnSeekBarChangeListener(sliderChangeListener)
+        binding.seekEyeY.setOnSeekBarChangeListener(sliderChangeListener)
+        binding.seekEyeZ.setOnSeekBarChangeListener(sliderChangeListener)
+
+        binding.seekLookX.setOnSeekBarChangeListener(sliderChangeListener)
+        binding.seekLookY.setOnSeekBarChangeListener(sliderChangeListener)
+        binding.seekLookZ.setOnSeekBarChangeListener(sliderChangeListener)
+
+        binding.btnCopyCamCode.setOnClickListener {
+            val codeSnippet = "eye = Vec3(%.2ff, %.2ff, %.2ff),\nlookAt = Vec3(%.2ff, %.2ff, %.2ff),".format(
+                currentCameraEye.x, currentCameraEye.y, currentCameraEye.z,
+                currentOrbitTarget.x, currentOrbitTarget.y, currentOrbitTarget.z
+            )
+            val clipboard = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
+            val clip = android.content.ClipData.newPlainText("Vec3 Camera Code", codeSnippet)
+            clipboard.setPrimaryClip(clip)
+            android.widget.Toast.makeText(this, "Copied Vec3 code to clipboard!", android.widget.Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun progressToFloat(progress: Int, minVal: Float = -5.0f, maxVal: Float = 5.0f): Float {
+        return minVal + (progress / 1000f) * (maxVal - minVal)
+    }
+
+    private fun floatToProgress(value: Float, minVal: Float = -5.0f, maxVal: Float = 5.0f): Int {
+        return (((value.coerceIn(minVal, maxVal) - minVal) / (maxVal - minVal)) * 1000f).toInt()
+    }
+
+    private fun updateLiveCameraTexts(eye: Vec3, lookAt: Vec3) {
+        binding.tvLiveEye.text = "eye = Vec3(%.2ff, %.2ff, %.2ff)".format(eye.x, eye.y, eye.z)
+        binding.tvLiveLookAt.text = "lookAt = Vec3(%.2ff, %.2ff, %.2ff)".format(lookAt.x, lookAt.y, lookAt.z)
+    }
+
+    private fun updateCameraTunerDisplaysAndSliders() {
+        val p = sceneView.cameraNode.position
+        currentCameraEye = Vec3(p.x, p.y, p.z)
+
+        updateLiveCameraTexts(currentCameraEye, currentOrbitTarget)
+
+        isUpdatingSlidersFromCode = true
+        binding.seekEyeX.progress = floatToProgress(currentCameraEye.x)
+        binding.seekEyeY.progress = floatToProgress(currentCameraEye.y)
+        binding.seekEyeZ.progress = floatToProgress(currentCameraEye.z)
+
+        binding.seekLookX.progress = floatToProgress(currentOrbitTarget.x)
+        binding.seekLookY.progress = floatToProgress(currentOrbitTarget.y)
+        binding.seekLookZ.progress = floatToProgress(currentOrbitTarget.z)
+        isUpdatingSlidersFromCode = false
+    }
 }

@@ -17,7 +17,7 @@ val P2118Guide = DtcGuide(
         "Throttle body gasket",
         "Electrical connector"
     ),
-    glbFile     = "vios_engine-tutor-Wanimation_P2118.glb",
+    glbFile     = "DTC P2118 (Throttle Body).glb",
     animationClipStartTimes = listOf(f(0)),
     vehicleId   = VehicleManager.VIOS.id,
     requiredTools = listOf("10mm & 12mm Sockets", "Throttle Body Cleaner", "Soft Toothbrush", "New Throttle Gasket", "Digital Multimeter"),
@@ -39,6 +39,23 @@ val P2118Guide = DtcGuide(
             animationTime       = f(0),
             animationDurationMs = 700L,
             steps               = listOf(
+                ChecklistStep(""),
+                ChecklistStep(""),
+                ChecklistStep("")
+            ),
+            infoTitle = "P2118 Throttle Actuator Diagnostics",
+
+        ),
+
+        DtcSlide(
+            title               = "Overview 2",
+            description         = "Initial overview of the engine and throttle body location.",
+            eye                 = Vec3(-0.07f, 0.35f, -0.54f),
+            lookAt              = Vec3(-0.02f, -1.05f, 0.01f),
+            animationStartTime  = f(1),
+            animationTime       = f(60),
+            animationDurationMs = 700L,
+            steps               = listOf(
                 ChecklistStep("Open the hood safely", "Ensure the car is on level ground and the parking brake is set."),
                 ChecklistStep("Locate the throttle body near the intake hose", "It's a large aluminum component connected to the air intake filter box."),
                 ChecklistStep("Inspect for visible damage or loose connectors", "Check if the 6-pin connector is securely pushed in.")
@@ -55,10 +72,10 @@ val P2118Guide = DtcGuide(
         DtcSlide(
             title               = "Remove Air Intake Hose",
             description         = "Disconnect the intake hose to access the throttle body.",
-            eye                 = Vec3(0.15f, 0.42f, -0.90f),
-            lookAt              = Vec3(0.20f, 0.18f, 0.00f),
-            animationStartTime  = f(5),
-            animationTime       = f(55),
+            eye                 = Vec3(-0.07f, 0.30f, -0.54f),
+            lookAt              = Vec3(0.05f, -0.67f, -0.03f),
+            animationStartTime  = f(70),
+            animationTime       = f(130),
             animationDurationMs = 800L,
             steps               = listOf(
                 ChecklistStep("Loosen the intake hose clamp", "Use a 10mm socket or a large flat-head screwdriver."),
@@ -67,30 +84,15 @@ val P2118Guide = DtcGuide(
             )
         ),
 
-        DtcSlide(
-            title               = "Disconnect Throttle Body Connector",
-            description         = "Disconnect the electronic connector from the throttle body.",
-            eye                 = Vec3(0.12f, 0.35f, -0.72f),
-            lookAt              = Vec3(0.18f, 0.20f, 0.00f),
-            animationStartTime  = f(60),
-            animationTime       = f(95),
-            animationDurationMs = 700L,
-            removeFirst         = "Air Intake Hose & Clamps",
-            teardownPath        = "Air Filter Box ➔ Air Intake Duct ➔ Electrical Harness ➔ Throttle Body",
-            steps               = listOf(
-                ChecklistStep("Press the connector lock tab", "Push the tab down until you feel a click before pulling."),
-                ChecklistStep("Gently disconnect the connector", "Do not pull by the wires! Pull only by the plastic housing."),
-                ChecklistStep("Inspect terminals for corrosion or damage", "Look for green crust or bent pins inside the connector.")
-            )
-        ),
+
 
         DtcSlide(
             title               = "Remove Throttle Body",
             description         = "Unbolt and remove the throttle body assembly.",
-            eye                 = Vec3(0.08f, 0.38f, -0.60f),
-            lookAt              = Vec3(0.12f, 0.15f, 0.00f),
-            animationStartTime  = f(100),
-            animationTime       = f(150),
+            eye                 = Vec3(-0.07f, 0.30f, -0.54f),
+            lookAt              = Vec3(0.05f, -0.67f, -0.03f),
+            animationStartTime  = f(140),
+            animationTime       = f(200),
             animationDurationMs = 900L,
             removeFirst         = "Electrical Harness & Coolant Bypass Hoses",
             teardownPath        = "Intake Hose ➔ Electrical Harness ➔ 4x 10mm Mounting Bolts ➔ Throttle Body",
@@ -101,28 +103,14 @@ val P2118Guide = DtcGuide(
             )
         ),
 
-        DtcSlide(
-            title               = "Inspect and Clean",
-            description         = "Inspect the throttle plate and clean carbon buildup.",
-            eye                 = Vec3(0.05f, 0.45f, -0.55f),
-            lookAt              = Vec3(0.10f, 0.10f, 0.00f),
-            animationStartTime  = f(155),
-            animationTime       = f(210),
-            animationDurationMs = 1200L,
-            steps               = listOf(
-                ChecklistStep("Inspect throttle plate movement", "It should be spring-loaded and not feel gritty when moved by hand."),
-                ChecklistStep("Clean carbon deposits carefully", "Use a dedicated throttle body cleaner and a soft toothbrush."),
-                ChecklistStep("Check for sticking or motor failure", "If it's stuck open or shut, the internal motor gears are likely stripped."),
-                ChecklistStep("Replace throttle body if defective", "Cleaning doesn't fix a dead motor; if P2118 persists, replace it.")
-            )
-        ),
+
 
         DtcSlide(
             title               = "Install New Throttle Body",
             description         = "Install the replacement throttle body assembly.",
-            eye                 = Vec3(0.08f, 0.38f, -0.60f),
-            lookAt              = Vec3(0.12f, 0.15f, 0.00f),
-            animationStartTime  = f(215),
+            eye                 = Vec3(-0.07f, 0.30f, -0.54f),
+            lookAt              = Vec3(0.05f, -0.67f, -0.03f),
+            animationStartTime  = f(210),
             animationTime       = f(270),
             animationDurationMs = 1000L,
             steps               = listOf(
@@ -135,10 +123,10 @@ val P2118Guide = DtcGuide(
         DtcSlide(
             title               = "Reconnect Components",
             description         = "Reconnect the electrical connector and intake hose.",
-            eye                 = Vec3(0.12f, 0.35f, -0.72f),
-            lookAt              = Vec3(0.18f, 0.20f, 0.00f),
-            animationStartTime  = f(275),
-            animationTime       = f(320),
+            eye                 = Vec3(-0.07f, 0.30f, -0.54f),
+            lookAt              = Vec3(0.05f, -0.67f, -0.03f),
+            animationStartTime  = f(280),
+            animationTime       = f(330),
             animationDurationMs = 800L,
             steps               = listOf(
                 ChecklistStep("Reconnect the throttle connector", "Push it in until you hear a distinct click."),
@@ -147,21 +135,7 @@ val P2118Guide = DtcGuide(
             )
         ),
 
-        DtcSlide(
-            title               = "Throttle Relearn and Verification",
-            description         = "Perform idle relearn and verify the repair.",
-            eye                 = Vec3(-1.20f, 0.70f, -1.10f),
-            lookAt              = Vec3(0.00f, 0.15f, 0.00f),
-            animationStartTime  = f(325),
-            animationTime       = f(360),
-            animationDurationMs = 1500L,
-            steps               = listOf(
-                ChecklistStep("Reconnect battery if disconnected", "Ensure terminals are clean and tight."),
-                ChecklistStep("Start the engine and let it idle", "Do not touch the gas pedal for at least 5 minutes."),
-                ChecklistStep("Clear the DTC using an OBD2 scanner", "Delete the code and wait for the dashboard light to go out."),
-                ChecklistStep("Verify that P2118 does not return", "Take a short test drive and check for normal throttle response.")
-            )
-        )
+
 
     )
 )
