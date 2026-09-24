@@ -8,7 +8,7 @@ private typealias ChangeOilVec3 = MAINTAINANCEActivity.Vec3
 private fun f(frame: Int): Float = frame / 24f
 
 val ChangeOilGuide = MaintenanceGuide(
-    name = "Engine Oil Change",
+    name = "PlaceHolder(Engine-Change Oil)",
     glbFile = "vios_engine-tutor-Wanimation_ChangeOil.glb",
     vehicleId = VehicleManager.VIOS.id,
     requiredTools = listOf("Oil Wrench", "14mm Socket & Ratchet", "Oil Drain Pan", "Funnel", "New Filter & Fresh Oil"),
