@@ -22,8 +22,8 @@ val BatteryReplacementGuide = MaintenanceGuide(
         ReplaceBatterySlide(
             title = "Car Overview",
             description = "Inspect engine compartment and locate the 12V battery tray.",
-            eye = ReplaceBatteryVec3(-1.50f, 0.80f, -1.40f),
-            lookAt = ReplaceBatteryVec3(0.00f, 0.10f, 0.00f),
+            eye = ReplaceBatteryVec3(-2.20f, 1.20f, -2.40f),
+            lookAt = ReplaceBatteryVec3(0.00f, 0.20f, 0.00f),
             targetPartName = "Engine Bay & 12V Battery",
             targetPartLocationNote = "Located in the front engine compartment on the driver's side tray",
             steps = listOf(

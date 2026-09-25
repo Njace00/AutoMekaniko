@@ -22,8 +22,8 @@ val VPMCGuide = MaintenanceGuide(
         MaintenanceSlide(
             title = "Vehicle Overview",
             description = "This is the Preview of the Vehicle...",
-            eye = MaintenanceVec3(-1.57f, 0.77f, -1.34f),
-            lookAt = MaintenanceVec3(0.00f, 0.10f, 0.00f),
+            eye = MaintenanceVec3(-2.20f, 1.20f, -2.40f),
+            lookAt = MaintenanceVec3(0.00f, 0.20f, 0.00f),
             steps = listOf(
                 ChecklistStep("Walk around the vehicle", "Check for any obvious body damage or items leaning against the car."),
                 ChecklistStep("Check for visible damage", "Look for dents, deep scratches, or cracked lights."),

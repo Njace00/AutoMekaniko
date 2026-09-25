@@ -20,8 +20,8 @@ val WigoVPMCGuide = MaintenanceGuide(
         WigoSlide(
             title = "Wigo 1.0L Vehicle Overview",
             description = "General inspection walkthrough for Toyota Wigo 1.0L 3-cylinder engine and fluid levels.",
-            eye = WigoVec3(-0.14f, 0.47f, 1.60f),
-            lookAt = WigoVec3(0.26f,  0.29f,  -5.00f),
+            eye = WigoVec3(-2.20f, 1.20f, 2.20f),
+            lookAt = WigoVec3(0.00f, 0.20f, 0.00f),
             steps = listOf(
                 ChecklistStep("Inspect Oil Dipstick", "Pull 1KR-VE dipstick, wipe clean, reinsert and confirm oil level is between MIN and MAX marks."),
                 ChecklistStep("Check Coolant Reservoir", "Ensure pink SLLC coolant level is near FULL line in translucent reservoir."),

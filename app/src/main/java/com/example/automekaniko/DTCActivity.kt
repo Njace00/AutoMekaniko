@@ -1,24 +1,19 @@
 package com.example.automekaniko
 
 import android.animation.ValueAnimator
-import android.content.res.ColorStateList
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.DecelerateInterpolator
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
+import androidx.core.content.edit
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.example.automekaniko.databinding.Activity3dDtcGuideBinding
 import io.github.sceneview.SceneView
@@ -29,15 +24,12 @@ import io.github.sceneview.node.ModelNode
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 class DtcActivity : AppCompatActivity() {
 
     private lateinit var binding: Activity3dDtcGuideBinding
     private var dtcList: List<DtcGuide> = dtcGuides
-
-    // -------------------------------------------------------------------------
-    // Views (removed individual view declarations)
-    // -------------------------------------------------------------------------
 
     private lateinit var sceneView:          SceneView
     private lateinit var modelLoader:        ModelLoader
@@ -46,10 +38,6 @@ class DtcActivity : AppCompatActivity() {
     private var dtcConfirmedInSession = false
 
     private val previewGlbFile = "Vehicle Preventive Maintenance Checklist (VPMC).glb"
-
-    // -------------------------------------------------------------------------
-    // State
-    // -------------------------------------------------------------------------
 
     private var currentModelNode:  ModelNode? = null
     private var currentEntry:      DtcGuide?  = null
@@ -62,9 +50,6 @@ class DtcActivity : AppCompatActivity() {
 
     private var currentCameraEye   = Vec3(0f, 0f, 0f)
     private var currentOrbitTarget = Vec3(0f, 0.5f, 0f)
-
-    private val startEye    = Vec3(0.15f, 0.95f, -2.75f)
-    private val startLookAt = Vec3(0f, 0.30f, 0f)
 
     private var savedManipulator:    CameraGestureDetector.CameraManipulator? = null
     private var manipulatorCaptured: Boolean = false
@@ -126,7 +111,7 @@ class DtcActivity : AppCompatActivity() {
 
     private fun loadPreviewModel() {
         lifecycleScope.launch {
-            delay(200L)
+            delay(200.milliseconds)
             loadGlbModel(previewGlbFile)
             currentEntry = null
             currentSlideIndex = 0
@@ -277,11 +262,11 @@ class DtcActivity : AppCompatActivity() {
             }
         }
 
-        val items = if (slide.infoItems.isEmpty()) fallbackItems else slide.infoItems
+        val items = slide.infoItems.ifEmpty { fallbackItems }
         binding.tvInfoPanelTitle.text = slide.infoTitle ?: "Recommended Info"
         binding.infoItemsContainer.removeAllViews()
 
-        val primaryTextColor = androidx.core.content.ContextCompat.getColor(this, R.color.text_primary)
+        val primaryTextColor = ContextCompat.getColor(this, R.color.text_primary)
 
         items.forEach { item ->
             val itemLayout = LinearLayout(this).apply {
@@ -424,7 +409,7 @@ class DtcActivity : AppCompatActivity() {
                 isClickable = false
                 isCheckable = false
                 setChipBackgroundColorResource(R.color.theme_red_light)
-                setTextColor(androidx.core.content.ContextCompat.getColor(this@DtcActivity, R.color.theme_red))
+                setTextColor(ContextCompat.getColor(this@DtcActivity, R.color.theme_red))
             }
             cgTools.addView(chip)
         }
@@ -704,7 +689,7 @@ class DtcActivity : AppCompatActivity() {
 
         binding.btnPrev.isEnabled = showPrev
         binding.btnNext.isEnabled = isCameraLocked && hasEntry && dtcConfirmedInSession && currentSlideIndex < lastSlideIndex
-        binding.btnNext.text = if (currentSlideIndex >= lastSlideIndex && lastSlideIndex >= 0) "Finish" else "Next Step"
+        binding.btnNext.text = if (lastSlideIndex in 0..currentSlideIndex) "Finish" else "Next Step"
 
         binding.btnPrev.alpha = 1f
         binding.btnNext.alpha = 1f
@@ -832,7 +817,7 @@ class DtcActivity : AppCompatActivity() {
 
             row.setOnClickListener {
                 isChecked = !isChecked
-                checklistPrefs.edit().putBoolean(stepKey, isChecked).apply()
+                checklistPrefs.edit { putBoolean(stepKey, isChecked) }
                 if (isChecked) checkedSteps.add(stepIndex) else checkedSteps.remove(stepIndex)
                 checkboxIcon.setImageResource(
                     if (isChecked) R.drawable.checkbox_red_checked else R.drawable.checkbox_red_unchecked
@@ -841,9 +826,9 @@ class DtcActivity : AppCompatActivity() {
             }
 
             infoBtn.setOnClickListener {
-                val isVisible = infoText.visibility == View.VISIBLE
-                infoText.visibility = if (isVisible) View.GONE else View.VISIBLE
-                infoBtn.animate().rotation(if (isVisible) 0f else 180f).setDuration(200L).start()
+                val isVis = infoText.isVisible
+                infoText.isVisible = !isVis
+                infoBtn.animate().rotation(if (isVis) 0f else 180f).setDuration(200L).start()
             }
 
             binding.checklistContainer.addView(row)

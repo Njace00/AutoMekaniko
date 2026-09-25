@@ -27,8 +27,8 @@ val P0301Guide = DtcGuide(
         DtcSlide(
             title              = "Overview",
             description        = "Full view of the engine before any parts are removed.",
-            eye                = Vec3(-1.57f, 0.77f, -1.34f),
-            lookAt             = Vec3(0.00f,  0.10f,  0.00f),
+            eye                = Vec3(-2.20f, 1.20f, -2.40f),
+            lookAt             = Vec3(0.00f,  0.20f,  0.00f),
             animationStartTime = f(0),
             animationTime      = f(0),
             animationDurationMs = 650L,

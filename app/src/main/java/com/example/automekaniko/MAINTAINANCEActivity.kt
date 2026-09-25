@@ -2,21 +2,17 @@ package com.example.automekaniko
 
 import android.animation.ValueAnimator
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.DecelerateInterpolator
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.SeekBar
-import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
+import androidx.core.content.edit
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.example.automekaniko.databinding.Activity3dMaintainanceBinding
 import io.github.sceneview.SceneView
@@ -27,16 +23,14 @@ import io.github.sceneview.node.ModelNode
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.asin
-import kotlin.math.atan2
-import kotlin.math.sqrt
+import kotlin.time.Duration.Companion.milliseconds
 
 class MAINTAINANCEActivity : AppCompatActivity() {
 
     companion object {
         const val PREFS_CHECKLIST = "automekaniko_checklist"
         fun getStepKey(guideName: String, slideIndex: Int, stepIndex: Int) =
-            "${guideName}_s${slideIndex}_i${stepIndex}"
+            "${guideName}_s${slideIndex}_i$stepIndex"
     }
 
     private lateinit var binding: Activity3dMaintainanceBinding
@@ -47,7 +41,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     data class InfoItem(
         val title: String,
         val description: String,
-        val imageResId: Int? = null
+        val imageResId: Int? = null,
     )
 
     data class CameraSlide(
@@ -83,9 +77,6 @@ class MAINTAINANCEActivity : AppCompatActivity() {
 
     private var currentCameraEye    = Vec3(0f, 0f, 0f)
     private var currentOrbitTarget  = Vec3(0f, 0.5f, 0f)
-
-    private val startEye    = Vec3(0.15f, 0.95f, -2.75f)
-    private val startLookAt = Vec3(0f, 0.30f, 0f)
 
     private var savedManipulator: CameraGestureDetector.CameraManipulator? = null
     private var manipulatorCaptured = false
@@ -360,7 +351,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
                 isClickable = false
                 isCheckable = false
                 setChipBackgroundColorResource(R.color.theme_red_light)
-                setTextColor(androidx.core.content.ContextCompat.getColor(this@MAINTAINANCEActivity, R.color.theme_red))
+                setTextColor(ContextCompat.getColor(this@MAINTAINANCEActivity, R.color.theme_red))
             }
             cgTools.addView(chip)
         }
@@ -371,7 +362,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         prereqs.forEach { prereq ->
             val cb = androidx.appcompat.widget.AppCompatCheckBox(this).apply {
                 text = prereq
-                setTextColor(androidx.core.content.ContextCompat.getColor(this@MAINTAINANCEActivity, R.color.text_primary))
+                setTextColor(ContextCompat.getColor(this@MAINTAINANCEActivity, R.color.text_primary))
                 textSize = 13f
                 setPadding(12, 12, 12, 12)
             }
@@ -485,7 +476,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
 
         binding.btnPrev.isEnabled = showPrev
         binding.btnNext.isEnabled = isCameraLocked && currentSlideIndex < lastSlideIndex
-        binding.btnNext.text = if (currentSlideIndex >= lastSlideIndex && lastSlideIndex >= 0) "Finish" else "Next Step"
+        binding.btnNext.text = if (lastSlideIndex in 0..currentSlideIndex) "Finish" else "Next Step"
     }
 
     private fun loadModel(fileName: String) {
@@ -497,8 +488,8 @@ class MAINTAINANCEActivity : AppCompatActivity() {
 
             val instance = try {
                 modelLoader.createModelInstance(assetFileLocation = fileName)
-            } catch (e: Exception) {
-                android.widget.Toast.makeText(this@MAINTAINANCEActivity, "Error loading model: $fileName", android.widget.Toast.LENGTH_LONG).show()
+            } catch (_: Exception) {
+                Toast.makeText(this@MAINTAINANCEActivity, "Error loading model: $fileName", Toast.LENGTH_LONG).show()
                 null
             } ?: return@launch
 
@@ -511,7 +502,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
                 playingAnimations.clear()
             }
 
-            modelNode.modelInstance.animator?.let { animator ->
+            modelNode.modelInstance.animator.let { animator ->
                 repeat(animator.animationCount) { i -> animator.applyAnimation(i, 0f) }
                 animator.updateBoneMatrices()
             }
@@ -684,7 +675,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
 
             row.setOnClickListener {
                 isChecked = !isChecked
-                checklistPrefs.edit().putBoolean(stepKey, isChecked).apply()
+                checklistPrefs.edit { putBoolean(stepKey, isChecked) }
                 if (isChecked) checkedSteps.add(stepIndex) else checkedSteps.remove(stepIndex)
                 checkboxIcon.setImageResource(
                     if (isChecked) R.drawable.checkbox_red_checked else R.drawable.checkbox_red_unchecked
@@ -693,9 +684,9 @@ class MAINTAINANCEActivity : AppCompatActivity() {
             }
 
             infoBtn.setOnClickListener {
-                val isVisible = infoText.visibility == View.VISIBLE
-                infoText.visibility = if (isVisible) View.GONE else View.VISIBLE
-                infoBtn.animate().rotation(if (isVisible) 0f else 180f).setDuration(200L).start()
+                val isVis = infoText.isVisible
+                infoText.isVisible = !isVis
+                infoBtn.animate().rotation(if (isVis) 0f else 180f).setDuration(200L).start()
             }
 
             binding.checklistContainer.addView(row)
@@ -809,7 +800,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
 
             row.setOnClickListener {
                 isChecked = !isChecked
-                checklistPrefs.edit().putBoolean(stepKey, isChecked).apply()
+                checklistPrefs.edit { putBoolean(stepKey, isChecked) }
                 if (isChecked) checkedSteps.add(stepIndex) else checkedSteps.remove(stepIndex)
                 checkboxIcon.setImageResource(
                     if (isChecked) R.drawable.checkbox_red_checked else R.drawable.checkbox_red_unchecked
@@ -818,9 +809,9 @@ class MAINTAINANCEActivity : AppCompatActivity() {
             }
 
             infoBtn.setOnClickListener {
-                val isVisible = infoText.visibility == View.VISIBLE
-                infoText.visibility = if (isVisible) View.GONE else View.VISIBLE
-                infoBtn.animate().rotation(if (isVisible) 0f else 180f).setDuration(200L).start()
+                val isVis = infoText.isVisible
+                infoText.isVisible = !isVis
+                infoBtn.animate().rotation(if (isVis) 0f else 180f).setDuration(200L).start()
             }
 
             container.addView(row)

@@ -24,8 +24,8 @@ val WigoP0100Guide = DtcGuide(
         DtcSlide(
             title              = "Wigo Engine Bay Overview",
             description        = "Overview of Toyota Wigo 1.0L 1KR-VE engine bay and MAF sensor position.",
-            eye                = Vec3(-0.14f, 0.47f, 1.60f),
-            lookAt             = Vec3(0.26f,  0.29f,  -5.00f),
+            eye                = Vec3(-2.20f, 1.20f, 2.20f),
+            lookAt             = Vec3(0.00f,  0.20f,  0.00f),
             animationStartTime = f(0),
             animationTime      = f(0),
             animationDurationMs = 650L,

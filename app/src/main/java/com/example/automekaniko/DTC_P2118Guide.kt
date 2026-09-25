@@ -33,8 +33,8 @@ val P2118Guide = DtcGuide(
         DtcSlide(
             title               = "Overview",
             description         = "Initial overview of the engine and throttle body location.",
-            eye                 = Vec3(-1.40f, 0.75f, -1.30f),
-            lookAt              = Vec3(0.00f, 0.15f, 0.00f),
+            eye                 = Vec3(-2.20f, 1.20f, -2.40f),
+            lookAt              = Vec3(0.00f, 0.20f, 0.00f),
             animationStartTime  = f(0),
             animationTime       = f(0),
             animationDurationMs = 700L,

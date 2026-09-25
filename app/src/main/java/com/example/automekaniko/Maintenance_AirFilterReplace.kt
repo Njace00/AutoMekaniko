@@ -21,8 +21,8 @@ val AirFilterReplacementGuide = MaintenanceGuide(
         AirFilterSlide(
             title = "Vehicle Overview",
             description = "Before starting, take a look at the engine bay and locate the air intake system.",
-            eye = AirFilterVec3(-1.57f, 0.77f, -1.34f),
-            lookAt = AirFilterVec3(0.00f, 0.10f, 0.00f),
+            eye = AirFilterVec3(-2.20f, 1.20f, -2.40f),
+            lookAt = AirFilterVec3(0.00f, 0.20f, 0.00f),
             steps = listOf(
                 ChecklistStep("Park on level ground and turn off the engine", "Prevents the vehicle from rolling and ensures safety during inspection."),
                 ChecklistStep("Let the engine bay cool down", "The intake area can get hot; wait at least 15-20 minutes."),
