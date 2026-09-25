@@ -29,6 +29,21 @@
             <!-- "Auto" in white, "Mekaniko" in red — set via SpannableString in Kotlin -->
         </TextView>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnTutorial"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginEnd="12dp"
+            android:paddingHorizontal="8dp"
+            android:text="Tutorial"
+            android:textColor="@color/theme_red"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- RESPONSIVE SCROLLABLE CENTRE CONTENT -->
@@ -55,7 +70,7 @@
                 android:layout_width="72dp"
                 android:layout_height="72dp"
                 android:layout_gravity="center"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="12dp"
                 android:contentDescription="@string/app_name"
                 android:scaleType="centerInside"
                 android:src="@mipmap/logo" />
@@ -290,5 +305,11 @@
         android:layout_width="match_parent"
         android:layout_height="80dp"
         app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- INTERACTIVE ONBOARDING TUTORIAL OVERLAY -->
+    <include
+        layout="@layout/overlay_tutorial"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/background_primary">
 
+    <!-- TOP BAR -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
@@ -28,6 +29,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <!-- HEADER SECTION -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/headerSection"
         android:layout_width="match_parent"
@@ -67,12 +69,12 @@
             android:id="@+id/btnHeaderVehicle"
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
-            android:layout_height="36dp"
+            android:layout_height="40dp"
             android:layout_marginEnd="16dp"
             android:paddingHorizontal="8dp"
             android:text="🚘 Vios 1.3L"
             android:textColor="@color/theme_red"
-            android:textSize="12sp"
+            android:textSize="14.5sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@id/tvMaintainanceTitle"
             app:layout_constraintEnd_toEndOf="parent"
@@ -127,7 +129,7 @@
                 android:layout_height="32dp"
                 android:text="Easy"
                 android:textColor="@color/theme_red"
-                android:textSize="11sp"
+                android:textSize="12sp"
                 app:chipBackgroundColor="@color/theme_red_light"
                 app:chipStrokeWidth="0dp" />
 
@@ -139,17 +141,17 @@
                 android:layout_weight="1"
                 android:text="⏱ 20 mins"
                 android:textColor="@color/text_secondary"
-                android:textSize="12sp" />
+                android:textSize="13sp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnToolsPrep"
                 style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
-                android:layout_height="36dp"
+                android:layout_height="38dp"
                 android:paddingHorizontal="8dp"
                 android:text="🧰 Tools &amp; Prep"
                 android:textColor="@color/theme_red"
-                android:textSize="11sp"
+                android:textSize="13sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -169,7 +171,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- MODERN 3D CARD -->
+    <!-- FULL 3D CONTAINER (EXPANDED TO BOTTOM) -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/mainCard"
         android:layout_width="0dp"
@@ -178,10 +180,10 @@
         android:layout_marginTop="4dp"
         android:layout_marginBottom="12dp"
         app:cardCornerRadius="24dp"
-        app:cardElevation="8dp"
+        app:cardElevation="6dp"
         app:strokeWidth="1dp"
         app:strokeColor="@color/divider"
-        app:layout_constraintBottom_toTopOf="@id/navButtonsSection"
+        app:layout_constraintBottom_toTopOf="@id/bottomBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/headerSection">
@@ -191,45 +193,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <!-- FLOATING 3D HUD PART BADGE -->
-        <LinearLayout
-            android:id="@+id/hudPartBadge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|start"
-            android:layout_margin="16dp"
-            android:background="@drawable/bg_glass_panel"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center_vertical"
-            android:orientation="vertical"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp"
-            android:elevation="4dp"
-            android:visibility="gone"
-            tools:visibility="visible">
-
-            <TextView
-                android:id="@+id/tvHudPartName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📍 Spark Plug #1"
-                android:textColor="@color/theme_red"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvHudPartNote"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="Deep inside cylinder well"
-                android:textColor="@color/text_secondary"
-                android:textSize="10sp"
-                android:visibility="gone"
-                tools:visibility="visible" />
-        </LinearLayout>
-
         <View
             android:id="@+id/lockOverlay"
             android:layout_width="match_parent"
@@ -238,24 +201,35 @@
             android:focusable="true"
             android:visibility="visible" />
 
-        <!-- FLOATING CAMERA TUNER BUTTON -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnCamTuner"
-            style="@style/Widget.Material3.Button.TonalButton"
+        <!-- FLOATING 3D HUD PART BADGE (Top-Start) -->
+        <LinearLayout
+            android:id="@+id/hudPartBadge"
             android:layout_width="wrap_content"
-            android:layout_height="36dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="top|start"
-            android:layout_margin="12dp"
-            android:elevation="6dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/bg_glass_panel"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
             android:paddingHorizontal="10dp"
-            android:text="📷 Tuner"
-            android:textColor="@color/theme_red"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            app:backgroundTint="@color/surface_card"
-            app:cornerRadius="12dp" />
+            android:paddingVertical="5dp"
+            android:elevation="4dp"
+            android:visibility="gone"
+            tools:visibility="visible">
 
-        <!-- MODERN INFO BUTTON -->
+            <TextView
+                android:id="@+id/tvHudPartName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📍 Engine Dipstick"
+                android:textColor="@color/theme_red"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- CIRCULAR INFO BUTTON (Top-End) -->
         <ImageButton
             android:id="@+id/btnInfoModern"
             android:layout_width="48dp"
@@ -267,257 +241,61 @@
             android:src="@drawable/ic_info_modern"
             app:tint="@color/theme_red" />
 
-        <!-- CAMERA TUNER OVERLAY PANEL -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/panelCamTuner"
+        <!-- CIRCULAR OVERVIEW / CHECKLIST BUTTON (Directly Below Info Button) -->
+        <ImageButton
+            android:id="@+id/btnOverviewModern"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="top|end"
+            android:layout_marginEnd="12dp"
+            android:layout_marginTop="68dp"
+            android:background="@drawable/bg_info_button"
+            android:elevation="4dp"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_checklist"
+            app:tint="@color/theme_red" />
+
+        <!-- FLOATING PREV / NEXT NAVIGATION BUTTONS (INSIDE 3D CONTAINER AT BOTTOM) -->
+        <LinearLayout
+            android:id="@+id/navButtonsSection"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:layout_margin="8dp"
-            android:elevation="12dp"
-            android:visibility="gone"
-            app:cardBackgroundColor="#F21A1A1A"
-            app:cardCornerRadius="16dp"
-            app:strokeColor="@color/theme_red"
-            app:strokeWidth="1dp"
-            tools:visibility="visible">
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginBottom="12dp"
+            android:animateLayoutChanges="true"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="12dp">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPrev"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="90dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="10dp"
+                android:text="Prev"
+                android:textAllCaps="false"
+                android:visibility="gone"
+                app:cornerRadius="24dp" />
 
-                <!-- Header bar -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnNext"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:text="Next Step"
+                android:textColor="@android:color/white"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                app:cornerRadius="24dp"
+                app:backgroundTint="@color/theme_red" />
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="📷 Camera Pose Tuner"
-                        android:textColor="#FFFFFF"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnCopyCamCode"
-                        style="@style/Widget.Material3.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="32dp"
-                        android:paddingHorizontal="6dp"
-                        android:text="📋 Copy Vec3"
-                        android:textColor="@color/theme_red"
-                        android:textSize="10sp"
-                        android:textStyle="bold" />
-
-                    <ImageView
-                        android:id="@+id/btnCloseCamTuner"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:background="?android:attr/selectableItemBackgroundBorderless"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:padding="2dp"
-                        android:src="@drawable/ic_back_red"
-                        android:rotation="270"
-                        app:tint="#AAAAAA" />
-                </LinearLayout>
-
-                <!-- Live Camera Values -->
-                <TextView
-                    android:id="@+id/tvLiveEye"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:fontFamily="monospace"
-                    android:text="eye = Vec3(0.00f, 0.00f, 0.00f)"
-                    android:textColor="#FF6666"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvLiveLookAt"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:fontFamily="monospace"
-                    android:text="lookAt = Vec3(0.00f, 0.00f, 0.00f)"
-                    android:textColor="#66B2FF"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
-
-                <!-- Eye Sliders -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="6dp">
-
-                    <TextView
-                        android:layout_width="45dp"
-                        android:layout_height="wrap_content"
-                        android:text="Eye X"
-                        android:textColor="#FF9999"
-                        android:textSize="10sp" />
-
-                    <SeekBar
-                        android:id="@+id/seekEyeX"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:max="1000"
-                        android:progress="500" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="45dp"
-                        android:layout_height="wrap_content"
-                        android:text="Eye Y"
-                        android:textColor="#FF9999"
-                        android:textSize="10sp" />
-
-                    <SeekBar
-                        android:id="@+id/seekEyeY"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:max="1000"
-                        android:progress="500" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="45dp"
-                        android:layout_height="wrap_content"
-                        android:text="Eye Z"
-                        android:textColor="#FF9999"
-                        android:textSize="10sp" />
-
-                    <SeekBar
-                        android:id="@+id/seekEyeZ"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:max="1000"
-                        android:progress="500" />
-                </LinearLayout>
-
-                <!-- LookAt Sliders -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="4dp">
-
-                    <TextView
-                        android:layout_width="45dp"
-                        android:layout_height="wrap_content"
-                        android:text="Look X"
-                        android:textColor="#99CCFF"
-                        android:textSize="10sp" />
-
-                    <SeekBar
-                        android:id="@+id/seekLookX"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:max="1000"
-                        android:progress="500" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="45dp"
-                        android:layout_height="wrap_content"
-                        android:text="Look Y"
-                        android:textColor="#99CCFF"
-                        android:textSize="10sp" />
-
-                    <SeekBar
-                        android:id="@+id/seekLookY"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:max="1000"
-                        android:progress="500" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="45dp"
-                        android:layout_height="wrap_content"
-                        android:text="Look Z"
-                        android:textColor="#99CCFF"
-                        android:textSize="10sp" />
-
-                    <SeekBar
-                        android:id="@+id/seekLookZ"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:max="1000"
-                        android:progress="500" />
-                </LinearLayout>
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- CAMERA INFO (DEBUG) -->
-        <TextView
-            android:id="@+id/tvCameraInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:layout_marginBottom="8dp"
-            android:background="#80000000"
-            android:padding="4dp"
-            android:textColor="#ffffff"
-            android:textSize="9sp"
-            android:visibility="gone"
-            tools:text="Camera Info" />
-
-        <TextView
-            android:id="@+id/modelTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|center_horizontal"
-            android:layout_marginTop="16dp"
-            android:textColor="@color/text_primary"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:visibility="gone" />
+        </LinearLayout>
 
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- GLASS INFO PANEL -->
+    <!-- GLASS INFO PANEL (Constrained INSIDE mainCard) -->
     <ScrollView
         android:id="@+id/infoSlidePanel"
         android:layout_width="0dp"
@@ -526,7 +304,7 @@
         android:elevation="12dp"
         android:padding="20dp"
         android:visibility="gone"
-        android:layout_margin="24dp"
+        android:layout_margin="20dp"
         app:layout_constraintBottom_toBottomOf="@id/mainCard"
         app:layout_constraintEnd_toEndOf="@id/mainCard"
         app:layout_constraintStart_toStartOf="@id/mainCard"
@@ -545,7 +323,7 @@
                 android:layout_marginBottom="20dp"
                 android:text="Recommended Info"
                 android:textColor="@color/text_primary"
-                android:textSize="20sp"
+                android:textSize="22sp"
                 android:textStyle="bold" />
 
             <LinearLayout
@@ -566,144 +344,77 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- GLASS CHECKLIST PANEL -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/progressSection"
-        android:layout_width="match_parent"
-        android:layout_height="96dp"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="16dp"
+    <!-- GLASS OVERVIEW & CHECKLIST PANEL (Constrained INSIDE mainCard) -->
+    <ScrollView
+        android:id="@+id/checklistSlidePanel"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:background="@drawable/bg_glass_panel"
-        android:elevation="4dp"
-        android:clickable="true"
-        android:focusable="true"
-        app:layout_constraintBottom_toTopOf="@id/bottomBar">
+        android:elevation="12dp"
+        android:padding="20dp"
+        android:visibility="gone"
+        android:layout_margin="20dp"
+        app:layout_constraintBottom_toBottomOf="@id/mainCard"
+        app:layout_constraintEnd_toEndOf="@id/mainCard"
+        app:layout_constraintStart_toStartOf="@id/mainCard"
+        app:layout_constraintTop_toTopOf="@id/mainCard">
 
-        <ImageView
-            android:id="@+id/ivProgressIcon"
-            android:layout_width="38dp"
-            android:layout_height="38dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="16dp"
-            android:src="@drawable/ic_star_circle"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/theme_red" />
-
-        <TextView
-            android:id="@+id/slideTitle"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="12dp"
-            android:textColor="@color/text_primary"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@id/bottomDrawerArrow"
-            app:layout_constraintStart_toEndOf="@id/ivProgressIcon"
-            app:layout_constraintTop_toTopOf="@id/ivProgressIcon"
-            tools:text="Step Title" />
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/slideDesc"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textColor="@color/text_secondary"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="@id/slideTitle"
-            app:layout_constraintStart_toStartOf="@id/slideTitle"
-            app:layout_constraintTop_toBottomOf="@id/slideTitle"
-            tools:text="Description goes here" />
+            <TextView
+                android:id="@+id/slideTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Overview"
+                android:textColor="@color/text_primary"
+                android:textSize="22sp"
+                android:textStyle="bold" />
 
-        <ImageView
-            android:id="@+id/bottomDrawerArrow"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginEnd="20dp"
-            android:src="@drawable/ic_expand_more"
-            app:layout_constraintBottom_toBottomOf="@id/slideDesc"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/slideTitle"
-            app:tint="@color/text_tertiary" />
+            <TextView
+                android:id="@+id/slideDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Step Description"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="16dp" />
 
-        <ScrollView
-            android:id="@+id/bottomChecklistScroll"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="12dp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/slideDesc">
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider"
+                android:layout_marginBottom="16dp" />
 
             <LinearLayout
                 android:id="@+id/checklistContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="20dp" />
-        </ScrollView>
+                android:orientation="vertical" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <Button
+                android:id="@+id/btnCloseChecklist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Got it"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="20dp"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:textColor="@color/theme_red" />
 
-    <!-- FLOATING NAVIGATION BUTTONS -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/navButtonsSection"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@id/progressSection">
+        </LinearLayout>
+    </ScrollView>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnPrev"
-            style="@style/Widget.Material3.Button.TonalButton"
-            android:layout_width="100dp"
-            android:layout_height="52dp"
-            android:text="Prev"
-            android:textAllCaps="false"
-            app:cornerRadius="26dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnNext"
-            android:layout_width="0dp"
-            android:layout_height="52dp"
-            android:layout_marginStart="12dp"
-            android:text="Next Step"
-            android:textAllCaps="false"
-            android:textStyle="bold"
-            app:cornerRadius="26dp"
-            app:backgroundTint="@color/theme_red"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/btnPrev"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnCameraLock"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="32dp"
-            android:layout_marginEnd="8dp"
-            android:text="Camera: LOCK"
-            android:textSize="10sp"
-            android:textColor="@color/text_tertiary"
-            android:visibility="gone"
-            app:layout_constraintBottom_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!-- HIDE OLD UI ELEMENTS BUT KEEP IDS FOR COMPATIBILITY -->
-    <View android:id="@+id/closeTab" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"/>
-    <View android:id="@+id/ivTabArrowTop" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"/>
-    <View android:id="@+id/ivTabArrowBottom" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"/>
-    <View android:id="@+id/tvTabText" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"/>
+    <!-- HIDE UNUSED DUMMY CONTAINERS -->
+    <View android:id="@+id/cardOverviewButton" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"/>
+    <View android:id="@+id/progressSection" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"/>
+    <View android:id="@+id/bottomChecklistScroll" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"/>
+    <View android:id="@+id/bottomDrawerArrow" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"/>
 
     <include
         android:id="@+id/bottomBar"

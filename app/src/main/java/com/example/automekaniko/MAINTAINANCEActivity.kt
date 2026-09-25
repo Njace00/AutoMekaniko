@@ -75,8 +75,6 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     private var currentSlides: List<CameraSlide> = emptyList()
     private var currentSlideIndex = 0
     private var isCameraLocked = true
-    private var isCamTunerOpen = false
-    private var isUpdatingSlidersFromCode = false
     private val checkedStepsBySlide = mutableMapOf<Int, MutableSet<Int>>()
 
     private var cameraAnimJob: Job? = null
@@ -96,7 +94,6 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     private var currentAnimTime: Float = 0f
     private var isScrubbing: Boolean = false
     private var isInfoOpen: Boolean = false
-    private var isBottomDrawerOpen: Boolean = false
 
     // ─────────────────────────────────────────────────────────────────────────
     //  Lifecycle
@@ -112,10 +109,10 @@ class MAINTAINANCEActivity : AppCompatActivity() {
 
         sceneView    = binding.sceneView
 
-        binding.closeTab.setOnClickListener { toggleInfoPanel() }
-        binding.progressSection.setOnClickListener { toggleBottomDrawer() }
         binding.btnInfoModern.setOnClickListener { toggleInfoPanel() }
         binding.btnCloseInfo.setOnClickListener { closeInfoPanel() }
+        binding.btnOverviewModern.setOnClickListener { toggleChecklistPanel() }
+        binding.btnCloseChecklist.setOnClickListener { closeChecklistPanel() }
 
         modelLoader = ModelLoader(sceneView.engine, this)
 
@@ -123,18 +120,13 @@ class MAINTAINANCEActivity : AppCompatActivity() {
             if (!isScrubbing) {
                 applyAnimationTime(lockedAnimTime)
             }
-            if (isCamTunerOpen && !isCameraLocked) {
-                updateCameraTunerDisplaysAndSliders()
-            }
         }
 
         captureManipulatorOnce()
         setupModelSelector()
         setupVehicleHeaderButton()
         setupControls() // ← wire up tab clicks
-        setupCameraTunerUi()
         setCameraLockState(true)
-        startCameraInfoUpdates()
 
         binding.backBtn.setOnClickListener {
             finish()
@@ -146,7 +138,6 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         setupVehicleHeaderButton()
         refreshGuideListForActiveVehicle()
         goToSlide(currentSlideIndex, animated = false, applySlideCamera = false)
-        startCameraInfoUpdates()
     }
 
     override fun onPause() {
@@ -216,35 +207,47 @@ class MAINTAINANCEActivity : AppCompatActivity() {
             .start()
     }
 
-    private fun toggleBottomDrawer() {
-        setBottomDrawerOpen(!isBottomDrawerOpen, animated = true)
+    private var isChecklistOpen = false
+
+    private fun toggleChecklistPanel() {
+        isChecklistOpen = !isChecklistOpen
+        if (isChecklistOpen) {
+            openChecklistPanel()
+        } else {
+            closeChecklistPanel()
+        }
     }
 
-    private fun setBottomDrawerOpen(open: Boolean, animated: Boolean) {
-        isBottomDrawerOpen = open
-        binding.bottomChecklistScroll.visibility = if (open) View.VISIBLE else View.GONE
-        binding.bottomDrawerArrow.animate()
-            .rotation(if (open) 180f else 0f)
-            .setDuration(if (animated) 180L else 0L)
+    private fun openChecklistPanel() {
+        binding.btnOverviewModern.visibility = View.GONE
+        binding.checklistSlidePanel.animate().cancel()
+        binding.checklistSlidePanel.scaleX = 0.8f
+        binding.checklistSlidePanel.scaleY = 0.8f
+        binding.checklistSlidePanel.alpha = 0f
+        binding.checklistSlidePanel.visibility = View.VISIBLE
+        binding.checklistSlidePanel.animate()
+            .scaleX(1f)
+            .scaleY(1f)
+            .alpha(1f)
+            .setDuration(260L)
+            .setInterpolator(DecelerateInterpolator())
             .start()
+    }
 
-        val targetHeight = (if (open) 220 else 96).toPx()
-        val params = binding.progressSection.layoutParams as ConstraintLayout.LayoutParams
-        if (!animated) {
-            params.height = targetHeight
-            binding.progressSection.layoutParams = params
-            return
-        }
-
-        ValueAnimator.ofInt(binding.progressSection.height.takeIf { it > 0 } ?: params.height, targetHeight).apply {
-            duration = 220L
-            interpolator = DecelerateInterpolator()
-            addUpdateListener { animator ->
-                params.height = animator.animatedValue as Int
-                binding.progressSection.layoutParams = params
+    private fun closeChecklistPanel() {
+        isChecklistOpen = false
+        binding.checklistSlidePanel.animate().cancel()
+        binding.checklistSlidePanel.animate()
+            .scaleX(0.8f)
+            .scaleY(0.8f)
+            .alpha(0f)
+            .setDuration(220L)
+            .setInterpolator(DecelerateInterpolator())
+            .withEndAction {
+                binding.checklistSlidePanel.visibility = View.GONE
+                binding.btnOverviewModern.visibility = View.VISIBLE
             }
-            start()
-        }
+            .start()
     }
 
     private fun captureManipulatorOnce() {
@@ -327,6 +330,9 @@ class MAINTAINANCEActivity : AppCompatActivity() {
             showToolsPrepDialog(guide.requiredTools, guide.estimatedTime, guide.difficulty, guide.prerequisites)
         }
 
+        // Automatically show Tools & Prep dialog on guide load
+        showToolsPrepDialog(guide.requiredTools, guide.estimatedTime, guide.difficulty, guide.prerequisites)
+
         loadModel(guide.glbFile)
     }
 
@@ -361,6 +367,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
 
         val containerPrereqs = dialogView.findViewById<LinearLayout>(R.id.containerPrereqs)
         containerPrereqs.removeAllViews()
+        val prereqCheckBoxes = mutableListOf<androidx.appcompat.widget.AppCompatCheckBox>()
         prereqs.forEach { prereq ->
             val cb = androidx.appcompat.widget.AppCompatCheckBox(this).apply {
                 text = prereq
@@ -369,10 +376,18 @@ class MAINTAINANCEActivity : AppCompatActivity() {
                 setPadding(12, 12, 12, 12)
             }
             containerPrereqs.addView(cb)
+            prereqCheckBoxes.add(cb)
         }
 
         dialogView.findViewById<View>(R.id.btnCloseDialog).setOnClickListener { dialog.dismiss() }
-        dialogView.findViewById<View>(R.id.btnConfirmPrep).setOnClickListener { dialog.dismiss() }
+        dialogView.findViewById<View>(R.id.btnConfirmPrep).setOnClickListener {
+            val allChecked = prereqCheckBoxes.isEmpty() || prereqCheckBoxes.all { it.isChecked }
+            if (allChecked) {
+                dialog.dismiss()
+            } else {
+                android.widget.Toast.makeText(this, "Please complete the checklist first!", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
 
         dialog.show()
     }
@@ -389,6 +404,12 @@ class MAINTAINANCEActivity : AppCompatActivity() {
 
         binding.btnNext.setOnClickListener {
             if (!isCameraLocked) return@setOnClickListener
+
+            if (!isSlideChecklistComplete(currentSlideIndex)) {
+                triggerIncompleteChecklistBlink()
+                return@setOnClickListener
+            }
+
             val to = (currentSlideIndex + 1).coerceAtMost(currentSlides.lastIndex)
             sceneView.cameraManipulator = null
             currentSlideIndex = to
@@ -396,11 +417,37 @@ class MAINTAINANCEActivity : AppCompatActivity() {
             updateUiState()
         }
 
-        binding.btnCameraLock.setOnClickListener {
-            setCameraLockState(!isCameraLocked)
-        }
-
         updateUiState()
+    }
+
+    private fun isSlideChecklistComplete(slideIndex: Int): Boolean {
+        val slide = currentSlides.getOrNull(slideIndex) ?: return true
+        if (slide.steps.isEmpty()) return true
+
+        val checklistPrefs = getSharedPreferences(PREFS_CHECKLIST, MODE_PRIVATE)
+        val guideName = currentGuide?.name ?: ""
+        slide.steps.indices.forEach { stepIndex ->
+            val stepKey = getStepKey(guideName, slideIndex, stepIndex)
+            if (!checklistPrefs.getBoolean(stepKey, false)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun triggerIncompleteChecklistBlink() {
+        android.widget.Toast.makeText(this, "Please complete all checklist steps before proceeding!", android.widget.Toast.LENGTH_SHORT).show()
+
+        val btn = binding.btnOverviewModern
+        btn.animate().cancel()
+        val blinkAnimator = ValueAnimator.ofFloat(1f, 0.15f, 1f, 0.15f, 1f, 0.15f, 1f).apply {
+            duration = 900L
+            interpolator = DecelerateInterpolator()
+            addUpdateListener { animator ->
+                btn.alpha = animator.animatedValue as Float
+            }
+        }
+        blinkAnimator.start()
     }
 
     private fun setCameraLockState(locked: Boolean) {
@@ -424,9 +471,21 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     }
 
     private fun updateUiState() {
-        binding.btnCameraLock.text = if (isCameraLocked) "Camera: LOCK" else "Camera: FREE"
-        binding.btnPrev.isEnabled  = isCameraLocked && currentSlideIndex > 0
-        binding.btnNext.isEnabled  = isCameraLocked && currentSlideIndex < currentSlides.lastIndex
+        val lastSlideIndex = currentSlides.lastIndex
+        val showPrev = isCameraLocked && currentSlideIndex > 0
+        val targetPrevVis = if (showPrev) View.VISIBLE else View.GONE
+
+        if (binding.btnPrev.visibility != targetPrevVis) {
+            androidx.transition.TransitionManager.beginDelayedTransition(
+                binding.navButtonsSection,
+                androidx.transition.AutoTransition().apply { duration = 280L }
+            )
+            binding.btnPrev.visibility = targetPrevVis
+        }
+
+        binding.btnPrev.isEnabled = showPrev
+        binding.btnNext.isEnabled = isCameraLocked && currentSlideIndex < lastSlideIndex
+        binding.btnNext.text = if (currentSlideIndex >= lastSlideIndex && lastSlideIndex >= 0) "Finish" else "Next Step"
     }
 
     private fun loadModel(fileName: String) {
@@ -505,34 +564,59 @@ class MAINTAINANCEActivity : AppCompatActivity() {
     private fun goToSlide(index: Int, animated: Boolean, applySlideCamera: Boolean = true) {
         val slide = currentSlides.getOrNull(index) ?: return
         binding.slideTitle.text = slide.title
+        val checkedSteps = checkedStepsBySlide.getOrPut(index) { mutableSetOf() }
+        val desc = slide.description
+        val prep = if (!slide.removeFirst.isNullOrEmpty()) " [🔒 ${slide.removeFirst}]" else ""
+        binding.slideDesc.text = "$desc$prep (${checkedSteps.size}/${slide.steps.size} Done)"
         
         // Update Progress Bar
         val progress = ((index + 1).toFloat() / currentSlides.size * 100).toInt()
         binding.stepProgressBar.setProgress(progress, animated)
 
+        // Wire Overview Button Click Listener
+        binding.cardOverviewButton.setOnClickListener {
+            showChecklistBottomSheet(slide, index)
+        }
+
         // ── 3D HUD Part Badge Callout ─────────────────────────────────────────
         if (!slide.targetPartName.isNullOrEmpty()) {
             binding.hudPartBadge.visibility = View.VISIBLE
             binding.tvHudPartName.text = "📍 ${slide.targetPartName}"
-            if (!slide.targetPartLocationNote.isNullOrEmpty()) {
-                binding.tvHudPartNote.text = slide.targetPartLocationNote
-                binding.tvHudPartNote.visibility = View.VISIBLE
-            } else {
-                binding.tvHudPartNote.visibility = View.GONE
-            }
-            binding.hudPartBadge.setOnClickListener {
-                if (!slide.targetPartLocationNote.isNullOrEmpty()) {
-                    val isVis = binding.tvHudPartNote.visibility == View.VISIBLE
-                    binding.tvHudPartNote.visibility = if (isVis) View.GONE else View.VISIBLE
-                }
-            }
+            binding.hudPartBadge.setOnClickListener(null)
         } else {
             binding.hudPartBadge.visibility = View.GONE
         }
 
+        populateChecklist(slide, index)
+        updateInfoPanel(slide)
+
+        val targetEye  = slide.eye
+        val targetLook = slide.lookAt
+
+        if (animated) {
+            animateCameraPose(
+                startEye  = currentCameraEye,
+                startLook = currentOrbitTarget,
+                endEye    = targetEye,
+                endLook   = targetLook,
+                durationMs = 650L
+            )
+            scrubAnimationTo(
+                slideStartTime = slide.animationStartTime,
+                targetTime = slide.animationTime,
+                durationMs = slide.animationDurationMs
+            )
+        } else {
+            if (applySlideCamera) {
+                setCamera(targetEye, targetLook)
+            }
+            applyAnimationTime(slide.animationTime)
+        }
+    }
+
+    private fun populateChecklist(slide: CameraSlide, slideIndex: Int) {
         binding.checklistContainer.removeAllViews()
 
-        // ── Dependency & Teardown Path Callouts ──────────────────────────────
         if (!slide.removeFirst.isNullOrEmpty()) {
             val tagView = TextView(this).apply {
                 text = "🔒 REMOVE FIRST: ${slide.removeFirst}"
@@ -555,7 +639,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         }
 
         val inflater = LayoutInflater.from(this)
-        val checkedSteps = checkedStepsBySlide.getOrPut(index) { mutableSetOf() }
+        val checkedSteps = checkedStepsBySlide.getOrPut(slideIndex) { mutableSetOf() }
 
         fun updateCompletionText() {
             val desc = slide.description
@@ -590,10 +674,10 @@ class MAINTAINANCEActivity : AppCompatActivity() {
                 }
             }
 
-            val stepKey = getStepKey(currentGuide?.name ?: "", index, stepIndex)
+            val stepKey = getStepKey(currentGuide?.name ?: "", slideIndex, stepIndex)
             var isChecked = checklistPrefs.getBoolean(stepKey, false)
             if (isChecked) checkedSteps.add(stepIndex) else checkedSteps.remove(stepIndex)
-            
+
             checkboxIcon.setImageResource(
                 if (isChecked) R.drawable.checkbox_red_checked else R.drawable.checkbox_red_unchecked
             )
@@ -618,108 +702,229 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         }
 
         updateCompletionText()
+    }
 
-        updateInfoPanel(slide)
+    private fun showChecklistBottomSheet(slide: CameraSlide, slideIndex: Int) {
+        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(this)
+        val bsView = LayoutInflater.from(this).inflate(R.layout.bottom_sheet_checklist, null)
+        dialog.setContentView(bsView)
 
-        val targetEye  = slide.eye
-        val targetLook = slide.lookAt
+        val tvTitle = bsView.findViewById<TextView>(R.id.bsStepTitle)
+        val tvDesc = bsView.findViewById<TextView>(R.id.bsStepDesc)
+        val container = bsView.findViewById<LinearLayout>(R.id.bsChecklistContainer)
+        val btnClose = bsView.findViewById<View>(R.id.btnCloseBs)
+        val btnDone = bsView.findViewById<View>(R.id.btnDoneBs)
 
-        if (animated) {
-            animateCameraPose(
-                startEye  = currentCameraEye,
-                startLook = currentOrbitTarget,
-                endEye    = targetEye,
-                endLook   = targetLook,
-                durationMs = 650L
-            )
-            scrubAnimationTo(
-                slideStartTime = slide.animationStartTime,
-                targetTime = slide.animationTime,
-                durationMs = slide.animationDurationMs
-            )
-        } else {
-            if (applySlideCamera) {
-                setCamera(targetEye, targetLook)
+        tvTitle.text = slide.title
+
+        val checkedSteps = checkedStepsBySlide.getOrPut(slideIndex) { mutableSetOf() }
+
+        fun updateCompletionText() {
+            val desc = slide.description
+            val prep = if (!slide.removeFirst.isNullOrEmpty()) " [🔒 ${slide.removeFirst}]" else ""
+            val formatted = "$desc$prep (${checkedSteps.size}/${slide.steps.size} Done)"
+            tvDesc.text = formatted
+            binding.slideDesc.text = formatted
+        }
+
+        populateChecklistContainer(container, slide, slideIndex) {
+            updateCompletionText()
+        }
+
+        updateCompletionText()
+
+        btnClose.setOnClickListener { dialog.dismiss() }
+        btnDone.setOnClickListener { dialog.dismiss() }
+
+        dialog.show()
+    }
+
+    private fun populateChecklistContainer(
+        container: LinearLayout,
+        slide: CameraSlide,
+        slideIndex: Int,
+        onStepChanged: () -> Unit
+    ) {
+        container.removeAllViews()
+
+        // ── Dependency & Teardown Path Callouts ──────────────────────────────
+        if (!slide.removeFirst.isNullOrEmpty()) {
+            val tagView = TextView(this).apply {
+                text = "🔒 REMOVE FIRST: ${slide.removeFirst}"
+                setTextColor(androidx.core.content.ContextCompat.getColor(this@MAINTAINANCEActivity, R.color.theme_red))
+                textSize = 12f
+                setTypeface(null, android.graphics.Typeface.BOLD)
+                setPadding(0, 0, 0, 8.toPx())
             }
-            applyAnimationTime(slide.animationTime)
+            container.addView(tagView)
+        }
+
+        if (!slide.teardownPath.isNullOrEmpty()) {
+            val pathView = TextView(this).apply {
+                text = "🛤 Sequence: ${slide.teardownPath}"
+                setTextColor(androidx.core.content.ContextCompat.getColor(this@MAINTAINANCEActivity, R.color.text_secondary))
+                textSize = 11f
+                setPadding(0, 0, 0, 16.toPx())
+            }
+            container.addView(pathView)
+        }
+
+        val inflater = LayoutInflater.from(this)
+        val checkedSteps = checkedStepsBySlide.getOrPut(slideIndex) { mutableSetOf() }
+
+        val checklistPrefs = getSharedPreferences(PREFS_CHECKLIST, MODE_PRIVATE)
+        val autoExpand = getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE)
+            .getBoolean(SettingsActivity.KEY_AUTO_EXPAND, false)
+
+        slide.steps.forEachIndexed { stepIndex, step ->
+            val row = inflater.inflate(R.layout.item_checklist_step, container, false)
+            val label = row.findViewById<TextView>(R.id.stepLabel)
+            val checkboxIcon = row.findViewById<ImageView>(R.id.stepCheckboxIcon)
+            val infoText = row.findViewById<TextView>(R.id.stepInfoText)
+            val warningText = row.findViewById<TextView>(R.id.stepWarningText)
+            val infoBtn = row.findViewById<ImageView>(R.id.btnStepInfo)
+
+            label.text = step.label
+            if (!step.warning.isNullOrEmpty()) {
+                warningText.visibility = View.VISIBLE
+                warningText.text = "⚠️ ${step.warning}"
+            }
+
+            if (!step.info.isNullOrEmpty()) {
+                infoBtn.visibility = View.VISIBLE
+                infoText.text = step.info
+                if (autoExpand) {
+                    infoText.visibility = View.VISIBLE
+                    infoBtn.rotation = 180f
+                }
+            }
+
+            val stepKey = getStepKey(currentGuide?.name ?: "", slideIndex, stepIndex)
+            var isChecked = checklistPrefs.getBoolean(stepKey, false)
+            if (isChecked) checkedSteps.add(stepIndex) else checkedSteps.remove(stepIndex)
+
+            checkboxIcon.setImageResource(
+                if (isChecked) R.drawable.checkbox_red_checked else R.drawable.checkbox_red_unchecked
+            )
+
+            row.setOnClickListener {
+                isChecked = !isChecked
+                checklistPrefs.edit().putBoolean(stepKey, isChecked).apply()
+                if (isChecked) checkedSteps.add(stepIndex) else checkedSteps.remove(stepIndex)
+                checkboxIcon.setImageResource(
+                    if (isChecked) R.drawable.checkbox_red_checked else R.drawable.checkbox_red_unchecked
+                )
+                onStepChanged()
+            }
+
+            infoBtn.setOnClickListener {
+                val isVisible = infoText.visibility == View.VISIBLE
+                infoText.visibility = if (isVisible) View.GONE else View.VISIBLE
+                infoBtn.animate().rotation(if (isVisible) 0f else 180f).setDuration(200L).start()
+            }
+
+            container.addView(row)
+        }
+    }
+
+    private fun updateOverviewButtonPosition(hasInfoButton: Boolean) {
+        val targetMarginTop = if (hasInfoButton) 68.toPx() else 12.toPx()
+        val params = binding.btnOverviewModern.layoutParams as? android.view.ViewGroup.MarginLayoutParams ?: return
+        if (params.topMargin != targetMarginTop) {
+            androidx.transition.TransitionManager.beginDelayedTransition(
+                binding.mainCard,
+                androidx.transition.AutoTransition().apply { duration = 280L }
+            )
+            params.topMargin = targetMarginTop
+            binding.btnOverviewModern.layoutParams = params
         }
     }
 
     private fun updateInfoPanel(slide: CameraSlide) {
-        // If there's no info content, we can hide the entire tab or just clear it.
-        // For now, let's just clear it.
         if (slide.infoItems.isEmpty()) {
             isInfoOpen = false
             binding.infoSlidePanel.animate().cancel()
             binding.infoSlidePanel.visibility = View.GONE
             binding.btnInfoModern.visibility = View.GONE
             binding.infoItemsContainer.removeAllViews()
+            updateOverviewButtonPosition(hasInfoButton = false)
             return
         } else {
             binding.btnInfoModern.visibility = View.VISIBLE
+            updateOverviewButtonPosition(hasInfoButton = true)
         }
 
         binding.tvInfoPanelTitle.text = slide.infoTitle ?: "Recommended Info"
         binding.infoItemsContainer.removeAllViews()
 
         val primaryTextColor = androidx.core.content.ContextCompat.getColor(this, R.color.text_primary)
-        val secondaryTextColor = androidx.core.content.ContextCompat.getColor(this, R.color.text_secondary)
 
         slide.infoItems.forEach { item ->
-            val itemLayout = android.widget.LinearLayout(this).apply {
-                orientation = android.widget.LinearLayout.HORIZONTAL
-                layoutParams = android.widget.LinearLayout.LayoutParams(
-                    android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
-                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            val itemLayout = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
                 ).apply {
                     setMargins(0, 0, 0, 16.toPx())
                 }
             }
 
-            val leftContainer = android.widget.LinearLayout(this).apply {
-                orientation = android.widget.LinearLayout.VERTICAL
-                layoutParams = android.widget.LinearLayout.LayoutParams(
-                    100.toPx(),
-                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-            }
-
-            val titleTv = android.widget.TextView(this).apply {
+            val titleTv = TextView(this).apply {
                 text = item.title
                 setTextColor(primaryTextColor)
-                textSize = 13f
+                textSize = 15f
                 setTypeface(null, android.graphics.Typeface.BOLD)
+                setPadding(0, 0, 0, 4.toPx())
             }
-            leftContainer.addView(titleTv)
+            itemLayout.addView(titleTv)
 
             if (item.imageResId != null) {
-                val iv = android.widget.ImageView(this).apply {
-                    layoutParams = android.widget.LinearLayout.LayoutParams(
-                        80.toPx(),
-                        80.toPx()
+                val rowContainer = LinearLayout(this).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                }
+                val iv = ImageView(this).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        72.toPx(),
+                        72.toPx()
                     ).apply {
-                        setMargins(0, 4.toPx(), 0, 0)
+                        setMargins(0, 0, 12.toPx(), 0)
                     }
                     setImageResource(item.imageResId)
-                    scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+                    scaleType = ImageView.ScaleType.FIT_CENTER
                 }
-                leftContainer.addView(iv)
-            }
+                rowContainer.addView(iv)
 
-            itemLayout.addView(leftContainer)
-
-            val descTv = android.widget.TextView(this).apply {
-                layoutParams = android.widget.LinearLayout.LayoutParams(
-                    0,
-                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
-                    1f
-                )
-                text = item.description
-                setTextColor(secondaryTextColor)
-                textSize = 12f
-                setLineSpacing(0f, 1.15f)
+                val descTv = TextView(this).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        0,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        1f
+                    )
+                    text = item.description
+                    setTextColor(primaryTextColor)
+                    textSize = 13.5f
+                    setLineSpacing(0f, 1.2f)
+                }
+                rowContainer.addView(descTv)
+                itemLayout.addView(rowContainer)
+            } else {
+                val descTv = TextView(this).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                    text = item.description
+                    setTextColor(primaryTextColor)
+                    textSize = 13.5f
+                    setLineSpacing(0f, 1.2f)
+                }
+                itemLayout.addView(descTv)
             }
-            itemLayout.addView(descTv)
 
             binding.infoItemsContainer.addView(itemLayout)
         }
@@ -756,127 +961,9 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         }
     }
 
-    private fun startCameraInfoUpdates() {
-        cameraInfoJob?.cancel()
-        cameraInfoJob = lifecycleScope.launch {
-            while (true) {
-                val p   = sceneView.cameraNode.position
-                val cam = Vec3(p.x, p.y, p.z)
-                if (!isCameraLocked) {
-                    currentCameraEye = cam
-                }
-
-                val target   = currentOrbitTarget
-                val dx       = cam.x - target.x
-                val dy       = cam.y - target.y
-                val dz       = cam.z - target.z
-                val distance = sqrt(dx * dx + dy * dy + dz * dz).coerceAtLeast(0.0001f)
-                val yaw      = Math.toDegrees(atan2(dx, dz).toDouble()).toFloat()
-                val pitch    = Math.toDegrees(asin((dy / distance).toDouble())).toFloat()
-
-                binding.tvCameraInfo.text =
-                    "eye=(%.2f, %.2f, %.2f) target=(%.2f, %.2f, %.2f) d=%.2f yaw=%.1f pitch=%.1f"
-                        .format(cam.x, cam.y, cam.z, target.x, target.y, target.z, distance, yaw, pitch)
-
-                delay(120L)
-            }
-        }
-    }
-
     private fun lerp(a: Float, b: Float, t: Float) = a + (b - a) * t
 
     private fun easeInOutCubic(t: Float) =
         if (t < 0.5f) 4f * t * t * t
         else 1f - ((-2f * t + 2f).let { it * it * it } / 2f)
-
-    // -------------------------------------------------------------------------
-    // Camera Pose Tuner HUD
-    // -------------------------------------------------------------------------
-
-    private fun setupCameraTunerUi() {
-        binding.btnCamTuner.setOnClickListener {
-            isCamTunerOpen = !isCamTunerOpen
-            binding.panelCamTuner.visibility = if (isCamTunerOpen) View.VISIBLE else View.GONE
-            if (isCamTunerOpen) {
-                updateCameraTunerDisplaysAndSliders()
-            }
-        }
-
-        binding.btnCloseCamTuner.setOnClickListener {
-            isCamTunerOpen = false
-            binding.panelCamTuner.visibility = View.GONE
-        }
-
-        val sliderChangeListener = object : android.widget.SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser && !isUpdatingSlidersFromCode) {
-                    val eyeX = progressToFloat(binding.seekEyeX.progress)
-                    val eyeY = progressToFloat(binding.seekEyeY.progress)
-                    val eyeZ = progressToFloat(binding.seekEyeZ.progress)
-
-                    val lookX = progressToFloat(binding.seekLookX.progress)
-                    val lookY = progressToFloat(binding.seekLookY.progress)
-                    val lookZ = progressToFloat(binding.seekLookZ.progress)
-
-                    val newEye = Vec3(eyeX, eyeY, eyeZ)
-                    val newLook = Vec3(lookX, lookY, lookZ)
-
-                    setCamera(newEye, newLook)
-                    updateLiveCameraTexts(newEye, newLook)
-                }
-            }
-
-            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
-        }
-
-        binding.seekEyeX.setOnSeekBarChangeListener(sliderChangeListener)
-        binding.seekEyeY.setOnSeekBarChangeListener(sliderChangeListener)
-        binding.seekEyeZ.setOnSeekBarChangeListener(sliderChangeListener)
-
-        binding.seekLookX.setOnSeekBarChangeListener(sliderChangeListener)
-        binding.seekLookY.setOnSeekBarChangeListener(sliderChangeListener)
-        binding.seekLookZ.setOnSeekBarChangeListener(sliderChangeListener)
-
-        binding.btnCopyCamCode.setOnClickListener {
-            val codeSnippet = "eye = Vec3(%.2ff, %.2ff, %.2ff),\nlookAt = Vec3(%.2ff, %.2ff, %.2ff),".format(
-                currentCameraEye.x, currentCameraEye.y, currentCameraEye.z,
-                currentOrbitTarget.x, currentOrbitTarget.y, currentOrbitTarget.z
-            )
-            val clipboard = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
-            val clip = android.content.ClipData.newPlainText("Vec3 Camera Code", codeSnippet)
-            clipboard.setPrimaryClip(clip)
-            android.widget.Toast.makeText(this, "Copied Vec3 code to clipboard!", android.widget.Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun progressToFloat(progress: Int, minVal: Float = -5.0f, maxVal: Float = 5.0f): Float {
-        return minVal + (progress / 1000f) * (maxVal - minVal)
-    }
-
-    private fun floatToProgress(value: Float, minVal: Float = -5.0f, maxVal: Float = 5.0f): Int {
-        return (((value.coerceIn(minVal, maxVal) - minVal) / (maxVal - minVal)) * 1000f).toInt()
-    }
-
-    private fun updateLiveCameraTexts(eye: Vec3, lookAt: Vec3) {
-        binding.tvLiveEye.text = "eye = Vec3(%.2ff, %.2ff, %.2ff)".format(eye.x, eye.y, eye.z)
-        binding.tvLiveLookAt.text = "lookAt = Vec3(%.2ff, %.2ff, %.2ff)".format(lookAt.x, lookAt.y, lookAt.z)
-    }
-
-    private fun updateCameraTunerDisplaysAndSliders() {
-        val p = sceneView.cameraNode.position
-        currentCameraEye = Vec3(p.x, p.y, p.z)
-
-        updateLiveCameraTexts(currentCameraEye, currentOrbitTarget)
-
-        isUpdatingSlidersFromCode = true
-        binding.seekEyeX.progress = floatToProgress(currentCameraEye.x)
-        binding.seekEyeY.progress = floatToProgress(currentCameraEye.y)
-        binding.seekEyeZ.progress = floatToProgress(currentCameraEye.z)
-
-        binding.seekLookX.progress = floatToProgress(currentOrbitTarget.x)
-        binding.seekLookY.progress = floatToProgress(currentOrbitTarget.y)
-        binding.seekLookZ.progress = floatToProgress(currentOrbitTarget.z)
-        isUpdatingSlidersFromCode = false
-    }
 }

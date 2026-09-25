@@ -54,6 +54,7 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun setupTitle() {
         AppNavigation.setupBrandedTitle(this, binding.appTitle)
+        binding.backBtn.setOnClickListener { finish() }
     }
 
     private fun loadVehicleProfileInfo() {

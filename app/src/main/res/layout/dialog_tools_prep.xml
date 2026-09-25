@@ -138,6 +138,7 @@
             android:layout_height="52dp"
             android:layout_marginTop="8dp"
             android:text="I'm Ready — Start Guide"
+            android:textColor="@android:color/white"
             android:textAllCaps="false"
             android:textStyle="bold"
             app:cornerRadius="14dp"

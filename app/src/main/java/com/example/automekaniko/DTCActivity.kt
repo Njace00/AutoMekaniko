@@ -43,7 +43,6 @@ class DtcActivity : AppCompatActivity() {
     private lateinit var modelLoader:        ModelLoader
 
     private var isInfoOpen = false
-    private var isBottomDrawerOpen = false
     private var dtcConfirmedInSession = false
 
     private val previewGlbFile = "Vehicle Preventive Maintenance Checklist (VPMC).glb"
@@ -56,8 +55,6 @@ class DtcActivity : AppCompatActivity() {
     private var currentEntry:      DtcGuide?  = null
     private var currentSlideIndex: Int        = 0
     private var isCameraLocked:    Boolean    = true
-    private var isCamTunerOpen:    Boolean    = false
-    private var isUpdatingSlidersFromCode: Boolean = false
     private val checkedStepsBySlide = mutableMapOf<Int, MutableSet<Int>>()
 
     private var cameraAnimJob: Job? = null
@@ -90,10 +87,10 @@ class DtcActivity : AppCompatActivity() {
         AppNavigation.wire(this)
 
         sceneView = binding.sceneView
-        binding.closeTab.setOnClickListener { toggleInfoPanel() }
-        binding.progressSection.setOnClickListener { toggleBottomDrawer() }
         binding.btnInfoModern.setOnClickListener { toggleInfoPanel() }
         binding.btnCloseInfo.setOnClickListener { closeInfoPanel() }
+        binding.btnOverviewModern.setOnClickListener { toggleChecklistPanel() }
+        binding.btnCloseChecklist.setOnClickListener { closeChecklistPanel() }
 
         modelLoader = ModelLoader(sceneView.engine, this)
 
@@ -105,16 +102,12 @@ class DtcActivity : AppCompatActivity() {
                     animator.updateBoneMatrices()
                 }
             }
-            if (isCamTunerOpen && !isCameraLocked) {
-                updateCameraTunerDisplaysAndSliders()
-            }
         }
 
         captureManipulatorOnce()
         setupDtcSelector()
         setupVehicleHeaderButton()
         setupControls()
-        setupCameraTunerUi()
         setCameraLockState(true)
 
         binding.backBtn.setOnClickListener { finish() }
@@ -206,34 +199,59 @@ class DtcActivity : AppCompatActivity() {
             .start()
     }
 
-    private fun toggleBottomDrawer() {
-        setBottomDrawerOpen(!isBottomDrawerOpen, animated = true)
+    private var isChecklistOpen = false
+
+    private fun toggleChecklistPanel() {
+        isChecklistOpen = !isChecklistOpen
+        if (isChecklistOpen) {
+            openChecklistPanel()
+        } else {
+            closeChecklistPanel()
+        }
     }
 
-    private fun setBottomDrawerOpen(open: Boolean, animated: Boolean) {
-        isBottomDrawerOpen = open
-        binding.bottomChecklistScroll.visibility = if (open) View.VISIBLE else View.GONE
-        binding.bottomDrawerArrow.animate()
-            .rotation(if (open) 180f else 0f)
-            .setDuration(if (animated) 180L else 0L)
+    private fun openChecklistPanel() {
+        binding.btnOverviewModern.visibility = View.GONE
+        binding.checklistSlidePanel.animate().cancel()
+        binding.checklistSlidePanel.scaleX = 0.8f
+        binding.checklistSlidePanel.scaleY = 0.8f
+        binding.checklistSlidePanel.alpha = 0f
+        binding.checklistSlidePanel.visibility = View.VISIBLE
+        binding.checklistSlidePanel.animate()
+            .scaleX(1f)
+            .scaleY(1f)
+            .alpha(1f)
+            .setDuration(260L)
+            .setInterpolator(DecelerateInterpolator())
             .start()
+    }
 
-        val targetHeight = (if (open) 220 else 96).toPx()
-        val params = binding.progressSection.layoutParams as ConstraintLayout.LayoutParams
-        if (!animated) {
-            params.height = targetHeight
-            binding.progressSection.layoutParams = params
-            return
-        }
-
-        ValueAnimator.ofInt(binding.progressSection.height.takeIf { it > 0 } ?: params.height, targetHeight).apply {
-            duration = 220L
-            interpolator = DecelerateInterpolator()
-            addUpdateListener { animator ->
-                params.height = animator.animatedValue as Int
-                binding.progressSection.layoutParams = params
+    private fun closeChecklistPanel() {
+        isChecklistOpen = false
+        binding.checklistSlidePanel.animate().cancel()
+        binding.checklistSlidePanel.animate()
+            .scaleX(0.8f)
+            .scaleY(0.8f)
+            .alpha(0f)
+            .setDuration(220L)
+            .setInterpolator(DecelerateInterpolator())
+            .withEndAction {
+                binding.checklistSlidePanel.visibility = View.GONE
+                binding.btnOverviewModern.visibility = View.VISIBLE
             }
-            start()
+            .start()
+    }
+
+    private fun updateOverviewButtonPosition(hasInfoButton: Boolean) {
+        val targetMarginTop = if (hasInfoButton) 68.toPx() else 12.toPx()
+        val params = binding.btnOverviewModern.layoutParams as? android.view.ViewGroup.MarginLayoutParams ?: return
+        if (params.topMargin != targetMarginTop) {
+            androidx.transition.TransitionManager.beginDelayedTransition(
+                binding.mainCard,
+                androidx.transition.AutoTransition().apply { duration = 280L }
+            )
+            params.topMargin = targetMarginTop
+            binding.btnOverviewModern.layoutParams = params
         }
     }
 
@@ -243,6 +261,7 @@ class DtcActivity : AppCompatActivity() {
         
         // For DTC, we almost always want info visible (fallback to code info)
         binding.btnInfoModern.visibility = View.VISIBLE
+        updateOverviewButtonPosition(hasInfoButton = true)
 
         if (slide.infoItems.isEmpty()) {
             guide?.let {
@@ -263,11 +282,10 @@ class DtcActivity : AppCompatActivity() {
         binding.infoItemsContainer.removeAllViews()
 
         val primaryTextColor = androidx.core.content.ContextCompat.getColor(this, R.color.text_primary)
-        val secondaryTextColor = androidx.core.content.ContextCompat.getColor(this, R.color.text_secondary)
 
         items.forEach { item ->
             val itemLayout = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
+                orientation = LinearLayout.VERTICAL
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
@@ -276,50 +294,61 @@ class DtcActivity : AppCompatActivity() {
                 }
             }
 
-            val leftContainer = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                layoutParams = LinearLayout.LayoutParams(
-                    100.toPx(),
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-            }
-
             val titleTv = TextView(this).apply {
                 text = item.title
                 setTextColor(primaryTextColor)
-                textSize = 13f
+                textSize = 15f
                 setTypeface(null, android.graphics.Typeface.BOLD)
+                setPadding(0, 0, 0, 4.toPx())
             }
-            leftContainer.addView(titleTv)
+            itemLayout.addView(titleTv)
 
             if (item.imageResId != null) {
+                val rowContainer = LinearLayout(this).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                }
                 val iv = ImageView(this).apply {
                     layoutParams = LinearLayout.LayoutParams(
-                        80.toPx(),
-                        80.toPx()
+                        72.toPx(),
+                        72.toPx()
                     ).apply {
-                        setMargins(0, 4.toPx(), 0, 0)
+                        setMargins(0, 0, 12.toPx(), 0)
                     }
                     setImageResource(item.imageResId)
                     scaleType = ImageView.ScaleType.FIT_CENTER
                 }
-                leftContainer.addView(iv)
-            }
+                rowContainer.addView(iv)
 
-            itemLayout.addView(leftContainer)
-
-            val descTv = TextView(this).apply {
-                layoutParams = LinearLayout.LayoutParams(
-                    0,
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    1f
-                )
-                text = item.description
-                setTextColor(secondaryTextColor)
-                textSize = 12f
-                setLineSpacing(0f, 1.15f)
+                val descTv = TextView(this).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        0,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        1f
+                    )
+                    text = item.description
+                    setTextColor(primaryTextColor)
+                    textSize = 13.5f
+                    setLineSpacing(0f, 1.2f)
+                }
+                rowContainer.addView(descTv)
+                itemLayout.addView(rowContainer)
+            } else {
+                val descTv = TextView(this).apply {
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                    text = item.description
+                    setTextColor(primaryTextColor)
+                    textSize = 13.5f
+                    setLineSpacing(0f, 1.2f)
+                }
+                itemLayout.addView(descTv)
             }
-            itemLayout.addView(descTv)
 
             binding.infoItemsContainer.addView(itemLayout)
         }
@@ -360,6 +389,9 @@ class DtcActivity : AppCompatActivity() {
             showToolsPrepDialog(entry.requiredTools, entry.estimatedTime, entry.difficulty, entry.prerequisites)
         }
 
+        // Automatically show Tools & Prep dialog on entry load
+        showToolsPrepDialog(entry.requiredTools, entry.estimatedTime, entry.difficulty, entry.prerequisites)
+
         updateUiState()
         loadGlbModel(entry.glbFile) {
             currentSlideIndex = 0
@@ -399,6 +431,7 @@ class DtcActivity : AppCompatActivity() {
 
         val containerPrereqs = dialogView.findViewById<LinearLayout>(R.id.containerPrereqs)
         containerPrereqs.removeAllViews()
+        val prereqCheckBoxes = mutableListOf<androidx.appcompat.widget.AppCompatCheckBox>()
         prereqs.forEach { prereq ->
             val cb = androidx.appcompat.widget.AppCompatCheckBox(this).apply {
                 text = prereq
@@ -407,10 +440,18 @@ class DtcActivity : AppCompatActivity() {
                 setPadding(12, 12, 12, 12)
             }
             containerPrereqs.addView(cb)
+            prereqCheckBoxes.add(cb)
         }
 
         dialogView.findViewById<View>(R.id.btnCloseDialog).setOnClickListener { dialog.dismiss() }
-        dialogView.findViewById<View>(R.id.btnConfirmPrep).setOnClickListener { dialog.dismiss() }
+        dialogView.findViewById<View>(R.id.btnConfirmPrep).setOnClickListener {
+            val allChecked = prereqCheckBoxes.isEmpty() || prereqCheckBoxes.all { it.isChecked }
+            if (allChecked) {
+                dialog.dismiss()
+            } else {
+                Toast.makeText(this, "Please complete the checklist first!", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         dialog.show()
     }
@@ -581,6 +622,12 @@ class DtcActivity : AppCompatActivity() {
         binding.btnNext.setOnClickListener {
             if (!isCameraLocked) return@setOnClickListener
             val entry = currentEntry ?: return@setOnClickListener
+
+            if (!isSlideChecklistComplete(currentSlideIndex)) {
+                triggerIncompleteChecklistBlink()
+                return@setOnClickListener
+            }
+
             val to = (currentSlideIndex + 1).coerceAtMost(entry.slides.lastIndex)
             sceneView.cameraManipulator = null
             currentSlideIndex = to
@@ -589,6 +636,37 @@ class DtcActivity : AppCompatActivity() {
         }
 
         updateUiState()
+    }
+
+    private fun isSlideChecklistComplete(slideIndex: Int): Boolean {
+        val entry = currentEntry ?: return true
+        val slide = entry.slides.getOrNull(slideIndex) ?: return true
+        if (slide.steps.isEmpty()) return true
+
+        val checklistPrefs = getSharedPreferences(MAINTAINANCEActivity.PREFS_CHECKLIST, MODE_PRIVATE)
+        val guideCode = entry.code
+        slide.steps.indices.forEach { stepIndex ->
+            val stepKey = MAINTAINANCEActivity.getStepKey(guideCode, slideIndex, stepIndex)
+            if (!checklistPrefs.getBoolean(stepKey, false)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun triggerIncompleteChecklistBlink() {
+        Toast.makeText(this, "Please complete all checklist steps before proceeding!", Toast.LENGTH_SHORT).show()
+
+        val btn = binding.btnOverviewModern
+        btn.animate().cancel()
+        val blinkAnimator = ValueAnimator.ofFloat(1f, 0.15f, 1f, 0.15f, 1f, 0.15f, 1f).apply {
+            duration = 900L
+            interpolator = DecelerateInterpolator()
+            addUpdateListener { animator ->
+                btn.alpha = animator.animatedValue as Float
+            }
+        }
+        blinkAnimator.start()
     }
 
     private fun setCameraLockState(locked: Boolean) {
@@ -613,8 +691,20 @@ class DtcActivity : AppCompatActivity() {
         val lastSlideIndex = currentEntry?.slides?.lastIndex ?: -1
         val hasEntry = currentEntry != null
 
-        binding.btnPrev.isEnabled = isCameraLocked && hasEntry && dtcConfirmedInSession && currentSlideIndex > 0
+        val showPrev = isCameraLocked && hasEntry && dtcConfirmedInSession && currentSlideIndex > 0
+        val targetPrevVis = if (showPrev) View.VISIBLE else View.GONE
+
+        if (binding.btnPrev.visibility != targetPrevVis) {
+            androidx.transition.TransitionManager.beginDelayedTransition(
+                binding.navButtonsSection,
+                androidx.transition.AutoTransition().apply { duration = 280L }
+            )
+            binding.btnPrev.visibility = targetPrevVis
+        }
+
+        binding.btnPrev.isEnabled = showPrev
         binding.btnNext.isEnabled = isCameraLocked && hasEntry && dtcConfirmedInSession && currentSlideIndex < lastSlideIndex
+        binding.btnNext.text = if (currentSlideIndex >= lastSlideIndex && lastSlideIndex >= 0) "Finish" else "Next Step"
 
         binding.btnPrev.alpha = 1f
         binding.btnNext.alpha = 1f
@@ -628,8 +718,12 @@ class DtcActivity : AppCompatActivity() {
         val entry = currentEntry ?: return
         val slide = entry.slides[index]
 
-        binding.slideTitle.text   = slide.title
-        
+        binding.slideTitle.text = slide.title
+        val checkedSteps = checkedStepsBySlide.getOrPut(index) { mutableSetOf() }
+        val desc = slide.description
+        val prep = if (!slide.removeFirst.isNullOrEmpty()) " [🔒 ${slide.removeFirst}]" else ""
+        binding.slideDesc.text = "$desc$prep (${checkedSteps.size}/${slide.steps.size} Done)"
+
         // Update Progress Bar
         val progress = ((index + 1).toFloat() / entry.slides.size * 100).toInt()
         binding.stepProgressBar.setProgress(progress, animated)
@@ -638,18 +732,7 @@ class DtcActivity : AppCompatActivity() {
         if (!slide.targetPartName.isNullOrEmpty()) {
             binding.hudPartBadge.visibility = View.VISIBLE
             binding.tvHudPartName.text = "📍 ${slide.targetPartName}"
-            if (!slide.targetPartLocationNote.isNullOrEmpty()) {
-                binding.tvHudPartNote.text = slide.targetPartLocationNote
-                binding.tvHudPartNote.visibility = View.VISIBLE
-            } else {
-                binding.tvHudPartNote.visibility = View.GONE
-            }
-            binding.hudPartBadge.setOnClickListener {
-                if (!slide.targetPartLocationNote.isNullOrEmpty()) {
-                    val isVis = binding.tvHudPartNote.visibility == View.VISIBLE
-                    binding.tvHudPartNote.visibility = if (isVis) View.GONE else View.VISIBLE
-                }
-            }
+            binding.hudPartBadge.setOnClickListener(null)
         } else {
             binding.hudPartBadge.visibility = View.GONE
         }
@@ -821,95 +904,4 @@ class DtcActivity : AppCompatActivity() {
     private fun easeInOutCubic(t: Float) =
         if (t < 0.5f) 4f * t * t * t
         else 1f - ((-2f * t + 2f).let { it * it * it } / 2f)
-
-    // -------------------------------------------------------------------------
-    // Camera Pose Tuner HUD
-    // -------------------------------------------------------------------------
-
-    private fun setupCameraTunerUi() {
-        binding.btnCamTuner.setOnClickListener {
-            isCamTunerOpen = !isCamTunerOpen
-            binding.panelCamTuner.visibility = if (isCamTunerOpen) View.VISIBLE else View.GONE
-            if (isCamTunerOpen) {
-                updateCameraTunerDisplaysAndSliders()
-            }
-        }
-
-        binding.btnCloseCamTuner.setOnClickListener {
-            isCamTunerOpen = false
-            binding.panelCamTuner.visibility = View.GONE
-        }
-
-        val sliderChangeListener = object : android.widget.SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser && !isUpdatingSlidersFromCode) {
-                    val eyeX = progressToFloat(binding.seekEyeX.progress)
-                    val eyeY = progressToFloat(binding.seekEyeY.progress)
-                    val eyeZ = progressToFloat(binding.seekEyeZ.progress)
-
-                    val lookX = progressToFloat(binding.seekLookX.progress)
-                    val lookY = progressToFloat(binding.seekLookY.progress)
-                    val lookZ = progressToFloat(binding.seekLookZ.progress)
-
-                    val newEye = Vec3(eyeX, eyeY, eyeZ)
-                    val newLook = Vec3(lookX, lookY, lookZ)
-
-                    setCamera(newEye, newLook)
-                    updateLiveCameraTexts(newEye, newLook)
-                }
-            }
-
-            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
-        }
-
-        binding.seekEyeX.setOnSeekBarChangeListener(sliderChangeListener)
-        binding.seekEyeY.setOnSeekBarChangeListener(sliderChangeListener)
-        binding.seekEyeZ.setOnSeekBarChangeListener(sliderChangeListener)
-
-        binding.seekLookX.setOnSeekBarChangeListener(sliderChangeListener)
-        binding.seekLookY.setOnSeekBarChangeListener(sliderChangeListener)
-        binding.seekLookZ.setOnSeekBarChangeListener(sliderChangeListener)
-
-        binding.btnCopyCamCode.setOnClickListener {
-            val codeSnippet = "eye = Vec3(%.2ff, %.2ff, %.2ff),\nlookAt = Vec3(%.2ff, %.2ff, %.2ff),".format(
-                currentCameraEye.x, currentCameraEye.y, currentCameraEye.z,
-                currentOrbitTarget.x, currentOrbitTarget.y, currentOrbitTarget.z
-            )
-            val clipboard = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
-            val clip = android.content.ClipData.newPlainText("Vec3 Camera Code", codeSnippet)
-            clipboard.setPrimaryClip(clip)
-            Toast.makeText(this, "Copied Vec3 code to clipboard!", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun progressToFloat(progress: Int, minVal: Float = -5.0f, maxVal: Float = 5.0f): Float {
-        return minVal + (progress / 1000f) * (maxVal - minVal)
-    }
-
-    private fun floatToProgress(value: Float, minVal: Float = -5.0f, maxVal: Float = 5.0f): Int {
-        return (((value.coerceIn(minVal, maxVal) - minVal) / (maxVal - minVal)) * 1000f).toInt()
-    }
-
-    private fun updateLiveCameraTexts(eye: Vec3, lookAt: Vec3) {
-        binding.tvLiveEye.text = "eye = Vec3(%.2ff, %.2ff, %.2ff)".format(eye.x, eye.y, eye.z)
-        binding.tvLiveLookAt.text = "lookAt = Vec3(%.2ff, %.2ff, %.2ff)".format(lookAt.x, lookAt.y, lookAt.z)
-    }
-
-    private fun updateCameraTunerDisplaysAndSliders() {
-        val p = sceneView.cameraNode.position
-        currentCameraEye = Vec3(p.x, p.y, p.z)
-
-        updateLiveCameraTexts(currentCameraEye, currentOrbitTarget)
-
-        isUpdatingSlidersFromCode = true
-        binding.seekEyeX.progress = floatToProgress(currentCameraEye.x)
-        binding.seekEyeY.progress = floatToProgress(currentCameraEye.y)
-        binding.seekEyeZ.progress = floatToProgress(currentCameraEye.z)
-
-        binding.seekLookX.progress = floatToProgress(currentOrbitTarget.x)
-        binding.seekLookY.progress = floatToProgress(currentOrbitTarget.y)
-        binding.seekLookZ.progress = floatToProgress(currentOrbitTarget.z)
-        isUpdatingSlidersFromCode = false
-    }
 }

@@ -1,5 +1,6 @@
 package com.example.automekaniko
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -9,8 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 
 class MainActivity : AppCompatActivity() {
-
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,11 +36,26 @@ class MainActivity : AppCompatActivity() {
         // Hidden buttons (fallback)
         viewBtn.setOnClickListener { go(GuidesActivity::class.java) }
         liveBtn.setOnClickListener { go(OBDActivity::class.java) }
+
+        // Tutorial re-run button
+        findViewById<View>(R.id.btnTutorial)?.setOnClickListener {
+            TutorialManager.startTutorial(this)
+        }
+
+        // Auto-run tutorial on first launch
+        val prefs = getSharedPreferences(SettingsActivity.PREFS_NAME, Context.MODE_PRIVATE)
+        val isCompleted = prefs.getBoolean(TutorialManager.PREFS_KEY_COMPLETED, false)
+        if (!isCompleted && !TutorialManager.isTutorialActive) {
+            findViewById<View>(R.id.scrollContentContainer)?.post {
+                TutorialManager.startTutorial(this)
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
         updateVehicleBannerUI()
+        TutorialManager.checkAndRenderStepOnResume(this)
     }
 
     private fun setupVehicleBanner() {
@@ -49,7 +63,7 @@ class MainActivity : AppCompatActivity() {
         val cardActiveVehicle = findViewById<View>(R.id.cardActiveVehicle)
         val btnSwitchVehicle = findViewById<View>(R.id.btnSwitchVehicle)
 
-        val listener = android.view.View.OnClickListener {
+        val listener = View.OnClickListener {
             VehicleManager.showSelectorDialog(this) { vehicle ->
                 updateVehicleBannerUI()
             }

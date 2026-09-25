@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingVertical="4dp"
-    android:paddingHorizontal="8dp"
+    android:paddingVertical="8dp"
+    android:paddingHorizontal="6dp"
     android:clickable="true"
     android:focusable="true"
     android:background="?android:attr/selectableItemBackground">
@@ -18,8 +18,8 @@
 
         <ImageView
             android:id="@+id/stepCheckboxIcon"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
             android:contentDescription="@null"
             android:src="@drawable/checkbox_red_unchecked"
             android:scaleType="fitCenter" />
@@ -33,17 +33,18 @@
             android:gravity="start"
             android:textAlignment="viewStart"
             android:textColor="@color/text_primary"
-            android:textSize="14sp" />
+            android:textSize="15.5sp"
+            android:textStyle="bold" />
 
         <ImageView
             android:id="@+id/btnStepInfo"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:padding="2dp"
             android:src="@drawable/ic_expand_more"
             android:visibility="gone"
             android:contentDescription="@null"
-            app:tint="@color/text_secondary" />
+            app:tint="@color/text_primary" />
 
     </LinearLayout>
 
@@ -51,25 +52,26 @@
         android:id="@+id/stepInfoText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="34dp"
-        android:layout_marginTop="2dp"
-        android:layout_marginBottom="4dp"
-        android:textColor="@color/text_secondary"
-        android:textSize="12sp"
+        android:layout_marginStart="38dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="6dp"
+        android:lineSpacingExtra="2dp"
+        android:textColor="@color/text_primary"
+        android:textSize="13.5sp"
         android:visibility="gone" />
 
     <TextView
         android:id="@+id/stepWarningText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="34dp"
+        android:layout_marginStart="38dp"
         android:layout_marginTop="4dp"
         android:layout_marginBottom="6dp"
         android:background="@drawable/info_tab_bg"
         android:backgroundTint="@color/theme_red_light"
         android:padding="8dp"
         android:textColor="@color/theme_red"
-        android:textSize="11sp"
+        android:textSize="12.5sp"
         android:textStyle="bold"
         android:visibility="gone" />
 
