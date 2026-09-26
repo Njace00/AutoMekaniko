@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_primary">
+    android:background="@drawable/bg_glassmorphic_background">
 
     <!-- TOP BAR -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="64dp"
-        android:background="@color/background_secondary"
+        android:background="@drawable/bg_glass_header"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView

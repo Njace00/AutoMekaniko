@@ -66,8 +66,8 @@ object TutorialManager {
         StepSpec(
             targetActivityClass = MainActivity::class.java,
             targetViewId = R.id.btnTutorial,
-            title = "Step 6 of 7: Re-Run Interactive Tutorial",
-            description = "Tap this 'Tutorial' button in the top-right corner of the top header bar anytime to repeat this interactive onboarding guide!"
+            title = "Step 6 of 7: Interactive Help & Onboarding Guide",
+            description = "Tap this '?' question mark button in the top-right header bar anytime for help or to repeat this interactive onboarding guide!"
         ),
         // Step 6 (Step 7 of 7)
         StepSpec(

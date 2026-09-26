@@ -4,12 +4,19 @@
     <color name="white">#FFFFFFFF</color>
 
     <!-- App Semantic Colors (Light) -->
-    <color name="background_primary">#FFFFFF</color>
-    <color name="background_secondary">#F8F9FA</color>
+    <color name="background_primary">#F4F6F9</color>
+    <color name="background_secondary">#FAFCFD</color>
     <color name="surface_card">#FFFFFF</color>
-    <color name="text_primary">#222222</color>
-    <color name="text_secondary">#555555</color>
-    <color name="text_tertiary">#777777</color>
+    <color name="text_primary">#1A1D21</color>
+    <color name="text_secondary">#4A5056</color>
+    <color name="text_tertiary">#70767D</color>
+
+    <!-- Glassmorphism Tokens (Light) -->
+    <color name="glass_surface">#F5FAFAFD</color>
+    <color name="glass_border">#26E02020</color>
+    <color name="glass_border_subtle">#1FE02020</color>
+    <color name="glass_chip_bg">#18E02020</color>
+    <color name="glass_header_bg">#F2FFFFFF</color>
 
     <!-- Aliases for compatibility -->
     <color name="app_background">@color/background_secondary</color>
@@ -19,6 +26,6 @@
 
     <color name="theme_red">#E02020</color>
     <color name="theme_red_light">#FFF0F0</color>
-    <color name="divider">#E0E0E0</color>
-    <color name="nav_bar_bg">#F8F9FA</color>
+    <color name="divider">#E2E8F0</color>
+    <color name="nav_bar_bg">#F2FAFCFD</color>
 </resources>

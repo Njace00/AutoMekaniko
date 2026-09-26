@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App Semantic Colors (Dark) -->
-    <color name="background_primary">#121212</color>
-    <color name="background_secondary">#1E1E1E</color>
-    <color name="surface_card">#1E1E1E</color>
-    <color name="text_primary">#E1E1E1</color>
-    <color name="text_secondary">#B0B1B1</color>
-    <color name="text_tertiary">#888888</color>
+    <color name="background_primary">#0E1015</color>
+    <color name="background_secondary">#161920</color>
+    <color name="surface_card">#1A1D26</color>
+    <color name="text_primary">#F0F3F6</color>
+    <color name="text_secondary">#B0B6C0</color>
+    <color name="text_tertiary">#808692</color>
+
+    <!-- Glassmorphism Tokens (Dark) -->
+    <color name="glass_surface">#D91E222E</color>
+    <color name="glass_border">#33FF4D4D</color>
+    <color name="glass_border_subtle">#26FF4D4D</color>
+    <color name="glass_chip_bg">#2A261A1A</color>
+    <color name="glass_header_bg">#EE161920</color>
 
     <!-- Aliases for compatibility -->
     <color name="app_background">@color/background_secondary</color>
@@ -16,6 +23,6 @@
 
     <color name="theme_red">#FF4D4D</color>
     <color name="theme_red_light">#2A1A1A</color>
-    <color name="divider">#333333</color>
-    <color name="nav_bar_bg">#1E1E1E</color>
+    <color name="divider">#2A2F3D</color>
+    <color name="nav_bar_bg">#EE161920</color>
 </resources>
