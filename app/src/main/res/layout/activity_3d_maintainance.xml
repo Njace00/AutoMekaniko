@@ -423,4 +423,10 @@
         android:layout_height="80dp"
         app:layout_constraintBottom_toBottomOf="parent" />
 
+    <include
+        android:id="@+id/overlayTutorial"
+        layout="@layout/overlay_tutorial"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

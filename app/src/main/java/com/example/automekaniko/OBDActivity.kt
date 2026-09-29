@@ -455,7 +455,7 @@ class OBDActivity : AppCompatActivity() {
                             speedVal.text = it
                             updateGauge(R.id.cardSpeed, it, 240f)
                         }
-                        cool?.let { 
+                        cool?.let {
                             coolantVal.text = it
                             updateGauge(R.id.cardCoolant, it, 130f, ::getTempColor)
                         }

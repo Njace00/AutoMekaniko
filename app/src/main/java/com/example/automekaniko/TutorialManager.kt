@@ -17,7 +17,6 @@ object TutorialManager {
 
     var isTutorialActive = false
     var currentStepIndex = 0
-    private const val TOTAL_STEPS = 7
 
     private data class StepSpec(
         val targetActivityClass: Class<out AppCompatActivity>,
@@ -27,53 +26,123 @@ object TutorialManager {
     )
 
     private val steps = listOf(
-        // Step 0 (Step 1 of 7)
+        // Step 1: Active Vehicle
         StepSpec(
             targetActivityClass = MainActivity::class.java,
             targetViewId = R.id.cardActiveVehicle,
-            title = "Step 1 of 7: Active Vehicle Profile",
+            title = "Active Vehicle Profile",
             description = "Displays your active vehicle (Toyota Vios / Wigo) with engine specs and oil capacity. Tap here or 'Switch' to switch active vehicle profiles anytime!"
         ),
-        // Step 1 (Step 2 of 7)
+        // Step 2: OBD Telemetry
         StepSpec(
             targetActivityClass = MainActivity::class.java,
             targetViewId = R.id.cardLive,
-            title = "Step 2 of 7: Real-Time OBD-II Telemetry Gauges",
+            title = "Real-Time OBD-II Telemetry Gauges",
             description = "Displays live engine RPM, speed, coolant temp & fuel trim via Bluetooth. Audio and haptic alerts sound if coolant overheats or engine exceeds redline!"
         ),
-        // Step 2 (Step 3 of 7)
+        // Step 3: 3D Guides Hub
         StepSpec(
             targetActivityClass = MainActivity::class.java,
             targetViewId = R.id.card3D,
-            title = "Step 3 of 7: 3D Interactive Repair Guides",
+            title = "3D Interactive Repair Guides",
             description = "Interactive step-by-step repair guides for DTC fault codes and preventive maintenance with 3D model overlays & required tool lists!"
         ),
-        // Step 3 (Step 4 of 7)
+        // Step 4: DTC Card in Guides Hub
         StepSpec(
             targetActivityClass = GuidesActivity::class.java,
             targetViewId = R.id.cardDtc,
-            title = "Step 4 of 7: Trouble Codes Diagnostic Breakdown",
-            description = "View active trouble codes (like P0301 misfire), root cause analysis, multimeter testing specs, and step-by-step repair fixes!"
+            title = "Trouble Codes Diagnostic Hub",
+            description = "View active trouble codes (like P0301 misfire or P2118 throttle motor), root cause analysis, multimeter testing specs, and step-by-step repair fixes!"
         ),
-        // Step 4 (Step 5 of 7)
+        // Step 5: Inside DTC Screen - Dropdown Selector
+        StepSpec(
+            targetActivityClass = DtcActivity::class.java,
+            targetViewId = R.id.menuDtc,
+            title = "DTC Fault Code Selection",
+            description = "Tap this dropdown menu to select specific diagnostic trouble codes (e.g. P0301 Cylinder Misfire, P2118 Throttle Control) for your active vehicle!"
+        ),
+        // Step 6: Inside DTC Screen - Tools & Prep
+        StepSpec(
+            targetActivityClass = DtcActivity::class.java,
+            targetViewId = R.id.btnToolsPrep,
+            title = "Required Tools & Safety Prep",
+            description = "Tap 'Tools & Prep' anytime to view required tools (Multimeter, Socket Wrench), estimated repair time, difficulty level, and safety rules!"
+        ),
+        // Step 7: Inside DTC Screen - Interactive Checklist
+        StepSpec(
+            targetActivityClass = DtcActivity::class.java,
+            targetViewId = R.id.btnOverviewModern,
+            title = "Interactive Repair Checklist",
+            description = "Tap this Checklist icon to open the step-by-step repair checklist! Check off completed steps and read safety warnings as you fix the issue."
+        ),
+        // Step 8: Inside DTC Screen - Tech Specs & Info Panel
+        StepSpec(
+            targetActivityClass = DtcActivity::class.java,
+            targetViewId = R.id.btnInfoModern,
+            title = "Technical Diagnostic Info & Specs",
+            description = "Tap this Info icon to view component multimeter testing specs, harness pinouts, component location notes, and root cause diagnostic guides."
+        ),
+        // Step 9: Inside DTC Screen - 3D Step Controls
+        StepSpec(
+            targetActivityClass = DtcActivity::class.java,
+            targetViewId = R.id.navButtonsSection,
+            title = "3D Step Animation Controls",
+            description = "Use 'Next Step' and 'Prev' to rotate 3D animations and navigate step-by-step through component teardowns and reassembly!"
+        ),
+        // Step 10: Maintenance Card in Guides Hub
         StepSpec(
             targetActivityClass = GuidesActivity::class.java,
             targetViewId = R.id.cardMaintenance,
-            title = "Step 5 of 7: Guided Care & Maintenance Toolkit",
-            description = "Step-by-step preventive care checklists (Oil & Filter, Air Filter, Battery) with required tools lists (Wrench Set, Jack Stand, Screwdriver, Gloves)!"
+            title = "Guided Care & Maintenance Toolkit",
+            description = "Step-by-step preventive care guides (Engine Oil & Filter, Air Filter, Battery) with required tools lists and recommended service intervals!"
         ),
-        // Step 5 (Step 6 of 7)
+        // Step 11: Inside Maintenance Screen - Guide Selector
+        StepSpec(
+            targetActivityClass = MAINTAINANCEActivity::class.java,
+            targetViewId = R.id.menuGuides,
+            title = "Preventive Maintenance Selector",
+            description = "Select preventive care procedures like Engine Oil & Filter Change, Engine Air Filter Replacement, or Battery Replacement!"
+        ),
+        // Step 12: Inside Maintenance Screen - Tools & Prep
+        StepSpec(
+            targetActivityClass = MAINTAINANCEActivity::class.java,
+            targetViewId = R.id.btnToolsPrep,
+            title = "Required Tools & Maintenance Prep",
+            description = "Tap 'Tools & Prep' to check required tools (Oil Filter Wrench, Drain Pan, Gloves), vehicle prep checklist, and time estimates."
+        ),
+        // Step 13: Inside Maintenance Screen - Interactive Checklist
+        StepSpec(
+            targetActivityClass = MAINTAINANCEActivity::class.java,
+            targetViewId = R.id.btnOverviewModern,
+            title = "Maintenance Checklist & Verification",
+            description = "Tap the Checklist icon to follow step-by-step instructions. Check off each task as you complete it to track progress!"
+        ),
+        // Step 14: Inside Maintenance Screen - Fluid & Tech Specs
+        StepSpec(
+            targetActivityClass = MAINTAINANCEActivity::class.java,
+            targetViewId = R.id.btnInfoModern,
+            title = "Spec Details & Fluid Capacities",
+            description = "Tap the Info icon to view oil capacities (e.g., 3.3L 0W-20), oil filter part numbers, tightening torque specs, and maintenance tips."
+        ),
+        // Step 15: Inside Maintenance Screen - 3D Teardown Controls
+        StepSpec(
+            targetActivityClass = MAINTAINANCEActivity::class.java,
+            targetViewId = R.id.navButtonsSection,
+            title = "3D Teardown & Reassembly Controls",
+            description = "Step through 3D maintenance animations using 'Next Step'. Complete all checklist items to unlock subsequent repair phases!"
+        ),
+        // Step 16: Tutorial Help Button
         StepSpec(
             targetActivityClass = MainActivity::class.java,
             targetViewId = R.id.btnTutorial,
-            title = "Step 6 of 7: Interactive Help & Onboarding Guide",
+            title = "Interactive Help & Onboarding Guide",
             description = "Tap this '?' question mark button in the top-right header bar anytime for help or to repeat this interactive onboarding guide!"
         ),
-        // Step 6 (Step 7 of 7)
+        // Step 17: Settings
         StepSpec(
             targetActivityClass = MainActivity::class.java,
             targetViewId = R.id.navSettings,
-            title = "Step 7 of 7: App Preferences & Settings",
+            title = "App Preferences & Settings",
             description = "Customize visual theme (Light/Dark), configure OBD auto-connect, toggle gauge audio alerts, reset checklist progress, or clear DTC cache!"
         )
     )
@@ -87,7 +156,7 @@ object TutorialManager {
     fun advanceStep(activity: AppCompatActivity) {
         if (!isTutorialActive) return
         currentStepIndex++
-        if (currentStepIndex >= TOTAL_STEPS) {
+        if (currentStepIndex >= steps.size) {
             finishTutorial(activity)
         } else {
             val nextSpec = steps[currentStepIndex]
@@ -160,11 +229,18 @@ object TutorialManager {
             finishTutorial(activity)
         }
 
-        tvStepTitle?.text = spec.title
+        tvStepTitle?.text = "Step ${currentStepIndex + 1} of ${steps.size}: ${spec.title}"
         tvDesc?.text = spec.description
 
         val targetView = activity.findViewById<View>(spec.targetViewId)
         if (targetView != null && viewSpotlight != null) {
+            if (targetView.width == 0 || targetView.height == 0) {
+                targetView.post {
+                    renderStepForActivity(activity)
+                }
+                return
+            }
+
             TransitionManager.beginDelayedTransition(overlay, AutoTransition().apply { duration = 250L })
 
             val location = IntArray(2)

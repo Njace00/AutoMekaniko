@@ -103,6 +103,7 @@ class DtcActivity : AppCompatActivity() {
         setupVehicleHeaderButton()
         refreshDtcListForActiveVehicle()
         goToSlide(currentSlideIndex, animated = false, applySlideCamera = false)
+        TutorialManager.checkAndRenderStepOnResume(this)
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -374,8 +375,10 @@ class DtcActivity : AppCompatActivity() {
             showToolsPrepDialog(entry.requiredTools, entry.estimatedTime, entry.difficulty, entry.prerequisites)
         }
 
-        // Automatically show Tools & Prep dialog on entry load
-        showToolsPrepDialog(entry.requiredTools, entry.estimatedTime, entry.difficulty, entry.prerequisites)
+        // Automatically show Tools & Prep dialog on entry load if tutorial is not active
+        if (!TutorialManager.isTutorialActive) {
+            showToolsPrepDialog(entry.requiredTools, entry.estimatedTime, entry.difficulty, entry.prerequisites)
+        }
 
         updateUiState()
         loadGlbModel(entry.glbFile) {

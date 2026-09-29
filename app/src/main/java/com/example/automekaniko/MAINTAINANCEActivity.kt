@@ -129,6 +129,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         setupVehicleHeaderButton()
         refreshGuideListForActiveVehicle()
         goToSlide(currentSlideIndex, animated = false, applySlideCamera = false)
+        TutorialManager.checkAndRenderStepOnResume(this)
     }
 
     override fun onPause() {
@@ -321,8 +322,10 @@ class MAINTAINANCEActivity : AppCompatActivity() {
             showToolsPrepDialog(guide.requiredTools, guide.estimatedTime, guide.difficulty, guide.prerequisites)
         }
 
-        // Automatically show Tools & Prep dialog on guide load
-        showToolsPrepDialog(guide.requiredTools, guide.estimatedTime, guide.difficulty, guide.prerequisites)
+        // Automatically show Tools & Prep dialog on guide load if tutorial is not active
+        if (!TutorialManager.isTutorialActive) {
+            showToolsPrepDialog(guide.requiredTools, guide.estimatedTime, guide.difficulty, guide.prerequisites)
+        }
 
         loadModel(guide.glbFile)
     }
