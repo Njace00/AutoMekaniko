@@ -122,6 +122,18 @@ class OBDActivity : AppCompatActivity() {
         // ── Header Branding ──────────────────────────────────────────────────
         AppNavigation.setupBrandedTitle(this, findViewById(R.id.appTitle))
         AppNavigation.wire(this)
+
+        // Tactile Press Micro-Interactions & Entrance Cascade
+        ViewAnimationUtils.applyPressScale(btnConnect)
+        val coreCards = listOf(
+            findViewById<View>(R.id.cardRpm),
+            findViewById<View>(R.id.cardSpeed),
+            findViewById<View>(R.id.cardCoolant),
+            findViewById<View>(R.id.cardThrottle),
+            findViewById<View>(R.id.cardLoad)
+        )
+        ViewAnimationUtils.animateEntranceCascade(coreCards)
+        coreCards.forEach { ViewAnimationUtils.applyPressScale(it) }
     }
 
     private fun loadSettings() {

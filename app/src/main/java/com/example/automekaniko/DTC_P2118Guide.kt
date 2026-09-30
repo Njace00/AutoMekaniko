@@ -39,12 +39,17 @@ val P2118Guide = DtcGuide(
             animationTime       = f(0),
             animationDurationMs = 700L,
             steps               = listOf(
-                ChecklistStep(""),
-                ChecklistStep(""),
-                ChecklistStep("")
+                ChecklistStep("Verify active DTC P2118 with OBD scanner", "Check freeze frame data for throttle motor voltage drops or limp mode triggers."),
+                ChecklistStep("Turn ignition OFF and disconnect 12V battery", "Disconnecting the negative battery cable prevents electrical shorts during throttle motor servicing."),
+                ChecklistStep("Locate electronic throttle body on intake manifold", "Identify the aluminum throttle body assembly mounted between the intake hose and manifold.")
             ),
             infoTitle = "P2118 Throttle Actuator Diagnostics",
-
+            infoItems = listOf(
+                MAINTAINANCEActivity.InfoItem("DTC Overview", "P2118 indicates Throttle Actuator Control Motor Current Range/Performance fault."),
+                MAINTAINANCEActivity.InfoItem("Failure Symptoms", "Limp Home Mode (max 15 mph), unresponsive gas pedal, idle surge, Check Engine & VSC lights on."),
+                MAINTAINANCEActivity.InfoItem("Motor Resistance Spec", "Measure resistance across motor terminals 1 & 2. Spec: 0.3–100 Ω at 20°C."),
+                MAINTAINANCEActivity.InfoItem("ETCS Fuse Check", "Inspect 10A ETCS fuse in engine compartment fuse box; replace if blown.")
+            )
         ),
 
         DtcSlide(

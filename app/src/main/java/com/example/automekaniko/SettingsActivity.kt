@@ -45,6 +45,19 @@ class SettingsActivity : AppCompatActivity() {
         loadSettings()
         setupListeners()
         AppNavigation.wire(this)
+
+        // Tactile Press Micro-Interactions
+        ViewAnimationUtils.applyPressScaleToAll(
+            binding.cardThemeLight,
+            binding.cardThemeDark,
+            binding.cardThemeSystem,
+            binding.btnSwitchVehicle,
+            binding.btnForgetObd,
+            binding.btnResetChecklists,
+            binding.btnClearDtcCache,
+            binding.btnRestoreDefaults,
+            binding.backBtn
+        )
     }
 
     override fun onResume() {

@@ -46,15 +46,26 @@ class GuidesActivity : AppCompatActivity() {
                 if (isDtcExpanded) "📋 Hide Trouble Codes ▴" else "📋 Trouble Codes Overview ▾"
         }
 
+        val cardDtc = findViewById<View>(R.id.cardDtc)
+        val cardMaint = findViewById<View>(R.id.cardMaintenance)
+        val btnDtcOverview = findViewById<View>(R.id.btnDtcOverview)
+        val btnMaintOverview = findViewById<View>(R.id.btnMaintOverview)
+
+        // Tactile Press Micro-Interactions
+        ViewAnimationUtils.applyPressScaleToAll(cardDtc, cardMaint, btnDtcOverview, btnMaintOverview)
+
+        // Staggered Entrance Cascade
+        ViewAnimationUtils.animateEntranceCascade(listOf(cardDtc, cardMaint))
+
         findViewById<View>(R.id.btnDtcOverview)?.setOnClickListener { toggleDtcExpand() }
         findViewById<View>(R.id.containerDtcPeek)?.setOnClickListener { toggleDtcExpand() }
 
         var isMaintExpanded = false
         val toggleMaintExpand = {
             isMaintExpanded = !isMaintExpanded
-            val cardMaint = findViewById<ViewGroup>(R.id.cardMaintenance)
-            if (cardMaint != null) {
-                TransitionManager.beginDelayedTransition(cardMaint, AutoTransition().apply { duration = 250L })
+            val cardMaintViewGroup = findViewById<ViewGroup>(R.id.cardMaintenance)
+            if (cardMaintViewGroup != null) {
+                TransitionManager.beginDelayedTransition(cardMaintViewGroup, AutoTransition().apply { duration = 250L })
             }
             findViewById<View>(R.id.expandableMaintSection)?.visibility =
                 if (isMaintExpanded) View.VISIBLE else View.GONE
@@ -93,6 +104,6 @@ class GuidesActivity : AppCompatActivity() {
             flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
         }
         startActivity(intent)
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        ViewAnimationUtils.overrideActivityTransition(this, isEntering = true)
     }
 }

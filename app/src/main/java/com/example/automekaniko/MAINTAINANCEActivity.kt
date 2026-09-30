@@ -119,6 +119,16 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         setupControls() // ← wire up tab clicks
         setCameraLockState(true)
 
+        // Tactile Press Micro-Interactions
+        ViewAnimationUtils.applyPressScaleToAll(
+            binding.btnInfoModern,
+            binding.btnOverviewModern,
+            binding.btnToolsPrep,
+            binding.btnNext,
+            binding.btnPrev,
+            binding.backBtn
+        )
+
         binding.backBtn.setOnClickListener {
             finish()
         }
@@ -362,10 +372,25 @@ class MAINTAINANCEActivity : AppCompatActivity() {
         val containerPrereqs = dialogView.findViewById<LinearLayout>(R.id.containerPrereqs)
         containerPrereqs.removeAllViews()
         val prereqCheckBoxes = mutableListOf<androidx.appcompat.widget.AppCompatCheckBox>()
+
+        val redColor = ContextCompat.getColor(this, R.color.theme_red)
+        val grayColor = ContextCompat.getColor(this, R.color.text_secondary)
+        val checkboxTint = android.content.res.ColorStateList(
+            arrayOf(
+                intArrayOf(android.R.attr.state_checked),
+                intArrayOf(-android.R.attr.state_checked)
+            ),
+            intArrayOf(
+                redColor,
+                grayColor
+            )
+        )
+
         prereqs.forEach { prereq ->
             val cb = androidx.appcompat.widget.AppCompatCheckBox(this).apply {
                 text = prereq
                 setTextColor(ContextCompat.getColor(this@MAINTAINANCEActivity, R.color.text_primary))
+                buttonTintList = checkboxTint
                 textSize = 13f
                 setPadding(12, 12, 12, 12)
             }
@@ -683,6 +708,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
                 checkboxIcon.setImageResource(
                     if (isChecked) R.drawable.checkbox_red_checked else R.drawable.checkbox_red_unchecked
                 )
+                ViewAnimationUtils.animateCheckmarkBounce(checkboxIcon)
                 updateCompletionText()
             }
 

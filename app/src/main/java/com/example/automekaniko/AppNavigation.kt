@@ -94,12 +94,14 @@ object AppNavigation {
     }
 
     private fun setNav(activity: AppCompatActivity, viewId: Int, target: Class<out AppCompatActivity>) {
-        activity.findOptional<View>(viewId)?.setOnClickListener {
+        val navView = activity.findOptional<View>(viewId) ?: return
+        ViewAnimationUtils.applyPressScale(navView, 0.92f)
+        navView.setOnClickListener {
             if (activity::class.java == target) return@setOnClickListener
             activity.startActivity(Intent(activity, target).apply {
                 flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
             })
-            activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+            ViewAnimationUtils.overrideActivityTransition(activity, isEntering = true)
         }
     }
 

@@ -37,8 +37,17 @@ class MainActivity : AppCompatActivity() {
         viewBtn.setOnClickListener { go(GuidesActivity::class.java) }
         liveBtn.setOnClickListener { go(OBDActivity::class.java) }
 
+        // Tactile Press Micro-Interactions
+        val cardActiveVehicle = findViewById<View>(R.id.cardActiveVehicle)
+        val btnSwitchVehicle  = findViewById<View>(R.id.btnSwitchVehicle)
+        val btnTutorial       = findViewById<View>(R.id.btnTutorial)
+        ViewAnimationUtils.applyPressScaleToAll(cardActiveVehicle, btnSwitchVehicle, card3D, cardLive, btnTutorial)
+
+        // Staggered Card Entrance Cascade
+        ViewAnimationUtils.animateEntranceCascade(listOf(cardActiveVehicle, card3D, cardLive))
+
         // Tutorial re-run button
-        findViewById<View>(R.id.btnTutorial)?.setOnClickListener {
+        btnTutorial?.setOnClickListener {
             TutorialManager.startTutorial(this)
         }
 
@@ -82,6 +91,6 @@ class MainActivity : AppCompatActivity() {
         startActivity(Intent(this, target).apply {
             flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
         })
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        ViewAnimationUtils.overrideActivityTransition(this, isEntering = true)
     }
 }
