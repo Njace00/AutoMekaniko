@@ -191,13 +191,11 @@
                     android:paddingHorizontal="24dp">
 
                     <ImageView
-                        android:layout_width="54dp"
-                        android:layout_height="54dp"
-                        android:padding="12dp"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:padding="4dp"
                         android:src="@drawable/ic_3d_guides"
                         android:contentDescription="3D Guides Icon"
-                        android:background="@drawable/info_tab_bg"
-                        android:backgroundTint="@color/theme_red_light"
                         android:layout_marginEnd="20dp"/>
 
                     <LinearLayout
@@ -264,13 +262,11 @@
                     android:paddingHorizontal="24dp">
 
                     <ImageView
-                        android:layout_width="54dp"
-                        android:layout_height="54dp"
-                        android:padding="12dp"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:padding="4dp"
                         android:src="@drawable/ic_sensors"
                         android:contentDescription="Live Data Icon"
-                        android:background="@drawable/info_tab_bg"
-                        android:backgroundTint="@color/background_secondary"
                         android:layout_marginEnd="20dp"/>
 
                     <LinearLayout
