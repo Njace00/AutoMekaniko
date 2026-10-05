@@ -5,18 +5,33 @@ import android.content.Intent
 import android.graphics.Rect
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.transition.AutoTransition
-import androidx.transition.TransitionManager
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
+import com.example.automekaniko.ui.components.TutorialOverlay
 
 object TutorialManager {
     const val PREFS_KEY_COMPLETED = "tutorial_completed"
 
-    var isTutorialActive = false
-    var currentStepIndex = 0
+    private val COMPOSE_OVERLAY_ID = View.generateViewId()
+
+    val isTutorialActiveState = mutableStateOf(false)
+    val currentStepIndexState = mutableIntStateOf(0)
+
+    var isTutorialActive: Boolean
+        get() = isTutorialActiveState.value
+        set(value) { isTutorialActiveState.value = value }
+
+    var currentStepIndex: Int
+        get() = currentStepIndexState.intValue
+        set(value) { currentStepIndexState.intValue = value }
+
+    val boundsMap = mutableStateMapOf<Int, Rect>()
 
     private data class StepSpec(
         val targetActivityClass: Class<out AppCompatActivity>,
@@ -99,7 +114,7 @@ object TutorialManager {
         // Step 11: Inside Maintenance Screen - Guide Selector
         StepSpec(
             targetActivityClass = MAINTAINANCEActivity::class.java,
-            targetViewId = R.id.menuGuides,
+            targetViewId = R.id.menuDtc,
             title = "Preventive Maintenance Selector",
             description = "Select preventive care procedures like Engine Oil & Filter Change, Engine Air Filter Replacement, or Battery Replacement!"
         ),
@@ -147,19 +162,45 @@ object TutorialManager {
         )
     )
 
+    var onStepUpdated: (() -> Unit)? = null
+
+    data class StepInfo(
+        val targetActivityClass: Class<out AppCompatActivity>,
+        val targetViewId: Int,
+        val title: String,
+        val description: String,
+        val stepIndex: Int,
+        val totalSteps: Int
+    )
+
+    fun getCurrentStepInfo(): StepInfo? {
+        if (!isTutorialActiveState.value) return null
+        val spec = steps.getOrNull(currentStepIndexState.intValue) ?: return null
+        return StepInfo(
+            targetActivityClass = spec.targetActivityClass,
+            targetViewId = spec.targetViewId,
+            title = spec.title,
+            description = spec.description,
+            stepIndex = currentStepIndexState.intValue,
+            totalSteps = steps.size
+        )
+    }
+
     fun startTutorial(activity: AppCompatActivity) {
-        isTutorialActive = true
-        currentStepIndex = 0
+        isTutorialActiveState.value = true
+        currentStepIndexState.intValue = 0
+        onStepUpdated?.invoke()
         renderStepForActivity(activity)
     }
 
     fun advanceStep(activity: AppCompatActivity) {
-        if (!isTutorialActive) return
-        currentStepIndex++
-        if (currentStepIndex >= steps.size) {
+        if (!isTutorialActiveState.value) return
+        currentStepIndexState.intValue++
+        onStepUpdated?.invoke()
+        if (currentStepIndexState.intValue >= steps.size) {
             finishTutorial(activity)
         } else {
-            val nextSpec = steps[currentStepIndex]
+            val nextSpec = steps[currentStepIndexState.intValue]
             if (activity::class.java != nextSpec.targetActivityClass) {
                 hideOverlay(activity)
                 val intent = Intent(activity, nextSpec.targetActivityClass).apply {
@@ -174,7 +215,11 @@ object TutorialManager {
     }
 
     fun finishTutorial(activity: AppCompatActivity) {
-        isTutorialActive = false
+        isTutorialActiveState.value = false
+        currentStepIndexState.intValue = 0
+        boundsMap.clear()
+        onStepUpdated?.invoke()
+
         val prefs = activity.getSharedPreferences(SettingsActivity.PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit().putBoolean(PREFS_KEY_COMPLETED, true).apply()
         hideOverlay(activity)
@@ -187,97 +232,57 @@ object TutorialManager {
             activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
 
-        Toast.makeText(activity, "Tutorial finished! Tap 'Tutorial' top-right anytime to repeat.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(activity, "Tutorial finished! Tap '?' top-right anytime to repeat.", Toast.LENGTH_SHORT).show()
     }
 
     fun checkAndRenderStepOnResume(activity: AppCompatActivity) {
-        if (!isTutorialActive) return
-        val spec = steps.getOrNull(currentStepIndex) ?: return
+        if (!isTutorialActiveState.value) return
+        val spec = steps.getOrNull(currentStepIndexState.intValue) ?: return
         if (spec.targetActivityClass == activity::class.java) {
-            val overlay = activity.findViewById<View>(R.id.overlayTutorial)
-            overlay?.post {
-                renderStepForActivity(activity)
-            }
+            renderStepForActivity(activity)
         }
     }
 
     private fun hideOverlay(activity: AppCompatActivity) {
-        val overlay = activity.findViewById<View>(R.id.overlayTutorial) ?: return
-        overlay.animate().alpha(0f).setDuration(200L).withEndAction {
-            overlay.visibility = View.GONE
-        }.start()
+        // Clean up legacy ComposeView overlays if present
+        val rootView = activity.findViewById<ViewGroup>(android.R.id.content) ?: return
+        val composeOverlay = rootView.findViewById<View>(COMPOSE_OVERLAY_ID) ?: return
+        rootView.removeView(composeOverlay)
     }
 
     fun renderStepForActivity(activity: AppCompatActivity) {
-        val spec = steps.getOrNull(currentStepIndex) ?: return
+        if (!isTutorialActiveState.value) return
+        val spec = steps.getOrNull(currentStepIndexState.intValue) ?: return
         if (spec.targetActivityClass != activity::class.java) return
 
-        val overlay = activity.findViewById<ViewGroup>(R.id.overlayTutorial) ?: return
-        val viewSpotlight = activity.findViewById<View>(R.id.viewSpotlight)
-        val tvStepTitle = activity.findViewById<TextView>(R.id.tvTutorialStepTitle)
-        val tvDesc = activity.findViewById<TextView>(R.id.tvTutorialDesc)
-        val btnSkip = activity.findViewById<View>(R.id.btnSkipTutorial)
-
-        overlay.visibility = View.VISIBLE
-        overlay.alpha = 1f
-
-        overlay.setOnClickListener {
-            advanceStep(activity)
-        }
-
-        btnSkip?.setOnClickListener {
-            finishTutorial(activity)
-        }
-
-        tvStepTitle?.text = "Step ${currentStepIndex + 1} of ${steps.size}: ${spec.title}"
-        tvDesc?.text = spec.description
-
         val targetView = activity.findViewById<View>(spec.targetViewId)
-        if (targetView != null && viewSpotlight != null) {
-            if (targetView.width == 0 || targetView.height == 0) {
-                targetView.post {
-                    renderStepForActivity(activity)
-                }
-                return
-            }
-
-            TransitionManager.beginDelayedTransition(overlay, AutoTransition().apply { duration = 250L })
-
-            val location = IntArray(2)
-            targetView.getLocationOnScreen(location)
-
-            val overlayLocation = IntArray(2)
-            overlay.getLocationOnScreen(overlayLocation)
-
-            val targetRect = Rect(
-                location[0] - overlayLocation[0],
-                location[1] - overlayLocation[1],
-                location[0] - overlayLocation[0] + targetView.width,
-                location[1] - overlayLocation[1] + targetView.height
-            )
-
-            val params = viewSpotlight.layoutParams as? ViewGroup.MarginLayoutParams
-            if (params != null) {
-                params.width = targetRect.width() + 16.toPx(activity)
-                params.height = targetRect.height() + 16.toPx(activity)
-                params.leftMargin = (targetRect.left - 8.toPx(activity)).coerceAtLeast(0)
-                params.topMargin = (targetRect.top - 8.toPx(activity)).coerceAtLeast(0)
-                viewSpotlight.layoutParams = params
-            }
-
-            val cardDialogue = activity.findViewById<View>(R.id.cardTutorialDialogue)
-            val dialogueParams = cardDialogue?.layoutParams as? ConstraintLayout.LayoutParams
-            if (dialogueParams != null) {
-                val screenHeight = overlay.height.takeIf { it > 0 } ?: activity.resources.displayMetrics.heightPixels
-                val targetCenterY = targetRect.centerY()
-
-                // If target is in top half of screen, move dialogue to bottom (bias = 0.82f)
-                // If target is in bottom half of screen, move dialogue to top (bias = 0.15f)
-                dialogueParams.verticalBias = if (targetCenterY < screenHeight / 2) 0.82f else 0.15f
-                cardDialogue.layoutParams = dialogueParams
+        if (targetView != null) {
+            targetView.post {
+                val location = IntArray(2)
+                targetView.getLocationOnScreen(location)
+                boundsMap[spec.targetViewId] = Rect(
+                    location[0],
+                    location[1],
+                    location[0] + targetView.width,
+                    location[1] + targetView.height
+                )
+                onStepUpdated?.invoke()
             }
         }
-    }
 
-    private fun Int.toPx(context: Context): Int = (this * context.resources.displayMetrics.density).toInt()
+        // All activities now render TutorialOverlay directly inside their root AutoMekanikoTheme Compose tree
+        onStepUpdated?.invoke()
+    }
+}
+
+// Extension Modifier to easily mark Compose elements for tutorial targeting
+fun Modifier.tutorialTarget(viewId: Int): Modifier = this.onGloballyPositioned { coordinates ->
+    val position = coordinates.positionInWindow()
+    val size = coordinates.size
+    TutorialManager.boundsMap[viewId] = Rect(
+        position.x.toInt(),
+        position.y.toInt(),
+        (position.x + size.width).toInt(),
+        (position.y + size.height).toInt()
+    )
 }

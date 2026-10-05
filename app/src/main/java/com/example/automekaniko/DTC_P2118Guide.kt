@@ -1,17 +1,15 @@
 package com.example.automekaniko
 
-// P2118 — Throttle Actuator Control Motor Current Range / Performance
+// P2118 — Throttle Actuator Control Motor Current Range/Performance
 
 private fun f(frame: Int): Float = frame / 24f
 
 val P2118Guide = DtcGuide(
     code        = "P2118",
-    name        = "Throttle Actuator Control Motor Range",
-    description = "This code indicates the electronic throttle body motor is not " +
-            "operating correctly. Common causes include a failing throttle body, " +
-            "carbon buildup, wiring issues, or low battery voltage.",
+    name        = "Throttle Control Motor Power Circuit",
+    description = "P2118 indicates an electrical current or power supply issue with the " +
+            "electronic throttle control actuator motor, forcing limp-mode.",
     parts       = listOf(
-        "Throttle body assembly",
         "Throttle actuator motor",
         "Throttle position sensor",
         "Throttle body gasket",
@@ -39,108 +37,77 @@ val P2118Guide = DtcGuide(
             animationTime       = f(0),
             animationDurationMs = 700L,
             steps               = listOf(
-                ChecklistStep("Verify active DTC P2118 with OBD scanner", "Check freeze frame data for throttle motor voltage drops or limp mode triggers."),
-                ChecklistStep("Turn ignition OFF and disconnect 12V battery", "Disconnecting the negative battery cable prevents electrical shorts during throttle motor servicing."),
-                ChecklistStep("Locate electronic throttle body on intake manifold", "Identify the aluminum throttle body assembly mounted between the intake hose and manifold.")
-            ),
-            infoTitle = "P2118 Throttle Actuator Diagnostics",
-            infoItems = listOf(
-                MAINTAINANCEActivity.InfoItem("DTC Overview", "P2118 indicates Throttle Actuator Control Motor Current Range/Performance fault."),
-                MAINTAINANCEActivity.InfoItem("Failure Symptoms", "Limp Home Mode (max 15 mph), unresponsive gas pedal, idle surge, Check Engine & VSC lights on."),
-                MAINTAINANCEActivity.InfoItem("Motor Resistance Spec", "Measure resistance across motor terminals 1 & 2. Spec: 0.3–100 Ω at 20°C."),
-                MAINTAINANCEActivity.InfoItem("ETCS Fuse Check", "Inspect 10A ETCS fuse in engine compartment fuse box; replace if blown.")
-            )
-        ),
-
-        DtcSlide(
-            title               = "Overview 2",
-            description         = "Initial overview of the engine and throttle body location.",
-            eye                 = Vec3(-0.07f, 0.35f, -0.54f),
-            lookAt              = Vec3(-0.02f, -1.05f, 0.01f),
-            animationStartTime  = f(1),
-            animationTime       = f(60),
-            animationDurationMs = 700L,
-            steps               = listOf(
-                ChecklistStep("Open the hood safely", "Ensure the car is on level ground and the parking brake is set."),
-                ChecklistStep("Locate the throttle body near the intake hose", "It's a large aluminum component connected to the air intake filter box."),
-                ChecklistStep("Inspect for visible damage or loose connectors", "Check if the 6-pin connector is securely pushed in.")
-            ),
-            infoTitle = "P2118 Throttle Actuator Diagnostics",
-            infoItems = listOf(
-                MAINTAINANCEActivity.InfoItem("Failure Symptoms", "Vehicle enters Limp Home Mode (max 15 mph), pedal non-responsive, harsh idle surge, check engine & VSC lights on."),
-                MAINTAINANCEActivity.InfoItem("Motor Resistance Test", "Measure resistance between actuator terminals 1 & 2. Spec is 0.3–100 Ω at 20°C. Open circuit (∞ Ω) indicates burned motor coils."),
-                MAINTAINANCEActivity.InfoItem("ETCS Fuse Check", "Inspect 10A ETCS fuse in engine bay fuse box. A blown fuse cuts power to throttle motor."),
-                MAINTAINANCEActivity.InfoItem("Throttle Relearn", "After cleaning or replacement, disconnect battery (-) for 10 mins, then idle engine for 15 mins with A/C off so ECM relearns throttle stops.")
+                ChecklistStep("Inspect engine bay ETCS fuse (10A)", "Locate engine bay fuse box and check 10A ETCS fuse element for blown wire."),
+                ChecklistStep("Check battery voltage (12.4V+ required)", "Low battery voltage can trigger false ETCS motor codes.")
             )
         ),
 
         DtcSlide(
             title               = "Remove Air Intake Hose",
-            description         = "Disconnect the intake hose to access the throttle body.",
-            eye                 = Vec3(-0.07f, 0.30f, -0.54f),
-            lookAt              = Vec3(0.05f, -0.67f, -0.03f),
-            animationStartTime  = f(70),
-            animationTime       = f(130),
-            animationDurationMs = 800L,
+            description         = "Loosen hose clamps and disconnect air duct from throttle body inlet.",
+            eye                 = Vec3(0.00f, 0.32f, -0.75f),
+            lookAt              = Vec3(-0.08f, 0.12f, -0.05f),
+            animationStartTime  = f(1),
+            animationTime       = f(110),
+            animationDurationMs = 1500L,
+            targetPartName      = "Air Intake Hose",
+            targetPartLocationNote = "Flexible rubber duct clamped to throttle body",
             steps               = listOf(
-                ChecklistStep("Loosen the intake hose clamp", "Use a 10mm socket or a large flat-head screwdriver."),
-                ChecklistStep("Disconnect vacuum lines if needed", "Pull them gently; if they are stuck, use a small pick to loosen the rubber."),
-                ChecklistStep("Carefully pull the intake hose away", "Move it aside to clear a path to the throttle body entrance.")
+                ChecklistStep("Loosen 10mm hose clamp on throttle body inlet", "Unscrew clamp until hose slides off smoothly."),
+                ChecklistStep("Disconnect vacuum hoses attached to intake duct", "Mark hose locations if necessary."),
+                ChecklistStep("Pull intake hose off throttle body spout", "Inspect interior hose walls for oil contamination or tears.")
             )
         ),
 
-
-
         DtcSlide(
-            title               = "Remove Throttle Body",
-            description         = "Unbolt and remove the throttle body assembly.",
-            eye                 = Vec3(-0.07f, 0.30f, -0.54f),
-            lookAt              = Vec3(0.05f, -0.67f, -0.03f),
-            animationStartTime  = f(140),
+            title               = "Disconnect Harness & Unbolt Throttle Body",
+            description         = "Unclip 6-pin ETCS connector and remove 4 retaining bolts.",
+            eye                 = Vec3(0.00f, 0.28f, -0.65f),
+            lookAt              = Vec3(-0.08f, 0.10f, -0.05f),
+            animationStartTime  = f(120),
             animationTime       = f(200),
-            animationDurationMs = 900L,
-            removeFirst         = "Electrical Harness & Coolant Bypass Hoses",
-            teardownPath        = "Intake Hose ➔ Electrical Harness ➔ 4x 10mm Mounting Bolts ➔ Throttle Body",
+            animationDurationMs = 1500L,
+            targetPartName      = "Throttle Body Assembly",
+            targetPartLocationNote = "Secured with four 10mm bolts to intake manifold",
             steps               = listOf(
-                ChecklistStep("Remove the mounting bolts", "Usually four 10mm or 12mm bolts. Loosen them in a cross pattern."),
-                ChecklistStep("Carefully pull out the throttle body", "Be aware that some coolant may leak if it has coolant bypass lines."),
-                ChecklistStep("Remove the old gasket if necessary", "Scrape off any remaining rubber bits from the intake manifold.")
+                ChecklistStep("Press release tab on 6-pin ETCS connector and disconnect", "Inspect pins for green corrosion or bent terminals."),
+                ChecklistStep("Remove 4 mounting bolts (10mm) in cross-pattern", "Keep bolts organized."),
+                ChecklistStep("Carefully detach throttle body from intake manifold", "Discard old paper/rubber gasket.")
             )
         ),
 
-
-
         DtcSlide(
-            title               = "Install New Throttle Body",
-            description         = "Install the replacement throttle body assembly.",
-            eye                 = Vec3(-0.07f, 0.30f, -0.54f),
-            lookAt              = Vec3(0.05f, -0.67f, -0.03f),
+            title               = "Clean Carbon Deposits & Inspect Motor",
+            description         = "Spray throttle cleaner onto cloth and wipe bore and throttle valve edges.",
+            eye                 = Vec3(0.02f, 0.25f, -0.58f),
+            lookAt              = Vec3(-0.05f, 0.05f, -0.05f),
             animationStartTime  = f(210),
-            animationTime       = f(270),
-            animationDurationMs = 1000L,
+            animationTime       = f(290),
+            animationDurationMs = 1500L,
+            targetPartName      = "Throttle Valve Plate",
+            targetPartLocationNote = "Clean carbon buildup around valve perimeter",
             steps               = listOf(
-                ChecklistStep("Install new gasket", "Never reuse an old gasket; it will cause a vacuum leak and high idle."),
-                ChecklistStep("Position the new throttle body", "Make sure the orientation matches the one you removed."),
-                ChecklistStep("Tighten mounting bolts evenly", "Snug them all up first, then torque to around 10-15 Nm.")
+                ChecklistStep("Spray aerosol cleaner on microfiber rag", "Do NOT spray directly onto electronic motor housing!"),
+                ChecklistStep("Wipe dark carbon ridge around valve perimeter", "Ensure plate moves smoothly when gently pushed."),
+                ChecklistStep("Measure motor coil resistance with multimeter (0.3–10 Ω)", "If resistance is infinite or zero, replace throttle assembly.")
             )
         ),
 
         DtcSlide(
-            title               = "Reconnect Components",
-            description         = "Reconnect the electrical connector and intake hose.",
-            eye                 = Vec3(-0.07f, 0.30f, -0.54f),
-            lookAt              = Vec3(0.05f, -0.67f, -0.03f),
-            animationStartTime  = f(280),
-            animationTime       = f(330),
-            animationDurationMs = 800L,
+            title               = "Reinstall with New Gasket & Calibrate",
+            description         = "Install new gasket, torque bolts to 10 Nm, and perform idle relearn.",
+            eye                 = Vec3(0.00f, 0.32f, -0.75f),
+            lookAt              = Vec3(-0.08f, 0.12f, -0.05f),
+            animationStartTime  = f(300),
+            animationTime       = f(340),
+            animationDurationMs = 1500L,
+            targetPartName      = "New Throttle Gasket",
+            targetPartLocationNote = "Torqued to 10 Nm (7 ft-lb)",
             steps               = listOf(
-                ChecklistStep("Reconnect the throttle connector", "Push it in until you hear a distinct click."),
-                ChecklistStep("Reinstall intake hose", "Ensure it is seated fully over the throttle body mouth."),
-                ChecklistStep("Secure all hose clamps properly", "A loose clamp after the MAF sensor causes lean codes.")
+                ChecklistStep("Place new gasket on intake manifold mating surface", "Ensure proper orientation."),
+                ChecklistStep("Torque 4 mounting bolts in cross-pattern to 10 Nm (7 ft-lb)", "Avoid overtightening into plastic intake manifold."),
+                ChecklistStep("Reconnect battery, turn ignition ON for 10s without starting", "Allows ECM to perform initial throttle zero-position calibration.")
             )
-        ),
-
-
-
+        )
     )
 )

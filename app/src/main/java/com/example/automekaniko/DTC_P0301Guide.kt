@@ -98,73 +98,50 @@ val P0301Guide = DtcGuide(
             lookAt             = Vec3(0.10f, -0.30f,  0.00f),
             animationStartTime = f(170),
             animationTime      = f(220),
-            animationDurationMs = 650L,
-            targetPartName     = "Spark Plug #1",
-            targetPartLocationNote = "Deep inside the cylinder 1 spark plug well",
-            steps              = listOf(
-                ChecklistStep("Attach a spark plug socket (16mm) to an extension bar", "The socket should have a rubber insert or magnet to hold the plug."),
-                ChecklistStep("Insert it into the spark plug well and turn counter-clockwise", "If it's very tight, use a bit of penetrating oil and wait.", warning = "Do not force if stuck cold! Allow engine to cool or spray penetrating lube to avoid snapping the plug."),
-                ChecklistStep("Carefully remove the spark plug and set it aside for inspection", "Check the tip for soot, oil, or melted electrodes.")
-            )
-        ),
-
-
-
-
-        DtcSlide(
-            title              = "Replace with the new one",
-            description        = "Install the new spark plug with the correct torque.",
-            eye                = Vec3(0.04f,  0.33f, -0.7774f),
-            lookAt             = Vec3(0.10f,  0.20f,  0.00f),
-            animationStartTime = f(240),
-            animationTime      = f(300),
             animationDurationMs = 1500L,
+            targetPartName     = "Spark Plug #1",
+            targetPartLocationNote = "Deep inside cylinder #1 well",
             steps              = listOf(
-                ChecklistStep("Thread the new spark plug in by hand to avoid cross-threading", "You should be able to turn it several times without any tools."),
-                ChecklistStep("Tighten with a spark plug socket to 18–25 Nm (do not overtighten)", "Overtightening can strip the threads in the aluminum engine head."),
-                ChecklistStep("Verify the plug is seated flush and secure", "It should feel solid and not wiggle at all."),
-                ChecklistStep("Apply a small amount of dielectric grease inside the coil boot (optional)", "This helps prevent moisture entry and makes future removal easier.")
+                ChecklistStep("Attach 5/8 spark plug socket to extension bar", "Ensure socket has rubber insert to hold the plug."),
+                ChecklistStep("Lower socket into well and loosen counter-clockwise", "Turn steadily until threads disengage completely."),
+                ChecklistStep("Lift spark plug out carefully", "Inspect electrode for black soot, oil, or worn gap.")
             )
         ),
 
 
         DtcSlide(
-            title              = "Put back the Ignition Coil",
-            description        = "Reinstall the ignition coil onto cylinder 1.",
-            eye                = Vec3(0.04f,  0.33f, -0.7774f),
-            lookAt             = Vec3(0.10f,  0.20f,  0.00f),
-            animationStartTime = f(310),
-            animationTime      = f(360),
-            animationDurationMs = 650L,
+            title              = "Install New Spark Plug & Torque",
+            description        = "Hand-thread new plug and torque to factory specs.",
+            eye                = Vec3(0.08f,  0.47f, -0.64f),
+            lookAt             = Vec3(0.10f, -0.30f,  0.00f),
+            animationStartTime = f(230),
+            animationTime      = f(270),
+            animationDurationMs = 1500L,
+            targetPartName     = "New Spark Plug #1",
+            targetPartLocationNote = "Torqued to 18–25 Nm (13–18 lb-ft)",
             steps              = listOf(
-                ChecklistStep("Lower the ignition coil back into the spark plug well", "Align it with the hole and the bolt mounting point."),
-                ChecklistStep("Press it firmly until it seats onto the plug", "You should feel a slight 'click' as the boot engages the plug top."),
-                ChecklistStep("Reinstall and tighten the retaining bolt", "Just snug it up; no need to overtighten an 8mm bolt."),
-                ChecklistStep("Reconnect the electrical connector until it clicks", "The click ensures the locking tab is engaged.")
+                ChecklistStep("Check new plug gap with feeler gauge (1.1mm)", "Adjust electrode gently if out of spec."),
+                ChecklistStep("Hand-thread new spark plug clockwise", "Hand-threading prevents cross-threading aluminum cylinder head threads."),
+                ChecklistStep("Torque with torque wrench to 18–25 Nm (13–18 lb-ft)", "Do not over-tighten!")
             )
         ),
 
 
         DtcSlide(
-            title              = "Assemble the Engine Top Cover Again",
-            description        = "Reinstall the engine cover and verify the repair.",
+            title              = "Reinstall Ignition Coil & Reconnect",
+            description        = "Reinsert coil, tighten 8mm bolt, and reconnect harness.",
             eye                = Vec3(0.04f,  0.33f, -0.7774f),
             lookAt             = Vec3(0.10f,  0.20f,  0.00f),
-            animationStartTime = f(370),
-            animationTime      = f(430),
-            animationDurationMs = 650L,
+            animationStartTime = f(280),
+            animationTime      = f(310),
+            animationDurationMs = 1500L,
+            targetPartName     = "Ignition Coil #1",
+            targetPartLocationNote = "Reinstalled & harness clipped",
             steps              = listOf(
-                ChecklistStep("Place the engine top cover back into position", "Ensure it's oriented correctly (logo facing up)."),
-                ChecklistStep("Clip or bolt it down securely", "Make sure no wires are pinched under the cover."),
-                ChecklistStep("Start the engine and listen for smooth idle", "The misfire (shaking) should be gone now."),
-                ChecklistStep("Use an OBD scanner to clear the P0301 code and confirm no reoccurrence", "Clear the code and drive for 10 minutes to see if the check engine light returns.")
-            ),
-            infoTitle = "P0301 Final Check",
-            infoItems = listOf(
-                MAINTAINANCEActivity.InfoItem("Tip", "If the code returns, try swapping the coil from cylinder 1 to cylinder 2 to see if the code changes to P0302."),
-                MAINTAINANCEActivity.InfoItem("Note", "Always use the exact spark plug model recommended by your car manufacturer.")
+                ChecklistStep("Apply small dab of dielectric grease inside coil boot", "Prevents moisture ingress and flashover."),
+                ChecklistStep("Push coil firmly onto spark plug tip", "Ensure it seats fully into the well."),
+                ChecklistStep("Tighten 8mm retaining bolt and click harness connector", "Listen for audible click from plastic harness latch.")
             )
         )
-
     )
 )

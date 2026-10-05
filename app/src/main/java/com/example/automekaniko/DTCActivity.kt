@@ -1,916 +1,225 @@
 package com.example.automekaniko
 
-import android.animation.ValueAnimator
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.os.SystemClock
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.view.animation.DecelerateInterpolator
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.core.content.edit
-import androidx.core.view.isVisible
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.lifecycleScope
-import com.example.automekaniko.databinding.Activity3dDtcGuideBinding
+import com.example.automekaniko.ui.screens.DtcScreen
+import com.example.automekaniko.ui.theme.AutoMekanikoTheme
 import io.github.sceneview.SceneView
-import io.github.sceneview.gesture.CameraGestureDetector
 import io.github.sceneview.loaders.ModelLoader
 import io.github.sceneview.math.Position
 import io.github.sceneview.node.ModelNode
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
 class DtcActivity : AppCompatActivity() {
 
-    private lateinit var binding: Activity3dDtcGuideBinding
     private var dtcList: List<DtcGuide> = dtcGuides
+    private lateinit var sceneViewContainer: View
+    private lateinit var sceneView: SceneView
+    private lateinit var modelLoader: ModelLoader
 
-    private lateinit var sceneView:          SceneView
-    private lateinit var modelLoader:        ModelLoader
+    private val activeVehicleState = mutableStateOf(VehicleManager.VIOS)
+    private val selectedDtcGuideState = mutableStateOf<DtcGuide?>(null)
+    private val currentSlideIndexState = mutableIntStateOf(0)
+    private val checkedStepIndicesState = mutableStateOf<Set<Int>>(emptySet())
+    private val isDarkThemeState = mutableStateOf(false)
 
-    private var isInfoOpen = false
-    private var dtcConfirmedInSession = false
-
-    private val previewGlbFile = "Vehicle Preventive Maintenance Checklist (VPMC).glb"
-
-    private var currentModelNode:  ModelNode? = null
-    private var currentEntry:      DtcGuide?  = null
-    private var currentSlideIndex: Int        = 0
-    private var isCameraLocked:    Boolean    = true
+    // Per-Slide Checklist Memory Map
     private val checkedStepsBySlide = mutableMapOf<Int, MutableSet<Int>>()
 
-    private var cameraAnimJob: Job? = null
-    private var animScrubJob:  Job? = null
+    private var currentModelNode: ModelNode? = null
+    private var currentEntry: DtcGuide? = null
 
-    private var currentCameraEye   = Vec3(0f, 0f, 0f)
-    private var currentOrbitTarget = Vec3(0f, 0.5f, 0f)
+    // Vsync-Driven Animation & Camera Interpolation State
+    private var is3DTransitionActive = false
+    private var animStartMs: Long = 0L
+    private var transitionDurationMs: Long = 1000L
 
-    private var savedManipulator:    CameraGestureDetector.CameraManipulator? = null
-    private var manipulatorCaptured: Boolean = false
+    private var startAnimTime: Float = 0f
+    private var targetAnimTime: Float = 0f
+    private var lastAppliedAnimTime: Float = -1f
 
-    private var currentAnimTime: Float = 0f
-    private var lockedAnimTime:  Float = 0f
-    private var isScrubbing:     Boolean = false
+    private var startCameraEye = Vec3(-2.20f, 1.20f, -2.40f)
+    private var targetCameraEye = Vec3(-2.20f, 1.20f, -2.40f)
+    private var currentCameraEye = Vec3(-2.20f, 1.20f, -2.40f)
 
-    // -------------------------------------------------------------------------
-    // Lifecycle
-    // -------------------------------------------------------------------------
+    private var startCameraLook = Vec3(0.00f, 0.20f, 0.00f)
+    private var targetCameraLook = Vec3(0.00f, 0.20f, 0.00f)
+    private var currentCameraLookAt = Vec3(0.00f, 0.20f, 0.00f)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        binding = Activity3dDtcGuideBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
-        // ── Header Branding ──────────────────────────────────────────────────
-        AppNavigation.setupBrandedTitle(this, binding.appTitle)
-        AppNavigation.wire(this)
-
-        sceneView = binding.sceneView
-        binding.btnInfoModern.setOnClickListener { toggleInfoPanel() }
-        binding.btnCloseInfo.setOnClickListener { closeInfoPanel() }
-        binding.btnOverviewModern.setOnClickListener { toggleChecklistPanel() }
-        binding.btnCloseChecklist.setOnClickListener { closeChecklistPanel() }
-
+        // Inflate SceneView from XML layout to ensure full Filament engine & lighting initialization
+        sceneViewContainer = LayoutInflater.from(this).inflate(R.layout.layout_scene_view, null)
+        sceneView = sceneViewContainer.findViewById(R.id.sceneViewInternal)
         modelLoader = ModelLoader(sceneView.engine, this)
 
+        isDarkThemeState.value = isDarkTheme(this)
+        lockViewportGestures()
+        setupVsyncFrameLoop()
+        refreshDtcListForActiveVehicle()
+
+        setContent {
+            AutoMekanikoTheme(darkTheme = isDarkThemeState.value) {
+                DtcScreen(
+                    activeVehicle = activeVehicleState.value,
+                    availableDtcGuides = dtcList,
+                    selectedDtcGuide = selectedDtcGuideState.value,
+                    currentSlideIndex = currentSlideIndexState.intValue,
+                    sceneViewInstance = sceneViewContainer,
+                    checkedStepIndices = checkedStepIndicesState.value,
+                    onVehicleUpdated = { updatedVehicle ->
+                        activeVehicleState.value = updatedVehicle
+                        VehicleManager.setActiveVehicle(this, updatedVehicle)
+                        refreshDtcListForActiveVehicle()
+                    },
+                    onDtcGuideSelected = { guide ->
+                        loadDtcEntry(guide)
+                    },
+                    onStepCheckedChange = { stepIdx, isChecked ->
+                        toggleStepChecked(stepIdx, isChecked)
+                    },
+                    onNextStepClick = { onNextClicked() },
+                    onPrevStepClick = { onPrevClicked() },
+                    onBackClick = { finish() },
+                    onHomeClick = { goHome() },
+                    onSettingsClick = { goSettings() }
+                )
+            }
+        }
+    }
+
+    private fun lockViewportGestures() {
+        // Lock out manual touch dragging, orbiting, and zoom gestures so the viewport is non-interactive
+        sceneView.setOnTouchListener { _, _ -> true }
+        sceneView.setOnGenericMotionListener(null)
+    }
+
+    private fun setupVsyncFrameLoop() {
+        // Synchronize 3D GLB model bone animation and camera pose directly with Filament vsync 60 FPS / 120 FPS render loop
         sceneView.onFrame = { _ ->
-            if (!isScrubbing) {
-                val animator = currentModelNode?.modelInstance?.animator
-                if (animator != null) {
-                    applyAnimationClips(animator, lockedAnimTime)
-                    animator.updateBoneMatrices()
+            if (is3DTransitionActive) {
+                val elapsed = SystemClock.uptimeMillis() - animStartMs
+                val rawT = (elapsed.toFloat() / transitionDurationMs).coerceIn(0f, 1f)
+                val easedT = easeInOutCubic(rawT)
+
+                // 1. Interpolate GLB bone animation across all tracks
+                val currAnimTime = lerp(startAnimTime, targetAnimTime, easedT)
+                applyAnimationTime(currAnimTime)
+
+                // 2. Interpolate Camera Eye and LookAt targets
+                val eyeX = lerp(startCameraEye.x, targetCameraEye.x, easedT)
+                val eyeY = lerp(startCameraEye.y, targetCameraEye.y, easedT)
+                val eyeZ = lerp(startCameraEye.z, targetCameraEye.z, easedT)
+
+                val lookX = lerp(startCameraLook.x, targetCameraLook.x, easedT)
+                val lookY = lerp(startCameraLook.y, targetCameraLook.y, easedT)
+                val lookZ = lerp(startCameraLook.z, targetCameraLook.z, easedT)
+
+                sceneView.cameraNode.position = Position(eyeX, eyeY, eyeZ)
+                sceneView.cameraNode.lookAt(Position(lookX, lookY, lookZ))
+
+                currentCameraEye = Vec3(eyeX, eyeY, eyeZ)
+                currentCameraLookAt = Vec3(lookX, lookY, lookZ)
+
+                if (rawT >= 1.0f) {
+                    is3DTransitionActive = false
                 }
             }
         }
-
-        captureManipulatorOnce()
-        setupDtcSelector()
-        setupVehicleHeaderButton()
-        setupControls()
-        setCameraLockState(true)
-
-        // Tactile Press Micro-Interactions
-        ViewAnimationUtils.applyPressScaleToAll(
-            binding.btnInfoModern,
-            binding.btnOverviewModern,
-            binding.btnToolsPrep,
-            binding.btnNext,
-            binding.btnPrev,
-            binding.backBtn
-        )
-
-        binding.backBtn.setOnClickListener { finish() }
     }
 
     override fun onResume() {
         super.onResume()
-        setupVehicleHeaderButton()
+        isDarkThemeState.value = isDarkTheme(this)
         refreshDtcListForActiveVehicle()
-        goToSlide(currentSlideIndex, animated = false, applySlideCamera = false)
         TutorialManager.checkAndRenderStepOnResume(this)
     }
 
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-    }
-
-    private fun loadPreviewModel() {
-        lifecycleScope.launch {
-            delay(200.milliseconds)
-            loadGlbModel(previewGlbFile)
-            currentEntry = null
-            currentSlideIndex = 0
-            dtcConfirmedInSession = false
-        }
-    }
-
     override fun onPause() {
-        cameraAnimJob?.cancel()
-        animScrubJob?.cancel()
+        is3DTransitionActive = false
         super.onPause()
-    }
-
-    override fun onDestroy() {
-        cameraAnimJob?.cancel()
-        animScrubJob?.cancel()
-        currentModelNode?.let {
-            runCatching {
-                sceneView.removeChildNode(it)
-                it.destroy()
-            }
-            currentModelNode = null
-        }
-        super.onDestroy()
-    }
-
-
-
-    // -------------------------------------------------------------------------
-    // INFO panel
-    // -------------------------------------------------------------------------
-
-    private fun toggleInfoPanel() {
-        isInfoOpen = !isInfoOpen
-        if (isInfoOpen) {
-            openInfoPanel()
-        } else {
-            closeInfoPanel()
-        }
-    }
-
-    private fun openInfoPanel() {
-        binding.btnInfoModern.visibility = View.GONE
-        binding.infoSlidePanel.animate().cancel()
-        binding.infoSlidePanel.scaleX = 0.8f
-        binding.infoSlidePanel.scaleY = 0.8f
-        binding.infoSlidePanel.alpha = 0f
-        binding.infoSlidePanel.visibility = View.VISIBLE
-        binding.infoSlidePanel.animate()
-            .scaleX(1f)
-            .scaleY(1f)
-            .alpha(1f)
-            .setDuration(260L)
-            .setInterpolator(DecelerateInterpolator())
-            .start()
-    }
-
-    private fun closeInfoPanel() {
-        binding.infoSlidePanel.animate().cancel()
-        binding.infoSlidePanel.animate()
-            .scaleX(0.8f)
-            .scaleY(0.8f)
-            .alpha(0f)
-            .setDuration(220L)
-            .setInterpolator(DecelerateInterpolator())
-            .withEndAction {
-                binding.infoSlidePanel.visibility = View.GONE
-                binding.btnInfoModern.visibility = View.VISIBLE
-            }
-            .start()
-    }
-
-    private var isChecklistOpen = false
-
-    private fun toggleChecklistPanel() {
-        isChecklistOpen = !isChecklistOpen
-        if (isChecklistOpen) {
-            openChecklistPanel()
-        } else {
-            closeChecklistPanel()
-        }
-    }
-
-    private fun openChecklistPanel() {
-        binding.btnOverviewModern.visibility = View.GONE
-        binding.checklistSlidePanel.animate().cancel()
-        binding.checklistSlidePanel.scaleX = 0.8f
-        binding.checklistSlidePanel.scaleY = 0.8f
-        binding.checklistSlidePanel.alpha = 0f
-        binding.checklistSlidePanel.visibility = View.VISIBLE
-        binding.checklistSlidePanel.animate()
-            .scaleX(1f)
-            .scaleY(1f)
-            .alpha(1f)
-            .setDuration(260L)
-            .setInterpolator(DecelerateInterpolator())
-            .start()
-    }
-
-    private fun closeChecklistPanel() {
-        isChecklistOpen = false
-        binding.checklistSlidePanel.animate().cancel()
-        binding.checklistSlidePanel.animate()
-            .scaleX(0.8f)
-            .scaleY(0.8f)
-            .alpha(0f)
-            .setDuration(220L)
-            .setInterpolator(DecelerateInterpolator())
-            .withEndAction {
-                binding.checklistSlidePanel.visibility = View.GONE
-                binding.btnOverviewModern.visibility = View.VISIBLE
-            }
-            .start()
-    }
-
-    private fun updateOverviewButtonPosition(hasInfoButton: Boolean) {
-        val targetMarginTop = if (hasInfoButton) 68.toPx() else 12.toPx()
-        val params = binding.btnOverviewModern.layoutParams as? android.view.ViewGroup.MarginLayoutParams ?: return
-        if (params.topMargin != targetMarginTop) {
-            androidx.transition.TransitionManager.beginDelayedTransition(
-                binding.mainCard,
-                androidx.transition.AutoTransition().apply { duration = 280L }
-            )
-            params.topMargin = targetMarginTop
-            binding.btnOverviewModern.layoutParams = params
-        }
-    }
-
-    private fun updateInfoPanel(slide: DtcSlide) {
-        val fallbackItems = mutableListOf<MAINTAINANCEActivity.InfoItem>()
-        val guide = currentEntry
-        
-        // For DTC, we almost always want info visible (fallback to code info)
-        binding.btnInfoModern.visibility = View.VISIBLE
-        updateOverviewButtonPosition(hasInfoButton = true)
-
-        if (slide.infoItems.isEmpty()) {
-            guide?.let {
-                fallbackItems.add(MAINTAINANCEActivity.InfoItem("DTC", "${it.code} - ${it.name}"))
-                fallbackItems.add(MAINTAINANCEActivity.InfoItem("Guide", it.description))
-                if (it.parts.isNotEmpty()) {
-                    fallbackItems.add(MAINTAINANCEActivity.InfoItem("Parts", it.parts.joinToString(", ")))
-                }
-            }
-            if (slide.steps.isNotEmpty()) {
-                val stepsText = slide.steps.joinToString("\n") { it.label }
-                fallbackItems.add(MAINTAINANCEActivity.InfoItem("Current Step", stepsText))
-            }
-        }
-
-        val items = slide.infoItems.ifEmpty { fallbackItems }
-        binding.tvInfoPanelTitle.text = slide.infoTitle ?: "Recommended Info"
-        binding.infoItemsContainer.removeAllViews()
-
-        val primaryTextColor = ContextCompat.getColor(this, R.color.text_primary)
-
-        items.forEach { item ->
-            val itemLayout = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    setMargins(0, 0, 0, 16.toPx())
-                }
-            }
-
-            val titleTv = TextView(this).apply {
-                text = item.title
-                setTextColor(primaryTextColor)
-                textSize = 15f
-                setTypeface(null, android.graphics.Typeface.BOLD)
-                setPadding(0, 0, 0, 4.toPx())
-            }
-            itemLayout.addView(titleTv)
-
-            if (item.imageResId != null) {
-                val rowContainer = LinearLayout(this).apply {
-                    orientation = LinearLayout.HORIZONTAL
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    )
-                }
-                val iv = ImageView(this).apply {
-                    layoutParams = LinearLayout.LayoutParams(
-                        72.toPx(),
-                        72.toPx()
-                    ).apply {
-                        setMargins(0, 0, 12.toPx(), 0)
-                    }
-                    setImageResource(item.imageResId)
-                    scaleType = ImageView.ScaleType.FIT_CENTER
-                }
-                rowContainer.addView(iv)
-
-                val descTv = TextView(this).apply {
-                    layoutParams = LinearLayout.LayoutParams(
-                        0,
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        1f
-                    )
-                    text = item.description
-                    setTextColor(primaryTextColor)
-                    textSize = 13.5f
-                    setLineSpacing(0f, 1.2f)
-                }
-                rowContainer.addView(descTv)
-                itemLayout.addView(rowContainer)
-            } else {
-                val descTv = TextView(this).apply {
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    )
-                    text = item.description
-                    setTextColor(primaryTextColor)
-                    textSize = 13.5f
-                    setLineSpacing(0f, 1.2f)
-                }
-                itemLayout.addView(descTv)
-            }
-
-            binding.infoItemsContainer.addView(itemLayout)
-        }
-    }
-
-    private fun Int.toPx(): Int = (this * resources.displayMetrics.density).toInt()
-
-    // -------------------------------------------------------------------------
-    // Load entry
-    // -------------------------------------------------------------------------
-
-    private fun setupVehicleHeaderButton() {
-        val btnHeaderVehicle = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnHeaderVehicle)
-        fun updateButtonText() {
-            val vehicle = VehicleManager.getActiveVehicle(this)
-            btnHeaderVehicle?.text = "🚘 ${vehicle.name.replace("Toyota ", "")}"
-        }
-        updateButtonText()
-        btnHeaderVehicle?.setOnClickListener {
-            VehicleManager.showSelectorDialog(this) {
-                updateButtonText()
-                refreshDtcListForActiveVehicle()
-            }
-        }
-    }
-
-    private fun loadDtcEntry(entry: DtcGuide) {
-        currentEntry      = entry
-        currentSlideIndex = 0
-        checkedStepsBySlide.clear()
-        currentAnimTime   = 0f
-        lockedAnimTime    = 0f
-
-        // Update Meta Bar
-        binding.chipDifficulty.text = entry.difficulty
-        binding.tvEstTime.text = "⏱ ${entry.estimatedTime}"
-        binding.btnToolsPrep.setOnClickListener {
-            showToolsPrepDialog(entry.requiredTools, entry.estimatedTime, entry.difficulty, entry.prerequisites)
-        }
-
-        // Automatically show Tools & Prep dialog on entry load if tutorial is not active
-        if (!TutorialManager.isTutorialActive) {
-            showToolsPrepDialog(entry.requiredTools, entry.estimatedTime, entry.difficulty, entry.prerequisites)
-        }
-
-        updateUiState()
-        loadGlbModel(entry.glbFile) {
-            currentSlideIndex = 0
-            goToSlide(0, animated = false, applySlideCamera = true)
-            updateUiState()
-        }
-    }
-
-    private fun showToolsPrepDialog(
-        tools: List<String>,
-        time: String,
-        difficulty: String,
-        prereqs: List<String>
-    ) {
-        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_tools_prep, null)
-        val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
-            .setView(dialogView)
-            .create()
-
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-
-        dialogView.findViewById<TextView>(R.id.tvDialogDifficulty).text = "Difficulty: $difficulty"
-        dialogView.findViewById<TextView>(R.id.tvDialogTime).text = "⏱ Est. Time: $time"
-
-        val cgTools = dialogView.findViewById<com.google.android.material.chip.ChipGroup>(R.id.cgTools)
-        cgTools.removeAllViews()
-        tools.forEach { tool ->
-            val chip = com.google.android.material.chip.Chip(this).apply {
-                text = tool
-                isClickable = false
-                isCheckable = false
-                setChipBackgroundColorResource(R.color.theme_red_light)
-                setTextColor(ContextCompat.getColor(this@DtcActivity, R.color.theme_red))
-            }
-            cgTools.addView(chip)
-        }
-
-        val containerPrereqs = dialogView.findViewById<LinearLayout>(R.id.containerPrereqs)
-        containerPrereqs.removeAllViews()
-        val prereqCheckBoxes = mutableListOf<androidx.appcompat.widget.AppCompatCheckBox>()
-
-        val redColor = ContextCompat.getColor(this, R.color.theme_red)
-        val grayColor = ContextCompat.getColor(this, R.color.text_secondary)
-        val checkboxTint = android.content.res.ColorStateList(
-            arrayOf(
-                intArrayOf(android.R.attr.state_checked),
-                intArrayOf(-android.R.attr.state_checked)
-            ),
-            intArrayOf(
-                redColor,
-                grayColor
-            )
-        )
-
-        prereqs.forEach { prereq ->
-            val cb = androidx.appcompat.widget.AppCompatCheckBox(this).apply {
-                text = prereq
-                setTextColor(ContextCompat.getColor(this@DtcActivity, R.color.text_primary))
-                buttonTintList = checkboxTint
-                textSize = 13f
-                setPadding(12, 12, 12, 12)
-            }
-            containerPrereqs.addView(cb)
-            prereqCheckBoxes.add(cb)
-        }
-
-        dialogView.findViewById<View>(R.id.btnCloseDialog).setOnClickListener { dialog.dismiss() }
-        dialogView.findViewById<View>(R.id.btnConfirmPrep).setOnClickListener {
-            val allChecked = prereqCheckBoxes.isEmpty() || prereqCheckBoxes.all { it.isChecked }
-            if (allChecked) {
-                dialog.dismiss()
-            } else {
-                Toast.makeText(this, "Please complete the checklist first!", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        dialog.show()
-    }
-
-    // -------------------------------------------------------------------------
-    // Model loading
-    // -------------------------------------------------------------------------
-
-    private fun loadGlbModel(fileName: String, onLoaded: (() -> Unit)? = null) {
-        lifecycleScope.launch {
-            currentModelNode?.let {
-                sceneView.removeChildNode(it)
-                it.destroy()
-                currentModelNode = null
-            }
-
-            Log.d("DtcActivity", "Loading GLB: $fileName")
-            val instance = try {
-                modelLoader.createModelInstance(assetFileLocation = fileName)
-            } catch (e: Exception) {
-                Log.e("DtcActivity", "Exception loading GLB: $fileName", e)
-                null
-            }
-
-            if (instance == null) {
-                Log.e("DtcActivity", "GLB not found or failed to load: $fileName")
-                Toast.makeText(
-                    this@DtcActivity,
-                    "Could not load model: $fileName\nCheck assets folder.",
-                    Toast.LENGTH_LONG
-                ).show()
-                return@launch
-            }
-
-            val modelNode = ModelNode(
-                modelInstance = instance,
-                autoAnimate = false,
-                scaleToUnits = 1.5f
-            ).apply {
-                isEditable = !isCameraLocked
-                playingAnimations.clear()
-            }
-
-            sceneView.addChildNode(modelNode)
-            currentModelNode = modelNode
-
-            lockedAnimTime = 0f
-            applyAnimationTime(0f)
-            onLoaded?.invoke()
-        }
-    }
-
-    // -------------------------------------------------------------------------
-    // Animation
-    // -------------------------------------------------------------------------
-
-    private fun applyAnimationTime(time: Float) {
-        val animator = currentModelNode?.modelInstance?.animator ?: return
-        lockedAnimTime  = time
-        currentAnimTime = time
-        applyAnimationClips(animator, time)
-        animator.updateBoneMatrices()
-    }
-
-    private fun applyAnimationClips(
-        animator: com.google.android.filament.gltfio.Animator,
-        time: Float
-    ) {
-        val clipStartTimes = currentEntry?.animationClipStartTimes.orEmpty()
-        repeat(animator.animationCount) { i ->
-            val clipStartTime = clipStartTimes.getOrNull(i) ?: 0f
-            if (time >= clipStartTime) {
-                animator.applyAnimation(i, clampedAnimationTime(animator, i, time))
-            }
-        }
-    }
-
-    private fun clampedAnimationTime(
-        animator: com.google.android.filament.gltfio.Animator,
-        animationIndex: Int,
-        time: Float
-    ): Float {
-        val duration = animator.getAnimationDuration(animationIndex)
-        return time.coerceIn(0f, duration)
-    }
-
-    private fun scrubAnimationTo(
-        slideStartTime: Float,
-        targetTime: Float,
-        durationMs: Long = 650L
-    ) {
-        animScrubJob?.cancel()
-        animScrubJob = lifecycleScope.launch {
-            isScrubbing = true
-            applyAnimationTime(slideStartTime)
-
-            val steps     = 30
-            val stepDelay = (durationMs / steps).coerceAtLeast(1L)
-            repeat(steps) { i ->
-                val t     = (i + 1) / steps.toFloat()
-                val eased = easeInOutCubic(t)
-                applyAnimationTime(lerp(slideStartTime, targetTime, eased))
-                delay(stepDelay)
-            }
-
-            applyAnimationTime(targetTime)
-            isScrubbing = false
-        }
-    }
-
-    // -------------------------------------------------------------------------
-    // Controls
-    // -------------------------------------------------------------------------
-
-    private fun setupDtcSelector() {
-        val openDropdown = {
-            binding.dtcAutoComplete.showDropDown()
-        }
-        binding.dtcAutoComplete.setOnClickListener { openDropdown() }
-        binding.menuDtc.setOnClickListener { openDropdown() }
-
-        binding.dtcAutoComplete.setOnItemClickListener { _, _, position, _ ->
-            val selectedText = binding.dtcAutoComplete.adapter.getItem(position)?.toString()
-            val entry = dtcList.find { "${it.code} — ${it.name}" == selectedText } ?: dtcList.getOrNull(position) ?: dtcList.firstOrNull()
-            if (entry != null) {
-                dtcConfirmedInSession = true
-                loadDtcEntry(entry)
-            }
-        }
-
-        refreshDtcListForActiveVehicle()
     }
 
     private fun refreshDtcListForActiveVehicle() {
         val activeVehicle = VehicleManager.getActiveVehicle(this)
+        activeVehicleState.value = activeVehicle
         dtcList = getDtcGuidesForVehicle(activeVehicle.id)
-
-        if (dtcList.isEmpty()) {
-            binding.dtcAutoComplete.setSimpleItems(emptyArray())
-            binding.dtcAutoComplete.setText("No DTC guides for ${activeVehicle.name.replace("Toyota ", "")}", false)
-            loadPreviewModel()
-            return
-        }
-
-        binding.dtcAutoComplete.setSimpleItems(dtcList.map { "${it.code} — ${it.name}" }.toTypedArray())
-
-        val currentMatchesVehicle = currentEntry?.vehicleId?.equals(activeVehicle.id, ignoreCase = true) == true
-
-        if (currentEntry == null || !currentMatchesVehicle || !dtcConfirmedInSession) {
-            val firstGuide = dtcList[0]
-            binding.dtcAutoComplete.setText("${firstGuide.code} — ${firstGuide.name}", false)
-            dtcConfirmedInSession = true
-            loadDtcEntry(firstGuide)
-        }
-    }
-
-    private fun setupControls() {
-        binding.btnPrev.setOnClickListener {
-            if (!isCameraLocked) return@setOnClickListener
-            currentEntry ?: return@setOnClickListener
-            val to = (currentSlideIndex - 1).coerceAtLeast(0)
-            sceneView.cameraManipulator = null
-            currentSlideIndex = to
-            goToSlide(to, animated = true)
-            updateUiState()
-        }
-
-        binding.btnNext.setOnClickListener {
-            if (!isCameraLocked) return@setOnClickListener
-            val entry = currentEntry ?: return@setOnClickListener
-
-            if (!isSlideChecklistComplete(currentSlideIndex)) {
-                triggerIncompleteChecklistBlink()
-                return@setOnClickListener
+        if (selectedDtcGuideState.value == null) {
+            val firstGuide = dtcList.firstOrNull()
+            if (TutorialManager.isTutorialActive) {
+                selectedDtcGuideState.value = firstGuide
+                firstGuide?.let { loadDtcEntry(it) }
             }
-
-            val to = (currentSlideIndex + 1).coerceAtMost(entry.slides.lastIndex)
-            sceneView.cameraManipulator = null
-            currentSlideIndex = to
-            goToSlide(to, animated = true)
-            updateUiState()
+        } else if (!dtcList.contains(selectedDtcGuideState.value)) {
+            selectedDtcGuideState.value = null
+            currentEntry = null
         }
-
-        updateUiState()
+        isDarkThemeState.value = isDarkTheme(this)
     }
 
-    private fun isSlideChecklistComplete(slideIndex: Int): Boolean {
-        val entry = currentEntry ?: return true
-        val slide = entry.slides.getOrNull(slideIndex) ?: return true
-        if (slide.steps.isEmpty()) return true
-
-        val checklistPrefs = getSharedPreferences(MAINTAINANCEActivity.PREFS_CHECKLIST, MODE_PRIVATE)
-        val guideCode = entry.code
-        slide.steps.indices.forEach { stepIndex ->
-            val stepKey = MAINTAINANCEActivity.getStepKey(guideCode, slideIndex, stepIndex)
-            if (!checklistPrefs.getBoolean(stepKey, false)) {
-                return false
-            }
+    private fun loadDtcEntry(entry: DtcGuide) {
+        selectedDtcGuideState.value = entry
+        currentEntry = entry
+        currentSlideIndexState.intValue = 0
+        checkedStepsBySlide.clear()
+        checkedStepIndicesState.value = emptySet()
+        lastAppliedAnimTime = -1f
+        loadGlbModel(entry.glbFile) {
+            goToSlide(0)
         }
-        return true
     }
 
-    private fun triggerIncompleteChecklistBlink() {
-        Toast.makeText(this, "Please complete all checklist steps before proceeding!", Toast.LENGTH_SHORT).show()
-
-        val btn = binding.btnOverviewModern
-        btn.animate().cancel()
-        val blinkAnimator = ValueAnimator.ofFloat(1f, 0.15f, 1f, 0.15f, 1f, 0.15f, 1f).apply {
-            duration = 900L
-            interpolator = DecelerateInterpolator()
-            addUpdateListener { animator ->
-                btn.alpha = animator.animatedValue as Float
-            }
-        }
-        blinkAnimator.start()
-    }
-
-    private fun setCameraLockState(locked: Boolean) {
-        isCameraLocked = locked
-        if (locked) {
-            if (savedManipulator == null) savedManipulator = sceneView.cameraManipulator
-            sceneView.cameraManipulator  = null
-            binding.lockOverlay.visibility       = View.VISIBLE
-            currentModelNode?.isEditable = false
-        } else {
-            if (sceneView.cameraManipulator == null && savedManipulator != null)
-                sceneView.cameraManipulator = savedManipulator
-            binding.lockOverlay.visibility       = View.GONE
-            currentModelNode?.isEditable = true
-            val p = sceneView.cameraNode.position
-            currentCameraEye = Vec3(p.x, p.y, p.z)
-        }
-        updateUiState()
-    }
-
-    private fun updateUiState() {
-        val lastSlideIndex = currentEntry?.slides?.lastIndex ?: -1
-        val hasEntry = currentEntry != null
-
-        val showPrev = isCameraLocked && hasEntry && dtcConfirmedInSession && currentSlideIndex > 0
-        val targetPrevVis = if (showPrev) View.VISIBLE else View.GONE
-
-        if (binding.btnPrev.visibility != targetPrevVis) {
-            androidx.transition.TransitionManager.beginDelayedTransition(
-                binding.navButtonsSection,
-                androidx.transition.AutoTransition().apply { duration = 280L }
-            )
-            binding.btnPrev.visibility = targetPrevVis
-        }
-
-        binding.btnPrev.isEnabled = showPrev
-        binding.btnNext.isEnabled = isCameraLocked && hasEntry && dtcConfirmedInSession && currentSlideIndex < lastSlideIndex
-        binding.btnNext.text = if (lastSlideIndex in 0..currentSlideIndex) "Finish" else "Next Step"
-
-        binding.btnPrev.alpha = 1f
-        binding.btnNext.alpha = 1f
-    }
-
-    // -------------------------------------------------------------------------
-    // Slide navigation
-    // -------------------------------------------------------------------------
-
-    private fun goToSlide(index: Int, animated: Boolean, applySlideCamera: Boolean = true) {
+    private fun goToSlide(slideIndex: Int) {
         val entry = currentEntry ?: return
-        val slide = entry.slides[index]
+        val slides = entry.slides
+        if (slideIndex !in slides.indices) return
 
-        binding.slideTitle.text = slide.title
-        val checkedSteps = checkedStepsBySlide.getOrPut(index) { mutableSetOf() }
-        val desc = slide.description
-        val prep = if (!slide.removeFirst.isNullOrEmpty()) " [🔒 ${slide.removeFirst}]" else ""
-        binding.slideDesc.text = "$desc$prep (${checkedSteps.size}/${slide.steps.size} Done)"
+        currentSlideIndexState.intValue = slideIndex
+        val savedCheckedForSlide = checkedStepsBySlide[slideIndex] ?: emptySet()
+        checkedStepIndicesState.value = savedCheckedForSlide
 
-        // Update Progress Bar
-        val progress = ((index + 1).toFloat() / entry.slides.size * 100).toInt()
-        binding.stepProgressBar.setProgress(progress, animated)
+        val slide = slides[slideIndex]
 
-        // ── 3D HUD Part Badge Callout ─────────────────────────────────────────
-        if (!slide.targetPartName.isNullOrEmpty()) {
-            binding.hudPartBadge.visibility = View.VISIBLE
-            binding.tvHudPartName.text = "📍 ${slide.targetPartName}"
-            binding.hudPartBadge.setOnClickListener(null)
-        } else {
-            binding.hudPartBadge.visibility = View.GONE
-        }
+        // Configure hardware vsync frame interpolation
+        startCameraEye = currentCameraEye
+        startCameraLook = currentCameraLookAt
+        targetCameraEye = slide.eye
+        targetCameraLook = slide.lookAt
 
-        populateChecklist(slide, index)
-        updateInfoPanel(slide)
+        startAnimTime = if (lastAppliedAnimTime >= 0f) lastAppliedAnimTime else slide.animationStartTime
+        targetAnimTime = slide.animationTime
 
-        if (animated) {
-            animateCameraPose(
-                startEye   = currentCameraEye,
-                startLook  = currentOrbitTarget,
-                endEye     = slide.eye,
-                endLook    = slide.lookAt,
-                durationMs = 650L
-            )
-            scrubAnimationTo(
-                slideStartTime = slide.animationStartTime,
-                targetTime     = slide.animationTime,
-                durationMs     = slide.animationDurationMs
-            )
-        } else {
-            if (applySlideCamera) {
-                setCamera(slide.eye, slide.lookAt)
-            }
-            applyAnimationTime(slide.animationTime)
-        }
+        transitionDurationMs = slide.animationDurationMs.coerceAtLeast(400L)
+        animStartMs = SystemClock.uptimeMillis()
+        is3DTransitionActive = true
     }
 
-    private fun populateChecklist(slide: DtcSlide, slideIndex: Int) {
-        binding.checklistContainer.removeAllViews()
-
-        // ── Dependency & Teardown Path Callouts ──────────────────────────────
-        if (!slide.removeFirst.isNullOrEmpty()) {
-            val tagView = TextView(this).apply {
-                text = "🔒 REMOVE FIRST: ${slide.removeFirst}"
-                setTextColor(androidx.core.content.ContextCompat.getColor(this@DtcActivity, R.color.theme_red))
-                textSize = 12f
-                setTypeface(null, android.graphics.Typeface.BOLD)
-                setPadding(0, 0, 0, 8.toPx())
-            }
-            binding.checklistContainer.addView(tagView)
+    private fun applyAnimationTime(time: Float) {
+        if (Math.abs(time - lastAppliedAnimTime) < 0.0005f) return
+        lastAppliedAnimTime = time
+        val animator = currentModelNode?.modelInstance?.animator ?: return
+        // Apply animation time across ALL tracks (hood opening, battery, dipstick, oil cap, filter, etc.)
+        repeat(animator.animationCount) { i ->
+            val duration = animator.getAnimationDuration(i)
+            animator.applyAnimation(i, time.coerceIn(0f, duration))
         }
-
-        if (!slide.teardownPath.isNullOrEmpty()) {
-            val pathView = TextView(this).apply {
-                text = "🛤 Sequence: ${slide.teardownPath}"
-                setTextColor(androidx.core.content.ContextCompat.getColor(this@DtcActivity, R.color.text_secondary))
-                textSize = 11f
-                setPadding(0, 0, 0, 16.toPx())
-            }
-            binding.checklistContainer.addView(pathView)
-        }
-
-        val inflater = LayoutInflater.from(this)
-        val checkedSteps = checkedStepsBySlide.getOrPut(slideIndex) { mutableSetOf() }
-
-        fun updateCompletionText() {
-            val desc = slide.description
-            val prep = if (!slide.removeFirst.isNullOrEmpty()) " [🔒 ${slide.removeFirst}]" else ""
-            binding.slideDesc.text = "$desc$prep (${checkedSteps.size}/${slide.steps.size} Done)"
-        }
-
-        val checklistPrefs = getSharedPreferences(MAINTAINANCEActivity.PREFS_CHECKLIST, MODE_PRIVATE)
-        val autoExpand = getSharedPreferences(SettingsActivity.PREFS_NAME, MODE_PRIVATE)
-            .getBoolean(SettingsActivity.KEY_AUTO_EXPAND, false)
-
-        slide.steps.forEachIndexed { stepIndex, step ->
-            val row = inflater.inflate(R.layout.item_checklist_step, binding.checklistContainer, false)
-            val label = row.findViewById<TextView>(R.id.stepLabel)
-            val checkboxIcon = row.findViewById<ImageView>(R.id.stepCheckboxIcon)
-            val infoText = row.findViewById<TextView>(R.id.stepInfoText)
-            val warningText = row.findViewById<TextView>(R.id.stepWarningText)
-            val infoBtn = row.findViewById<ImageView>(R.id.btnStepInfo)
-
-            label.text = step.label
-            if (!step.warning.isNullOrEmpty()) {
-                warningText.visibility = View.VISIBLE
-                warningText.text = "⚠️ ${step.warning}"
-            }
-
-            if (!step.info.isNullOrEmpty()) {
-                infoBtn.visibility = View.VISIBLE
-                infoText.text = step.info
-                if (autoExpand) {
-                    infoText.visibility = View.VISIBLE
-                    infoBtn.rotation = 180f
-                }
-            }
-
-            val stepKey = MAINTAINANCEActivity.getStepKey(currentEntry?.code ?: "", slideIndex, stepIndex)
-            var isChecked = checklistPrefs.getBoolean(stepKey, false)
-            if (isChecked) checkedSteps.add(stepIndex) else checkedSteps.remove(stepIndex)
-
-            checkboxIcon.setImageResource(
-                if (isChecked) R.drawable.checkbox_red_checked else R.drawable.checkbox_red_unchecked
-            )
-
-            row.setOnClickListener {
-                isChecked = !isChecked
-                checklistPrefs.edit { putBoolean(stepKey, isChecked) }
-                if (isChecked) checkedSteps.add(stepIndex) else checkedSteps.remove(stepIndex)
-                checkboxIcon.setImageResource(
-                    if (isChecked) R.drawable.checkbox_red_checked else R.drawable.checkbox_red_unchecked
-                )
-                ViewAnimationUtils.animateCheckmarkBounce(checkboxIcon)
-                updateCompletionText()
-            }
-
-            infoBtn.setOnClickListener {
-                val isVis = infoText.isVisible
-                infoText.isVisible = !isVis
-                infoBtn.animate().rotation(if (isVis) 0f else 180f).setDuration(200L).start()
-            }
-
-            binding.checklistContainer.addView(row)
-        }
-
-        updateCompletionText()
-    }
-
-    // -------------------------------------------------------------------------
-    // Camera helpers
-    // -------------------------------------------------------------------------
-
-    private fun captureManipulatorOnce() {
-        if (!manipulatorCaptured) {
-            savedManipulator    = sceneView.cameraManipulator
-            manipulatorCaptured = true
-        }
-    }
-
-    private fun setCamera(cameraPos: Vec3, lookTarget: Vec3) {
-        currentCameraEye   = cameraPos
-        currentOrbitTarget = lookTarget
-        sceneView.cameraNode.position = Position(cameraPos.x, cameraPos.y, cameraPos.z)
-        sceneView.cameraNode.lookAt(Position(lookTarget.x, lookTarget.y, lookTarget.z))
-    }
-
-    private fun animateCameraPose(
-        startEye: Vec3, startLook: Vec3,
-        endEye: Vec3,   endLook: Vec3,
-        durationMs: Long
-    ) {
-        cameraAnimJob?.cancel()
-        cameraAnimJob = lifecycleScope.launch {
-            val steps     = 30
-            val stepDelay = (durationMs / steps).coerceAtLeast(1L)
-            repeat(steps) { i ->
-                val t     = (i + 1) / steps.toFloat()
-                val eased = easeInOutCubic(t)
-                val eye   = Vec3(
-                    lerp(startEye.x, endEye.x, eased),
-                    lerp(startEye.y, endEye.y, eased),
-                    lerp(startEye.z, endEye.z, eased)
-                )
-                val look  = Vec3(
-                    lerp(startLook.x, endLook.x, eased),
-                    lerp(startLook.y, endLook.y, eased),
-                    lerp(startLook.z, endLook.z, eased)
-                )
-                setCamera(eye, look)
-                delay(stepDelay)
-            }
-            setCamera(endEye, endLook)
-        }
+        animator.updateBoneMatrices()
     }
 
     private fun lerp(a: Float, b: Float, t: Float) = a + (b - a) * t
@@ -918,4 +227,92 @@ class DtcActivity : AppCompatActivity() {
     private fun easeInOutCubic(t: Float) =
         if (t < 0.5f) 4f * t * t * t
         else 1f - ((-2f * t + 2f).let { it * it * it } / 2f)
+
+    private fun toggleStepChecked(index: Int, isChecked: Boolean) {
+        val slideIdx = currentSlideIndexState.intValue
+        val slideSet = checkedStepsBySlide.getOrPut(slideIdx) { mutableSetOf() }
+        if (isChecked) slideSet.add(index) else slideSet.remove(index)
+        checkedStepIndicesState.value = slideSet.toSet()
+    }
+
+    private fun onNextClicked() {
+        val entry = currentEntry ?: return
+        val currentSlide = entry.slides.getOrNull(currentSlideIndexState.intValue) ?: return
+        val totalChecklistCount = currentSlide.steps.size
+        val completedCount = checkedStepIndicesState.value.size
+
+        // Enforce checklist prerequisite gate
+        if (totalChecklistCount > 0 && completedCount < totalChecklistCount) {
+            Toast.makeText(this, "Please complete all checklist items for this step first!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val currentIdx = currentSlideIndexState.intValue
+        if (currentIdx < entry.slides.size - 1) {
+            goToSlide(currentIdx + 1)
+        } else {
+            Toast.makeText(this, "Guide Completed! Great job fixing ${entry.code}.", Toast.LENGTH_SHORT).show()
+            goToSlide(0)
+        }
+    }
+
+    private fun onPrevClicked() {
+        val currentIdx = currentSlideIndexState.intValue
+        if (currentIdx > 0) {
+            goToSlide(currentIdx - 1)
+        }
+    }
+
+    private fun loadGlbModel(glbFile: String, onLoaded: (() -> Unit)? = null) {
+        lifecycleScope.launch {
+            currentModelNode?.let {
+                runCatching {
+                    sceneView.removeChildNode(it)
+                    it.destroy()
+                }
+                currentModelNode = null
+            }
+            delay(150.milliseconds)
+            runCatching {
+                val instance = modelLoader.createModelInstance(glbFile)
+                    ?: modelLoader.createModelInstance("models/$glbFile")
+                val node = ModelNode(
+                    modelInstance = instance,
+                    autoAnimate = false,
+                    scaleToUnits = 1.5f
+                )
+                currentModelNode = node
+                sceneView.addChildNode(node)
+                onLoaded?.invoke()
+            }.onFailure { e ->
+                Log.e("DtcActivity", "Failed to load GLB model '$glbFile': ${e.message}", e)
+            }
+        }
+    }
+
+    private fun isDarkTheme(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(SettingsActivity.PREFS_NAME, Context.MODE_PRIVATE)
+        return when (prefs.getInt(SettingsActivity.KEY_THEME, SettingsActivity.THEME_LIGHT)) {
+            SettingsActivity.THEME_LIGHT -> false
+            SettingsActivity.THEME_DARK -> true
+            else -> {
+                val uiMode = context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+                uiMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
+            }
+        }
+    }
+
+    private fun goHome() {
+        startActivity(Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+        })
+        ViewAnimationUtils.overrideActivityTransition(this, isEntering = false)
+    }
+
+    private fun goSettings() {
+        startActivity(Intent(this, SettingsActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+        })
+        ViewAnimationUtils.overrideActivityTransition(this, isEntering = true)
+    }
 }

@@ -58,13 +58,13 @@ object AppNavigation {
         val rootView = activity.findViewById<View>(android.R.id.content)
         ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            
+
             // Apply padding to Top Bar
             activity.findViewById<View>(R.id.topBar)?.updatePadding(top = systemBars.top)
-            
+
             // Apply padding to Bottom Bar
             activity.findViewById<View>(R.id.bottomBar)?.updatePadding(bottom = systemBars.bottom)
-            
+
             insets
         }
     }

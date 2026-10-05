@@ -1,15 +1,15 @@
 package com.example.automekaniko
 
-// Wigo Dummy Guide — P0100 Mass Air Flow Circuit Inspection (Wigo 1.0L)
+// Wigo DTC P0100 — Mass Air Flow Sensor Circuit Malfunction
 
 private fun f(frame: Int): Float = frame / 24f
 
 val WigoP0100Guide = DtcGuide(
     code        = "P0100",
-    name        = "MAF Circuit Malfunction (Wigo 1.0L)",
-    description = "Mass or Volume Air Flow Circuit Malfunction on Toyota Wigo 1.0L. " +
-            "Inspect intake ducting, sensor connector, and clean MAF sensor element.",
-    parts       = listOf("MAF Sensor", "Intake Hose", "Air Filter Box", "Wiring Connector"),
+    name        = "Mass Air Flow Circuit Malfunction",
+    description = "P0100 indicates the Engine Control Module (ECM) detects an out-of-range " +
+            "voltage signal from the Mass Air Flow (MAF) sensor.",
+    parts       = listOf("MAF Sensor", "Air Filter Box", "Wiring Harness", "Intake Duct"),
     glbFile     = "wigo.glb",
     animationClipStartTimes = listOf(f(0)),
     vehicleId   = VehicleManager.WIGO.id,
@@ -24,7 +24,7 @@ val WigoP0100Guide = DtcGuide(
         DtcSlide(
             title              = "Wigo Engine Bay Overview",
             description        = "Overview of Toyota Wigo 1.0L 1KR-VE engine bay and MAF sensor position.",
-            eye                = Vec3(-2.20f, 1.20f, 2.20f),
+            eye                = Vec3(-4.80f, 2.20f, 4.80f),
             lookAt             = Vec3(0.00f,  0.20f,  0.00f),
             animationStartTime = f(0),
             animationTime      = f(0),
