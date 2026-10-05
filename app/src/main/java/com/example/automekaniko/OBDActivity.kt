@@ -44,7 +44,8 @@ class OBDActivity : AppCompatActivity() {
         private val PID_NEVER_BLACKLIST = setOf(
             "010C", "010D", "0105", "0111", "0104",
             "010F", "0110", "010A", "010B", "0114",
-            "0115", "0100", "0120", "0140", "011F"
+            "0115", "0100", "0120", "0140", "011F",
+            "0106", "0108", "010E", "0133", "013C", "013D", "0142", "015E"
         )
     }
 
@@ -349,22 +350,41 @@ class OBDActivity : AppCompatActivity() {
         if (!isConnected) return ""
 
         if (outputStream != null && inputStream != null) {
-            return try {
-                sendRaw(cmd)
-                val buf = ByteArray(4096); val sb = StringBuilder()
-                val t0 = System.currentTimeMillis()
-                while (System.currentTimeMillis() - t0 < timeout) {
-                    val avail = inputStream!!.available()
-                    if (avail > 0) {
-                        val n = inputStream!!.read(buf, 0, minOf(avail, buf.size))
-                        if (n > 0) {
-                            sb.append(String(buf, 0, n, Charsets.UTF_8))
-                            if (sb.contains(">")) break
+            return withContext(Dispatchers.IO) {
+                try {
+                    sendRaw(cmd)
+                    val buf = ByteArray(1024)
+                    val sb = StringBuilder()
+                    val endTime = System.currentTimeMillis() + timeout
+
+                    while (System.currentTimeMillis() < endTime) {
+                        val avail = runCatching { inputStream!!.available() }.getOrDefault(0)
+                        if (avail > 0) {
+                            val n = inputStream!!.read(buf, 0, minOf(avail, buf.size))
+                            if (n > 0) {
+                                sb.append(String(buf, 0, n, Charsets.UTF_8))
+                                if (sb.contains(">")) break
+                            }
+                        } else {
+                            delay(2)
+                            val avail2 = runCatching { inputStream!!.available() }.getOrDefault(0)
+                            if (avail2 > 0) {
+                                val n = inputStream!!.read(buf, 0, minOf(avail2, buf.size))
+                                if (n > 0) {
+                                    sb.append(String(buf, 0, n, Charsets.UTF_8))
+                                    if (sb.contains(">")) break
+                                }
+                            }
                         }
-                    } else delay(1) // Fast 1ms socket check
+                    }
+                    val result = sb.toString().trim()
+                    Log.d(TAG, "CMD=$cmd RSP=${result.take(120)}")
+                    result
+                } catch (e: Exception) {
+                    Log.e(TAG, "send '$cmd': ${e.message}")
+                    ""
                 }
-                sb.toString().trim().also { Log.d(TAG, "CMD=$cmd RSP=${it.take(120)}") }
-            } catch (e: Exception) { Log.e(TAG, "send '$cmd': ${e.message}"); "" }
+            }
         }
 
         while (responseChannel.tryReceive().isSuccess) {}
@@ -409,7 +429,7 @@ class OBDActivity : AppCompatActivity() {
                         updateSensor(R.id.cardLoad, load)
                     }
 
-                    if (extendedCycle++ % 10 == 0) pollExtended()
+                    if (extendedCycle++ % 5 == 0) pollExtended()
                 } catch (e: Exception) {
                     if (e is CancellationException) throw e
                     Log.e(TAG, "Poll error: ${e.message}"); delay(100)
@@ -419,7 +439,7 @@ class OBDActivity : AppCompatActivity() {
     }
 
     private suspend fun pollExtended() {
-        val extTimeout = 500L
+        val extTimeout = 400L
 
         suspend fun q(pid: String): String {
             if (pid !in PID_NEVER_BLACKLIST && pid in unsupportedPids) return ""
@@ -437,21 +457,44 @@ class OBDActivity : AppCompatActivity() {
             return r
         }
 
-        val mafRsp   = q("0110")
-        val maf      = parseMaf(mafRsp)
-        val iat      = parseTemp(q("010F"), "0F")
-        val o2s1     = parseO2(q("0114"), "14")
-        val o2s2     = parseO2(q("0115"), "15")
+        // Category 2: Live OBD Sensors
+        val maf   = parseMaf(q("0110"))
+        val iat   = parseTemp(q("010F"), "0F")
+        val o2s1  = parseO2(q("0114"), "14")
+        val o2s2  = parseO2(q("0115"), "15")
+        val map   = parseBaroOrMap(q("010B"), "0B")
 
-        val loadRsp  = q("0104")
-        val calcLoad = parsePerc(loadRsp, "04")
+        // Category 3: Fuel Trim & Timing
+        val stft   = parseFuelTrim(q("0106"), "06")
+        val ltft   = parseFuelTrim(q("0108"), "08")
+        val timing = parseTiming(q("010E"))
+        val baro   = parseBaroOrMap(q("0133"), "33")
+
+        // Category 4: Catalyst & Electrical
+        val cat1     = parseCatTemp(q("013C"), "3C")
+        val cat2     = parseCatTemp(q("013D"), "3D")
+        val modVolts = parseVoltage(q("0142").ifBlank { q("AT RV") })
+        val fuelRate = parseFuelRate(q("015E"))
 
         runOnUiThread {
+            // Category 2: Live OBD
             updateSensor(R.id.cardMaf, maf)
             updateSensor(R.id.cardIat, iat)
             updateSensor(R.id.cardO2s1, o2s1)
             updateSensor(R.id.cardO2s2, o2s2)
-            if (calcLoad.isNotBlank()) updateSensor(R.id.cardLoad, calcLoad)
+            updateSensor(R.id.cardMap, map)
+
+            // Category 3: Fuel Trim & Timing
+            updateSensor(R.id.cardStft, stft)
+            updateSensor(R.id.cardLtft, ltft)
+            updateSensor(R.id.cardTiming, timing)
+            updateSensor(R.id.cardBaro, baro)
+
+            // Category 4: Catalyst & Electrical
+            updateSensor(R.id.cardCat1, cat1)
+            updateSensor(R.id.cardCat2, cat2)
+            updateSensor(R.id.cardModVoltage, modVolts)
+            updateSensor(R.id.cardFuelRate, fuelRate)
         }
     }
 
@@ -500,19 +543,84 @@ class OBDActivity : AppCompatActivity() {
         return String.format(Locale.US, "%.2f V", volts)
     }
 
+    private fun parseFuelTrim(raw: String, pidHex: String): String {
+        val bytes = hexBytes(raw, "41 $pidHex") ?: return ""
+        if (bytes.isEmpty()) return ""
+        val pct = (bytes[0] - 128) * 100f / 128f
+        return String.format(Locale.US, "%+.1f%%", pct)
+    }
+
+    private fun parseTiming(raw: String): String {
+        val bytes = hexBytes(raw, "41 0E") ?: return ""
+        if (bytes.isEmpty()) return ""
+        val deg = (bytes[0] - 128) / 2f
+        return String.format(Locale.US, "%.1f°", deg)
+    }
+
+    private fun parseBaroOrMap(raw: String, pidHex: String): String {
+        val bytes = hexBytes(raw, "41 $pidHex") ?: return ""
+        if (bytes.isEmpty()) return ""
+        val kpa = bytes[0] and 0xFF
+        return "$kpa kPa"
+    }
+
+    private fun parseCatTemp(raw: String, pidHex: String): String {
+        val bytes = hexBytes(raw, "41 $pidHex") ?: return ""
+        if (bytes.size < 2) return ""
+        val temp = ((bytes[0] and 0xFF) * 256 + (bytes[1] and 0xFF)) / 10f - 40f
+        return String.format(Locale.US, "%.0f°C", temp)
+    }
+
+    private fun parseVoltage(raw: String): String {
+        val bytes = hexBytes(raw, "41 42")
+        if (bytes != null && bytes.size >= 2) {
+            val volts = ((bytes[0] and 0xFF) * 256 + (bytes[1] and 0xFF)) / 1000f
+            return String.format(Locale.US, "%.1f V", volts)
+        }
+        val clean = raw.replace("\r", " ").replace("\n", " ").trim()
+        val match = Regex("([0-9]+\\.[0-9]+)\\s*V", RegexOption.IGNORE_CASE).find(clean)
+        if (match != null) {
+            return "${match.groupValues[1]} V"
+        }
+        return ""
+    }
+
+    private fun parseFuelRate(raw: String): String {
+        val bytes = hexBytes(raw, "41 5E") ?: return ""
+        if (bytes.size < 2) return ""
+        val rate = ((bytes[0] and 0xFF) * 256 + (bytes[1] and 0xFF)) / 20f
+        return String.format(Locale.US, "%.1f L/h", rate)
+    }
+
     private fun hexBytes(raw: String, header: String): IntArray? {
         val clean = raw.replace("\r", " ").replace("\n", " ").uppercase()
-        val idx = clean.indexOf(header)
-        if (idx == -1) return null
-        val after = clean.substring(idx + header.length).trim()
-        val tokens = after.split("\\s+".toRegex()).takeWhile { it.length == 2 && it.all { c -> c in "0123456789ABCDEF" } }
-        if (tokens.isEmpty()) return null
-        return tokens.map { it.toInt(16) }.toIntArray()
+        var idx = clean.indexOf(header)
+        if (idx != -1) {
+            val after = clean.substring(idx + header.length).trim()
+            val tokens = after.split("\\s+".toRegex()).takeWhile { it.length == 2 && it.all { c -> c in "0123456789ABCDEF" } }
+            if (tokens.isNotEmpty()) {
+                return tokens.map { it.toInt(16) }.toIntArray()
+            }
+        }
+
+        // Fallback: Check un-spaced format e.g. "410C"
+        val noSpaceHeader = header.replace(" ", "")
+        val cleanNoSpace = clean.replace(" ", "")
+        idx = cleanNoSpace.indexOf(noSpaceHeader)
+        if (idx != -1) {
+            val after = cleanNoSpace.substring(idx + noSpaceHeader.length).trim()
+            val tokens = after.chunked(2).takeWhile { it.length == 2 && it.all { c -> c in "0123456789ABCDEF" } }
+            if (tokens.isNotEmpty()) {
+                return tokens.map { it.toInt(16) }.toIntArray()
+            }
+        }
+
+        return null
     }
 
     private fun isDarkTheme(context: Context): Boolean {
         val prefs = context.getSharedPreferences(SettingsActivity.PREFS_NAME, Context.MODE_PRIVATE)
-        return when (prefs.getInt(SettingsActivity.KEY_THEME, SettingsActivity.THEME_SYSTEM)) {
+        return when (prefs.getInt(SettingsActivity.KEY_THEME, SettingsActivity.THEME_LIGHT)) {
             SettingsActivity.THEME_LIGHT -> false
             SettingsActivity.THEME_DARK -> true
             else -> {

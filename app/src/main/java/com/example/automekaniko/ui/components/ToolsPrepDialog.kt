@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.example.automekaniko.R
 import com.example.automekaniko.ui.theme.ThemeRed
 import com.example.automekaniko.ui.theme.ThemeRedLight
@@ -54,9 +55,12 @@ fun ToolsPrepDialog(
 ) {
     val checkedMap = remember { mutableStateMapOf<Int, Boolean>() }
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
         Surface(
-            modifier = modifier.fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(0.92f),
             shape = RoundedCornerShape(24.dp),
             color = MaterialTheme.colorScheme.surface,
             border = BorderStroke(1.5.dp, ThemeRed),
@@ -188,7 +192,7 @@ fun ToolsPrepDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.Top
                     ) {
                         Checkbox(
                             checked = isChecked,
@@ -196,14 +200,15 @@ fun ToolsPrepDialog(
                             colors = CheckboxDefaults.colors(
                                 checkedColor = ThemeRed,
                                 uncheckedColor = MaterialTheme.colorScheme.outline
-                            )
+                            ),
+                            modifier = Modifier.padding(top = 0.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = safetyItem,
                             color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = 13.sp,
-                            lineHeight = 18.sp
+                            fontSize = 13.5.sp,
+                            lineHeight = 19.sp
                         )
                     }
                 }
