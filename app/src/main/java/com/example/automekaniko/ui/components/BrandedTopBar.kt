@@ -17,21 +17,25 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.automekaniko.R
 import com.example.automekaniko.tutorialTarget
 import com.example.automekaniko.ui.theme.ThemeRed
+import com.example.automekaniko.ui.theme.ThemeRedLight
 
 @Composable
 fun BrandedTopBar(
     onTutorialClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val haptic = LocalHapticFeedback.current
+
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface,
@@ -49,8 +53,7 @@ fun BrandedTopBar(
                 withStyle(
                     style = SpanStyle(
                         color = MaterialTheme.colorScheme.onBackground,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp
+                        fontWeight = FontWeight.Bold
                     )
                 ) {
                     append("Auto")
@@ -58,8 +61,7 @@ fun BrandedTopBar(
                 withStyle(
                     style = SpanStyle(
                         color = ThemeRed,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp
+                        fontWeight = FontWeight.Bold
                     )
                 ) {
                     append("Mekaniko")
@@ -68,14 +70,17 @@ fun BrandedTopBar(
 
             Text(
                 text = annotatedTitle,
-                fontSize = 22.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
 
             // Top-right Question Mark Tutorial Button
             if (onTutorialClick != null) {
                 Card(
-                    onClick = onTutorialClick,
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onTutorialClick()
+                    },
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
                         .padding(end = 12.dp)
@@ -83,7 +88,7 @@ fun BrandedTopBar(
                         .tutorialTarget(R.id.btnTutorial),
                     shape = CircleShape,
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                        containerColor = ThemeRedLight
                     ),
                     border = BorderStroke(1.5.dp, ThemeRed),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -95,7 +100,7 @@ fun BrandedTopBar(
                         Text(
                             text = "?",
                             color = ThemeRed,
-                            fontSize = 20.sp,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
                     }

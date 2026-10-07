@@ -1,10 +1,17 @@
 package com.example.automekaniko.ui.screens
 
 import android.view.View
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,11 +44,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.automekaniko.ChecklistStep
 import com.example.automekaniko.MaintenanceGuide
@@ -50,9 +58,11 @@ import com.example.automekaniko.VehicleProfile
 import com.example.automekaniko.tutorialTarget
 import com.example.automekaniko.ui.components.BottomNavBar
 import com.example.automekaniko.ui.components.BrandedTopBar
+import com.example.automekaniko.ui.components.GlassCard
 import com.example.automekaniko.ui.components.InfoSection
 import com.example.automekaniko.ui.components.NavTab
 import com.example.automekaniko.ui.components.RepairChecklistDialog
+import com.example.automekaniko.ui.components.StepProgressIndicator
 import com.example.automekaniko.ui.components.TechnicalInfoDialog
 import com.example.automekaniko.ui.components.ToolsPrepDialog
 import com.example.automekaniko.ui.components.TutorialOverlay
@@ -85,6 +95,7 @@ fun MaintenanceScreen(
     var showChecklistDialog by remember { mutableStateOf(false) }
     var showInfoDialog by remember { mutableStateOf(false) }
 
+    val haptic = LocalHapticFeedback.current
     val vehicleDisplayName = activeVehicle.name.replace("Toyota ", "")
     val guideTitle = selectedMaintenanceGuide?.name ?: "Select Maintenance Guide"
     val currentSlide = selectedMaintenanceGuide?.slides?.getOrNull(currentSlideIndex)
@@ -107,331 +118,588 @@ fun MaintenanceScreen(
             containerColor = MaterialTheme.colorScheme.background
         ) { innerPadding ->
 
-            Column(
+            BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(horizontal = 14.dp, vertical = 8.dp)
             ) {
-                // Sub Header Row
-                Row(
+                val isWideScreen = this.maxWidth >= 600.dp
+
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .fillMaxSize()
+                        .padding(horizontal = 14.dp, vertical = 8.dp)
                 ) {
-                    IconButton(
-                        onClick = onBackClick,
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_back_red),
-                            contentDescription = "Back",
-                            tint = ThemeRed,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-
-                    Text(
-                        text = "Maintainance",
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    // Clickable Vehicle Profile Badge Chip
-                    Surface(
-                        onClick = { showVehicleSelectorDialog = true },
-                        shape = RoundedCornerShape(12.dp),
-                        color = ThemeRedLight,
-                        border = BorderStroke(1.dp, ThemeRed.copy(alpha = 0.3f))
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_car),
-                                contentDescription = "Vehicle",
-                                tint = ThemeRed,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = vehicleDisplayName,
-                                color = ThemeRed,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-                }
-
-                // Maintenance Dropdown Selector Card
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 10.dp)
-                        .tutorialTarget(R.id.menuDtc)
-                ) {
-                    Card(
+                    // Sub Header Row
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { isDropdownExpanded = true },
-                        shape = RoundedCornerShape(14.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        ),
-                        border = BorderStroke(1.2.dp, ThemeRed)
+                            .padding(bottom = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 14.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                        IconButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onBackClick()
+                            },
+                            modifier = Modifier.size(36.dp)
                         ) {
-                            Text(
-                                text = guideTitle,
-                                color = if (selectedMaintenanceGuide == null) ThemeRed else MaterialTheme.colorScheme.onSurface,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.weight(1f)
-                            )
-
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_back_red),
-                                contentDescription = "Dropdown",
+                                contentDescription = "Back",
                                 tint = ThemeRed,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(24.dp)
                             )
                         }
-                    }
-
-                    DropdownMenu(
-                        expanded = isDropdownExpanded,
-                        onDismissRequest = { isDropdownExpanded = false },
-                        modifier = Modifier.fillMaxWidth(0.9f)
-                    ) {
-                        availableMaintenanceGuides.forEach { guide ->
-                            DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        text = guide.name,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                },
-                                onClick = {
-                                    onGuideSelected(guide)
-                                    showToolsPrepDialog = true
-                                    isDropdownExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-
-                // Action Chips Row (Difficulty & Tools Prep Button)
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = ThemeRedLight
-                        ) {
-                            Text(
-                                text = selectedMaintenanceGuide?.difficulty ?: "Easy",
-                                color = ThemeRed,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(8.dp))
 
                         Text(
-                            text = "⏱ ${selectedMaintenanceGuide?.estimatedTime ?: "15–20 mins"}",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 12.sp
+                            text = "Maintenance",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f)
                         )
-                    }
 
-                    // Tools & Prep Button
-                    if (selectedMaintenanceGuide != null) {
+                        // Clickable Vehicle Profile Badge Chip
                         Surface(
-                            onClick = { showToolsPrepDialog = true },
-                            modifier = Modifier.tutorialTarget(R.id.btnToolsPrep),
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                showVehicleSelectorDialog = true
+                            },
                             shape = RoundedCornerShape(12.dp),
                             color = ThemeRedLight,
-                            border = BorderStroke(1.dp, ThemeRed)
+                            border = BorderStroke(1.dp, ThemeRed.copy(alpha = 0.3f))
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_car),
+                                    contentDescription = "Vehicle",
+                                    tint = ThemeRed,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
                                 Text(
-                                    text = "🧰 Tools & Prep",
+                                    text = vehicleDisplayName,
+                                    style = MaterialTheme.typography.labelMedium,
                                     color = ThemeRed,
-                                    fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
                         }
                     }
-                }
 
-                // 3D SceneView Viewport Container
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .padding(bottom = 8.dp)
-                        .tutorialTarget(R.id.navButtonsSection),
-                    shape = RoundedCornerShape(24.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.Black),
-                    border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.outline)
-                ) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        // Embedded 3D SceneView Viewport
-                        AndroidView(
-                            factory = { sceneViewInstance },
-                            modifier = Modifier.fillMaxSize()
-                        )
-
-                        if (selectedMaintenanceGuide != null) {
-                            // Floating Action Buttons (Top-Right)
-                            Column(
-                                modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .padding(16.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                // Info Button FAB
-                                Surface(
-                                    onClick = { showInfoDialog = true },
-                                    modifier = Modifier
-                                        .size(44.dp)
-                                        .tutorialTarget(R.id.btnInfoModern),
-                                    shape = CircleShape,
-                                    color = Color.White,
-                                    border = BorderStroke(1.5.dp, ThemeRed),
-                                    shadowElevation = 6.dp
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Text(
-                                            text = "i",
-                                            color = ThemeRed,
-                                            fontSize = 20.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                }
-
-                                // Checklist Button FAB
-                                Surface(
-                                    onClick = { showChecklistDialog = true },
-                                    modifier = Modifier
-                                        .size(44.dp)
-                                        .tutorialTarget(R.id.btnOverviewModern),
-                                    shape = CircleShape,
-                                    color = Color.White,
-                                    border = BorderStroke(1.5.dp, ThemeRed),
-                                    shadowElevation = 6.dp
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_check_white),
-                                            contentDescription = "Checklist",
-                                            tint = ThemeRed,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                    }
-                                }
-                            }
-
-                            // Bottom Step Action Row (Prev & Next Step Buttons)
+                    // Maintenance Dropdown Selector Card
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                            .tutorialTarget(R.id.menuDtc)
+                    ) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    isDropdownExpanded = true
+                                },
+                            shape = RoundedCornerShape(14.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            ),
+                            border = BorderStroke(1.2.dp, ThemeRed)
+                        ) {
                             Row(
                                 modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .padding(16.dp)
-                                    .fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 14.dp, vertical = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                // Prev Step Button
-                                if (currentSlideIndex > 0) {
-                                    OutlinedButton(
-                                        onClick = onPrevStepClick,
-                                        modifier = Modifier
-                                            .weight(0.35f)
-                                            .height(48.dp),
-                                        shape = RoundedCornerShape(14.dp),
-                                        border = BorderStroke(1.5.dp, ThemeRed),
-                                        colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White.copy(alpha = 0.9f))
-                                    ) {
-                                        Text(
-                                            text = "Prev",
-                                            color = ThemeRed,
-                                            fontSize = 14.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                }
+                                Text(
+                                    text = guideTitle,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = if (selectedMaintenanceGuide == null) ThemeRed else MaterialTheme.colorScheme.onSurface,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.weight(1f)
+                                )
 
-                                // Next Step Button
-                                Button(
-                                    onClick = onNextStepClick,
-                                    modifier = Modifier
-                                        .weight(if (currentSlideIndex > 0) 0.65f else 1f)
-                                        .height(48.dp),
-                                    shape = RoundedCornerShape(14.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = ThemeRed)
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_back_red),
+                                    contentDescription = "Dropdown",
+                                    tint = ThemeRed,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+
+                        DropdownMenu(
+                            expanded = isDropdownExpanded,
+                            onDismissRequest = { isDropdownExpanded = false },
+                            modifier = Modifier.fillMaxWidth(0.9f)
+                        ) {
+                            availableMaintenanceGuides.forEach { guide ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = guide.name,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                    },
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        onGuideSelected(guide)
+                                        showToolsPrepDialog = true
+                                        isDropdownExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    // Action Chips Row (Difficulty & Tools Prep Button)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = ThemeRedLight
+                            ) {
+                                Text(
+                                    text = selectedMaintenanceGuide?.difficulty ?: "Easy",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = ThemeRed,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Text(
+                                text = "⏱ ${selectedMaintenanceGuide?.estimatedTime ?: "15–20 mins"}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        // Tools & Prep Button
+                        if (selectedMaintenanceGuide != null) {
+                            Surface(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    showToolsPrepDialog = true
+                                },
+                                modifier = Modifier.tutorialTarget(R.id.btnToolsPrep),
+                                shape = RoundedCornerShape(12.dp),
+                                color = ThemeRedLight,
+                                border = BorderStroke(1.dp, ThemeRed)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = if (currentSlideIndex >= totalSlides - 1) "Finish" else "Next Step",
-                                        color = Color.White,
-                                        fontSize = 15.sp,
+                                        text = "🧰 Tools & Prep",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = ThemeRed,
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
                             }
-                        } else {
-                            // Prompt Overlay when no guide is selected yet
-                            Surface(
+                        }
+                    }
+
+                    // STEP PROGRESS INDICATOR
+                    if (selectedMaintenanceGuide != null) {
+                        StepProgressIndicator(
+                            currentStep = currentSlideIndex,
+                            totalSteps = totalSlides,
+                            stepTitle = currentSlide?.title ?: "Step ${currentSlideIndex + 1}",
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                    }
+
+                    // STEP CONTENT & 3D VIEWPORT CONTAINER (Adapts to phone vertical vs tablet split)
+                    if (isWideScreen && selectedMaintenanceGuide != null) {
+                        // Tablet Side-by-Side Split View
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            // Left Column: 3D SceneView Viewport
+                            Card(
                                 modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .padding(horizontal = 20.dp),
-                                shape = RoundedCornerShape(20.dp),
-                                color = Color.Black.copy(alpha = 0.85f),
-                                border = BorderStroke(1.5.dp, ThemeRed)
+                                    .weight(0.6f)
+                                    .fillMaxSize(),
+                                shape = RoundedCornerShape(24.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color.Black),
+                                border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.outline)
+                            ) {
+                                AndroidView(
+                                    factory = { sceneViewInstance },
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
+
+                            // Right Column: Step Description, FABs, and Action Controls
+                            GlassCard(
+                                modifier = Modifier
+                                    .weight(0.4f)
+                                    .fillMaxSize(),
+                                cornerRadius = 24.dp,
+                                elevation = 8.dp,
+                                borderColor = ThemeRed,
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
                             ) {
                                 Column(
-                                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 22.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(16.dp),
+                                    verticalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Text(
-                                        text = "Select a Maintenance Guide above",
-                                        color = Color.White,
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        textAlign = TextAlign.Center
-                                    )
-                                    Spacer(modifier = Modifier.height(10.dp))
-                                    Text(
-                                        text = "Choose a maintenance procedure to view tools, safety prep, and 3D step-by-step guides.",
-                                        color = Color.White.copy(alpha = 0.90f),
-                                        fontSize = 14.5.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        lineHeight = 21.sp,
-                                        textAlign = TextAlign.Center
-                                    )
+                                    Column {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = "INSTRUCTIONS",
+                                                style = MaterialTheme.typography.labelMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = ThemeRed
+                                            )
+
+                                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                                // Info FAB
+                                                Surface(
+                                                    onClick = {
+                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                        showInfoDialog = true
+                                                    },
+                                                    modifier = Modifier.size(38.dp),
+                                                    shape = CircleShape,
+                                                    color = Color.White,
+                                                    border = BorderStroke(1.5.dp, ThemeRed),
+                                                    shadowElevation = 4.dp
+                                                ) {
+                                                    Box(contentAlignment = Alignment.Center) {
+                                                        Text("i", color = ThemeRed, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                                    }
+                                                }
+
+                                                // Checklist FAB
+                                                Surface(
+                                                    onClick = {
+                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                        showChecklistDialog = true
+                                                    },
+                                                    modifier = Modifier.size(38.dp),
+                                                    shape = CircleShape,
+                                                    color = Color.White,
+                                                    border = BorderStroke(1.5.dp, ThemeRed),
+                                                    shadowElevation = 4.dp
+                                                ) {
+                                                    Box(contentAlignment = Alignment.Center) {
+                                                        Icon(
+                                                            painter = painterResource(id = R.drawable.ic_check_white),
+                                                            contentDescription = "Checklist",
+                                                            tint = ThemeRed,
+                                                            modifier = Modifier.size(18.dp)
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        Spacer(modifier = Modifier.height(10.dp))
+
+                                        // Directional Animated Step Description Content
+                                        AnimatedContent(
+                                            targetState = currentSlideIndex,
+                                            transitionSpec = {
+                                                if (targetState > initialState) {
+                                                    (slideInHorizontally { width -> width } + fadeIn()).togetherWith(slideOutHorizontally { width -> -width } + fadeOut())
+                                                } else {
+                                                    (slideInHorizontally { width -> -width } + fadeIn()).togetherWith(slideOutHorizontally { width -> width } + fadeOut())
+                                                }
+                                            },
+                                            label = "TabletStepDescriptionTransition"
+                                        ) { slideIdx ->
+                                            val slide = selectedMaintenanceGuide.slides.getOrNull(slideIdx)
+                                            if (slide != null) {
+                                                Column {
+                                                    Text(
+                                                        text = slide.title,
+                                                        style = MaterialTheme.typography.titleMedium,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = MaterialTheme.colorScheme.onSurface
+                                                    )
+                                                    Spacer(modifier = Modifier.height(6.dp))
+                                                    Text(
+                                                        text = slide.description,
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // Next / Prev Step Action Row
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        if (currentSlideIndex > 0) {
+                                            OutlinedButton(
+                                                onClick = {
+                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                    onPrevStepClick()
+                                                },
+                                                modifier = Modifier
+                                                    .weight(0.4f)
+                                                    .height(48.dp),
+                                                shape = RoundedCornerShape(14.dp),
+                                                border = BorderStroke(1.5.dp, ThemeRed)
+                                            ) {
+                                                Text("Prev", color = ThemeRed, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                                            }
+                                        }
+
+                                        Button(
+                                            onClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                onNextStepClick()
+                                            },
+                                            modifier = Modifier
+                                                .weight(if (currentSlideIndex > 0) 0.6f else 1f)
+                                                .height(48.dp),
+                                            shape = RoundedCornerShape(14.dp),
+                                            colors = ButtonDefaults.buttonColors(containerColor = ThemeRed)
+                                        ) {
+                                            Text(
+                                                text = if (currentSlideIndex >= totalSlides - 1) "Finish" else "Next Step",
+                                                color = Color.White,
+                                                style = MaterialTheme.typography.labelLarge,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        // Phone Viewport + Actions
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .padding(bottom = 8.dp)
+                                .tutorialTarget(R.id.navButtonsSection),
+                            shape = RoundedCornerShape(24.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.Black),
+                            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.outline)
+                        ) {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                // Embedded 3D SceneView Viewport
+                                AndroidView(
+                                    factory = { sceneViewInstance },
+                                    modifier = Modifier.fillMaxSize()
+                                )
+
+                                if (selectedMaintenanceGuide != null) {
+                                    // Directional Animated Step Overlay Banner (Dark Surface over 3D View for High Contrast White Text)
+                                    AnimatedContent(
+                                        targetState = currentSlideIndex,
+                                        modifier = Modifier
+                                            .align(Alignment.TopStart)
+                                            .padding(12.dp)
+                                            .fillMaxWidth(0.72f),
+                                        transitionSpec = {
+                                            if (targetState > initialState) {
+                                                (slideInHorizontally { width -> width } + fadeIn()).togetherWith(slideOutHorizontally { width -> -width } + fadeOut())
+                                            } else {
+                                                (slideInHorizontally { width -> -width } + fadeIn()).togetherWith(slideOutHorizontally { width -> width } + fadeOut())
+                                            }
+                                        },
+                                        label = "PhoneStepOverlayTransition"
+                                    ) { slideIdx ->
+                                        val slide = selectedMaintenanceGuide.slides.getOrNull(slideIdx)
+                                        if (slide != null) {
+                                            GlassCard(
+                                                cornerRadius = 16.dp,
+                                                borderColor = ThemeRed,
+                                                containerColor = Color.Black.copy(alpha = 0.85f)
+                                            ) {
+                                                Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
+                                                    Text(
+                                                        text = slide.title,
+                                                        style = MaterialTheme.typography.titleSmall,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = Color.White
+                                                    )
+                                                    Text(
+                                                        text = slide.description,
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = Color.White.copy(alpha = 0.88f),
+                                                        maxLines = 2,
+                                                        modifier = Modifier.padding(top = 2.dp)
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // Floating Action Buttons (Top-Right)
+                                    Column(
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .padding(12.dp),
+                                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        // Info Button FAB
+                                        Surface(
+                                            onClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                showInfoDialog = true
+                                            },
+                                            modifier = Modifier
+                                                .size(42.dp)
+                                                .tutorialTarget(R.id.btnInfoModern),
+                                            shape = CircleShape,
+                                            color = Color.White,
+                                            border = BorderStroke(1.5.dp, ThemeRed),
+                                            shadowElevation = 6.dp
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center) {
+                                                Text(
+                                                    text = "i",
+                                                    color = ThemeRed,
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+
+                                        // Checklist Button FAB
+                                        Surface(
+                                            onClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                showChecklistDialog = true
+                                            },
+                                            modifier = Modifier
+                                                .size(42.dp)
+                                                .tutorialTarget(R.id.btnOverviewModern),
+                                            shape = CircleShape,
+                                            color = Color.White,
+                                            border = BorderStroke(1.5.dp, ThemeRed),
+                                            shadowElevation = 6.dp
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center) {
+                                                Icon(
+                                                    painter = painterResource(id = R.drawable.ic_check_white),
+                                                    contentDescription = "Checklist",
+                                                    tint = ThemeRed,
+                                                    modifier = Modifier.size(18.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    // Bottom Step Action Row (Prev & Next Step Buttons)
+                                    Row(
+                                        modifier = Modifier
+                                            .align(Alignment.BottomCenter)
+                                            .padding(12.dp)
+                                            .fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        // Prev Step Button
+                                        if (currentSlideIndex > 0) {
+                                            OutlinedButton(
+                                                onClick = {
+                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                    onPrevStepClick()
+                                                },
+                                                modifier = Modifier
+                                                    .weight(0.35f)
+                                                    .height(48.dp),
+                                                shape = RoundedCornerShape(14.dp),
+                                                border = BorderStroke(1.5.dp, ThemeRed),
+                                                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White.copy(alpha = 0.9f))
+                                            ) {
+                                                Text(
+                                                    text = "Prev",
+                                                    color = ThemeRed,
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+
+                                        // Next Step Button
+                                        Button(
+                                            onClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                onNextStepClick()
+                                            },
+                                            modifier = Modifier
+                                                .weight(if (currentSlideIndex > 0) 0.65f else 1f)
+                                                .height(48.dp),
+                                            shape = RoundedCornerShape(14.dp),
+                                            colors = ButtonDefaults.buttonColors(containerColor = ThemeRed)
+                                        ) {
+                                            Text(
+                                                text = if (currentSlideIndex >= totalSlides - 1) "Finish" else "Next Step",
+                                                color = Color.White,
+                                                style = MaterialTheme.typography.labelLarge,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
+                                } else {
+                                    // Prompt Overlay when no guide is selected yet (Dark Translucent Card for White Text Contrast)
+                                    GlassCard(
+                                        modifier = Modifier
+                                            .align(Alignment.Center)
+                                            .padding(horizontal = 20.dp),
+                                        cornerRadius = 20.dp,
+                                        borderColor = ThemeRed,
+                                        containerColor = Color.Black.copy(alpha = 0.85f)
+                                    ) {
+                                        Column(
+                                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 22.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Text(
+                                                text = "Select a Maintenance Guide above",
+                                                color = Color.White,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                textAlign = TextAlign.Center
+                                            )
+                                            Spacer(modifier = Modifier.height(10.dp))
+                                            Text(
+                                                text = "Choose a maintenance procedure to view tools, safety prep, and 3D step-by-step guides.",
+                                                color = Color.White.copy(alpha = 0.90f),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                textAlign = TextAlign.Center
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }

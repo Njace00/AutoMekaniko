@@ -19,7 +19,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.automekaniko.ui.theme.ThemeRed
@@ -36,6 +38,7 @@ fun GlassCard(
     content: @Composable BoxScope.() -> Unit
 ) {
     var isPressed by remember { mutableStateOf(false) }
+    val haptic = LocalHapticFeedback.current
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.96f else 1.0f,
         animationSpec = tween(durationMillis = 100),
@@ -59,6 +62,7 @@ fun GlassCard(
                                 }
                             },
                             onTap = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 onClick()
                             }
                         )

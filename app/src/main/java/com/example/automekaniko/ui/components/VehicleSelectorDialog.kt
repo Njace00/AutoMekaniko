@@ -1,6 +1,5 @@
 package com.example.automekaniko.ui.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
@@ -11,15 +10,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,7 +28,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.automekaniko.R
 import com.example.automekaniko.VehicleManager
@@ -51,12 +45,11 @@ fun VehicleSelectorDialog(
     var selectedVehicleId by remember { mutableStateOf(currentVehicle.id) }
 
     Dialog(onDismissRequest = onDismiss) {
-        Surface(
+        GlassCard(
             modifier = modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
-            color = MaterialTheme.colorScheme.surface,
-            border = BorderStroke(1.5.dp, ThemeRed),
-            shadowElevation = 12.dp
+            cornerRadius = 24.dp,
+            elevation = 12.dp,
+            borderColor = ThemeRed
         ) {
             Column(
                 modifier = Modifier
@@ -72,8 +65,8 @@ fun VehicleSelectorDialog(
                 ) {
                     Text(
                         text = "🚘 Select Vehicle Profile",
+                        style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.weight(1f)
                     )
@@ -97,7 +90,7 @@ fun VehicleSelectorDialog(
                 VehicleManager.ALL_VEHICLES.forEach { vehicle ->
                     val isSelected = vehicle.id == selectedVehicleId
 
-                    Card(
+                    GlassCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 12.dp)
@@ -111,15 +104,9 @@ fun VehicleSelectorDialog(
                                     onDismiss()
                                 }
                             ),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        ),
-                        border = BorderStroke(
-                            width = if (isSelected) 2.dp else 1.dp,
-                            color = if (isSelected) ThemeRed else MaterialTheme.colorScheme.outline
-                        ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        cornerRadius = 16.dp,
+                        borderColor = if (isSelected) ThemeRed else MaterialTheme.colorScheme.outline,
+                        borderWidth = if (isSelected) 1.5.dp else 1.dp
                     ) {
                         Row(
                             modifier = Modifier
@@ -141,8 +128,8 @@ fun VehicleSelectorDialog(
                             ) {
                                 Text(
                                     text = vehicle.name,
+                                    style = MaterialTheme.typography.titleSmall,
                                     color = MaterialTheme.colorScheme.onSurface,
-                                    fontSize = 16.sp,
                                     fontWeight = FontWeight.Bold
                                 )
 
@@ -150,8 +137,8 @@ fun VehicleSelectorDialog(
 
                                 Text(
                                     text = "${vehicle.engine} • ${vehicle.oilCapacity} Oil",
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontSize = 12.sp
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
 
