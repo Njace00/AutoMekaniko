@@ -36,7 +36,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.automekaniko.R
 import com.example.automekaniko.ui.theme.ThemeRed
-import com.example.automekaniko.ui.theme.ThemeRedLight
 
 @Composable
 fun StepProgressIndicator(
@@ -76,14 +75,14 @@ fun StepProgressIndicator(
                 // Step Badge ("Step 1 of 6")
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = ThemeRedLight,
-                    border = androidx.compose.foundation.BorderStroke(1.dp, ThemeRed.copy(alpha = 0.3f))
+                    color = Color.Black,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, ThemeRed)
                 ) {
                     Text(
                         text = "Step ${currentStep + 1} of $totalSteps",
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
-                        color = ThemeRed,
+                        color = Color.White,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                     )
                 }
@@ -110,7 +109,7 @@ fun StepProgressIndicator(
                     .height(6.dp)
                     .clip(RoundedCornerShape(3.dp)),
                 color = ThemeRed,
-                trackColor = ThemeRedLight
+                trackColor = ThemeRed.copy(alpha = 0.25f)
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -128,7 +127,7 @@ fun StepProgressIndicator(
                     val dotBgColor by animateColorAsState(
                         targetValue = when {
                             isCurrent -> ThemeRed
-                            isCompleted -> ThemeRedLight
+                            isCompleted -> Color.Black
                             else -> MaterialTheme.colorScheme.surface
                         },
                         animationSpec = tween(durationMillis = 250),
@@ -161,7 +160,7 @@ fun StepProgressIndicator(
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_check_white),
                                 contentDescription = "Step ${i + 1} completed",
-                                tint = ThemeRed,
+                                tint = Color.White,
                                 modifier = Modifier.size(14.dp)
                             )
                         } else {

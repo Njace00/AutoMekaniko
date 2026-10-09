@@ -48,7 +48,6 @@ import com.example.automekaniko.ui.components.GlassCard
 import com.example.automekaniko.ui.components.NavTab
 import com.example.automekaniko.ui.components.TutorialOverlay
 import com.example.automekaniko.ui.theme.ThemeRed
-import com.example.automekaniko.ui.theme.ThemeRedLight
 
 @Composable
 fun GuidesScreen(
@@ -104,11 +103,12 @@ fun GuidesScreen(
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        // Clickable Red Header Action Bar
+                        // Clickable Header Action Bar
                         Surface(
                             onClick = onDtcClick,
                             shape = RoundedCornerShape(12.dp),
-                            color = ThemeRedLight,
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            border = BorderStroke(1.dp, ThemeRed),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(
@@ -140,7 +140,7 @@ fun GuidesScreen(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = "DTC Codes",
-                                        color = ThemeRed,
+                                        color = Color.White,
                                         fontSize = 19.sp,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -171,7 +171,7 @@ fun GuidesScreen(
                         Surface(
                             onClick = { isDtcExpanded = !isDtcExpanded },
                             shape = RoundedCornerShape(18.dp),
-                            color = ThemeRedLight,
+                            color = Color.Black,
                             border = BorderStroke(1.dp, ThemeRed),
                             modifier = Modifier.height(38.dp)
                         ) {
@@ -181,7 +181,7 @@ fun GuidesScreen(
                             ) {
                                 Text(
                                     text = if (isDtcExpanded) "📋 Hide Trouble Codes ▴" else "📋 Trouble Codes Overview ▾",
-                                    color = ThemeRed,
+                                    color = Color.White,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -281,11 +281,12 @@ fun GuidesScreen(
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        // Clickable Red Header Action Bar
+                        // Clickable Header Action Bar
                         Surface(
                             onClick = onMaintClick,
                             shape = RoundedCornerShape(12.dp),
-                            color = ThemeRedLight,
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            border = BorderStroke(1.dp, ThemeRed),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(
@@ -317,7 +318,7 @@ fun GuidesScreen(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = "Maintenance",
-                                        color = ThemeRed,
+                                        color = Color.White,
                                         fontSize = 19.sp,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -348,7 +349,7 @@ fun GuidesScreen(
                         Surface(
                             onClick = { isMaintExpanded = !isMaintExpanded },
                             shape = RoundedCornerShape(18.dp),
-                            color = ThemeRedLight,
+                            color = Color.Black,
                             border = BorderStroke(1.dp, ThemeRed),
                             modifier = Modifier.height(38.dp)
                         ) {
@@ -358,7 +359,7 @@ fun GuidesScreen(
                             ) {
                                 Text(
                                     text = if (isMaintExpanded) "🧰 Hide Toolkit & Procedures ▴" else "🧰 Toolkit & Procedures ▾",
-                                    color = ThemeRed,
+                                    color = Color.White,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -455,12 +456,12 @@ fun GuidesScreen(
 private fun PeekChip(text: String, isHighlighted: Boolean) {
     Surface(
         shape = RoundedCornerShape(8.dp),
-        color = if (isHighlighted) ThemeRedLight else MaterialTheme.colorScheme.surfaceVariant,
+        color = if (isHighlighted) Color.Black else MaterialTheme.colorScheme.surfaceVariant,
         border = BorderStroke(1.dp, if (isHighlighted) ThemeRed else MaterialTheme.colorScheme.outline)
     ) {
         Text(
             text = text,
-            color = if (isHighlighted) ThemeRed else MaterialTheme.colorScheme.onSurface,
+            color = if (isHighlighted) Color.White else MaterialTheme.colorScheme.onSurface,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -472,12 +473,12 @@ private fun PeekChip(text: String, isHighlighted: Boolean) {
 private fun FeatureChip(text: String, isPrimary: Boolean) {
     Surface(
         shape = RoundedCornerShape(8.dp),
-        color = if (isPrimary) ThemeRedLight else MaterialTheme.colorScheme.surfaceVariant,
+        color = if (isPrimary) Color.Black else MaterialTheme.colorScheme.surfaceVariant,
         border = BorderStroke(1.dp, if (isPrimary) ThemeRed else MaterialTheme.colorScheme.outline)
     ) {
         Text(
             text = text,
-            color = if (isPrimary) ThemeRed else MaterialTheme.colorScheme.onSurface,
+            color = if (isPrimary) Color.White else MaterialTheme.colorScheme.onSurface,
             fontSize = 11.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)

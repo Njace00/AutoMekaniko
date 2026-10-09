@@ -68,7 +68,6 @@ import com.example.automekaniko.ui.components.ToolsPrepDialog
 import com.example.automekaniko.ui.components.TutorialOverlay
 import com.example.automekaniko.ui.components.VehicleSelectorDialog
 import com.example.automekaniko.ui.theme.ThemeRed
-import com.example.automekaniko.ui.theme.ThemeRedLight
 
 @Composable
 fun MaintenanceScreen(
@@ -167,8 +166,8 @@ fun MaintenanceScreen(
                                 showVehicleSelectorDialog = true
                             },
                             shape = RoundedCornerShape(12.dp),
-                            color = ThemeRedLight,
-                            border = BorderStroke(1.dp, ThemeRed.copy(alpha = 0.3f))
+                            color = Color.Black,
+                            border = BorderStroke(1.dp, ThemeRed)
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
@@ -177,14 +176,14 @@ fun MaintenanceScreen(
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_car),
                                     contentDescription = "Vehicle",
-                                    tint = ThemeRed,
+                                    tint = Color.White,
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = vehicleDisplayName,
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = ThemeRed,
+                                    color = Color.White,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -270,12 +269,13 @@ fun MaintenanceScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Surface(
                                 shape = RoundedCornerShape(8.dp),
-                                color = ThemeRedLight
+                                color = Color.Black,
+                                border = BorderStroke(1.dp, ThemeRed)
                             ) {
                                 Text(
                                     text = selectedMaintenanceGuide?.difficulty ?: "Easy",
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = ThemeRed,
+                                    color = Color.White,
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                 )
@@ -299,7 +299,7 @@ fun MaintenanceScreen(
                                 },
                                 modifier = Modifier.tutorialTarget(R.id.btnToolsPrep),
                                 shape = RoundedCornerShape(12.dp),
-                                color = ThemeRedLight,
+                                color = Color.Black,
                                 border = BorderStroke(1.dp, ThemeRed)
                             ) {
                                 Row(
@@ -309,7 +309,7 @@ fun MaintenanceScreen(
                                     Text(
                                         text = "🧰 Tools & Prep",
                                         style = MaterialTheme.typography.labelMedium,
-                                        color = ThemeRed,
+                                        color = Color.White,
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
@@ -389,12 +389,12 @@ fun MaintenanceScreen(
                                                     },
                                                     modifier = Modifier.size(38.dp),
                                                     shape = CircleShape,
-                                                    color = Color.White,
+                                                    color = Color.Black,
                                                     border = BorderStroke(1.5.dp, ThemeRed),
                                                     shadowElevation = 4.dp
                                                 ) {
                                                     Box(contentAlignment = Alignment.Center) {
-                                                        Text("i", color = ThemeRed, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                                        Text("i", color = Color.White, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                                                     }
                                                 }
 
@@ -406,7 +406,7 @@ fun MaintenanceScreen(
                                                     },
                                                     modifier = Modifier.size(38.dp),
                                                     shape = CircleShape,
-                                                    color = Color.White,
+                                                    color = Color.Black,
                                                     border = BorderStroke(1.5.dp, ThemeRed),
                                                     shadowElevation = 4.dp
                                                 ) {
@@ -414,7 +414,7 @@ fun MaintenanceScreen(
                                                         Icon(
                                                             painter = painterResource(id = R.drawable.ic_check_white),
                                                             contentDescription = "Checklist",
-                                                            tint = ThemeRed,
+                                                            tint = Color.White,
                                                             modifier = Modifier.size(18.dp)
                                                         )
                                                     }
@@ -579,14 +579,14 @@ fun MaintenanceScreen(
                                                 .size(42.dp)
                                                 .tutorialTarget(R.id.btnInfoModern),
                                             shape = CircleShape,
-                                            color = Color.White,
+                                            color = Color.Black,
                                             border = BorderStroke(1.5.dp, ThemeRed),
                                             shadowElevation = 6.dp
                                         ) {
                                             Box(contentAlignment = Alignment.Center) {
                                                 Text(
                                                     text = "i",
-                                                    color = ThemeRed,
+                                                    color = Color.White,
                                                     style = MaterialTheme.typography.titleMedium,
                                                     fontWeight = FontWeight.Bold
                                                 )
@@ -603,7 +603,7 @@ fun MaintenanceScreen(
                                                 .size(42.dp)
                                                 .tutorialTarget(R.id.btnOverviewModern),
                                             shape = CircleShape,
-                                            color = Color.White,
+                                            color = Color.Black,
                                             border = BorderStroke(1.5.dp, ThemeRed),
                                             shadowElevation = 6.dp
                                         ) {
@@ -611,7 +611,7 @@ fun MaintenanceScreen(
                                                 Icon(
                                                     painter = painterResource(id = R.drawable.ic_check_white),
                                                     contentDescription = "Checklist",
-                                                    tint = ThemeRed,
+                                                    tint = Color.White,
                                                     modifier = Modifier.size(18.dp)
                                                 )
                                             }

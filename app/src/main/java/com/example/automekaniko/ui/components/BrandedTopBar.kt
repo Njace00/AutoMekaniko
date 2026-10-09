@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import com.example.automekaniko.R
 import com.example.automekaniko.tutorialTarget
 import com.example.automekaniko.ui.theme.ThemeRed
-import com.example.automekaniko.ui.theme.ThemeRedLight
 
 @Composable
 fun BrandedTopBar(
@@ -88,7 +87,7 @@ fun BrandedTopBar(
                         .tutorialTarget(R.id.btnTutorial),
                     shape = CircleShape,
                     colors = CardDefaults.cardColors(
-                        containerColor = ThemeRedLight
+                        containerColor = androidx.compose.ui.graphics.Color.Black
                     ),
                     border = BorderStroke(1.5.dp, ThemeRed),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -99,7 +98,7 @@ fun BrandedTopBar(
                     ) {
                         Text(
                             text = "?",
-                            color = ThemeRed,
+                            color = androidx.compose.ui.graphics.Color.White,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
