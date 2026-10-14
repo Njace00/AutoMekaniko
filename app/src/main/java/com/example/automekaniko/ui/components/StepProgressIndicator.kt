@@ -75,14 +75,14 @@ fun StepProgressIndicator(
                 // Step Badge ("Step 1 of 6")
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.primaryContainer,
                     border = androidx.compose.foundation.BorderStroke(1.dp, ThemeRed)
                 ) {
                     Text(
                         text = "Step ${currentStep + 1} of $totalSteps",
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                     )
                 }
@@ -127,7 +127,7 @@ fun StepProgressIndicator(
                     val dotBgColor by animateColorAsState(
                         targetValue = when {
                             isCurrent -> ThemeRed
-                            isCompleted -> Color.Black
+                            isCompleted -> ThemeRed.copy(alpha = 0.85f)
                             else -> MaterialTheme.colorScheme.surface
                         },
                         animationSpec = tween(durationMillis = 250),

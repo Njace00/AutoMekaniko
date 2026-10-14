@@ -114,7 +114,7 @@ fun ToolsPrepDialog(
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
                     shape = RoundedCornerShape(16.dp),
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.surfaceVariant,
                     border = BorderStroke(1.dp, ThemeRed)
                 ) {
                     Row(
@@ -126,7 +126,7 @@ fun ToolsPrepDialog(
                     ) {
                         Text(
                             text = "Difficulty: $difficultyText",
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -143,7 +143,7 @@ fun ToolsPrepDialog(
                 // Section 1: Required Tools & Supplies
                 Text(
                     text = "REQUIRED TOOLS & SUPPLIES",
-                    color = Color.White,
+                    color = ThemeRed,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 0.08.sp,
@@ -178,7 +178,7 @@ fun ToolsPrepDialog(
                 // Section 2: Safety & Pre-Repair Checklist
                 Text(
                     text = "SAFETY & PRE-REPAIR CHECKLIST",
-                    color = Color.White,
+                    color = ThemeRed,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 0.08.sp,
@@ -243,12 +243,12 @@ private fun ToolChip(text: String, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(10.dp),
-        color = Color.Black,
-        border = BorderStroke(1.dp, ThemeRed)
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Text(
             text = text,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onSurface,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)

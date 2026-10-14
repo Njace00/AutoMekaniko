@@ -18,25 +18,25 @@ private val LightColorScheme = lightColorScheme(
     onBackground = TextPrimary,
     surface = SurfaceCard,
     onSurface = TextPrimary,
-    surfaceVariant = GlassSurface,
+    surfaceVariant = Color(0xFFEAEFF5),
     onSurfaceVariant = TextSecondary,
-    outline = GlassBorder
+    outline = Color(0xFFD0D7DE)
 )
 
 private val DarkColorScheme = darkColorScheme(
     primary = ThemeRed,
     onPrimary = Color.White,
-    primaryContainer = Color(0xFF330808),
+    primaryContainer = Color(0xFF3B1212),
     onPrimaryContainer = Color(0xFFFFB4AB),
-    secondary = TextSecondary,
-    onSecondary = Color.White,
+    secondary = Color(0xFFC4C6D0),
+    onSecondary = Color(0xFF1E2024),
     background = Color(0xFF121316),
     onBackground = Color(0xFFE2E2E6),
     surface = Color(0xFF1E2024),
     onSurface = Color(0xFFE2E2E6),
     surfaceVariant = Color(0xFF2B2D33),
     onSurfaceVariant = Color(0xFFC4C6D0),
-    outline = Color(0xFF4E2020)
+    outline = Color(0xFF4A2020)
 )
 
 @Composable

@@ -166,7 +166,7 @@ fun DtcScreen(
                                 showVehicleSelectorDialog = true
                             },
                             shape = RoundedCornerShape(12.dp),
-                            color = Color.Black,
+                            color = MaterialTheme.colorScheme.primaryContainer,
                             border = BorderStroke(1.dp, ThemeRed)
                         ) {
                             Row(
@@ -176,14 +176,14 @@ fun DtcScreen(
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_car),
                                     contentDescription = "Vehicle",
-                                    tint = Color.White,
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = vehicleDisplayName,
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -269,13 +269,13 @@ fun DtcScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Surface(
                                 shape = RoundedCornerShape(8.dp),
-                                color = Color.Black,
+                                color = MaterialTheme.colorScheme.primaryContainer,
                                 border = BorderStroke(1.dp, ThemeRed)
                             ) {
                                 Text(
                                     text = selectedDtcGuide?.difficulty ?: "Moderate",
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                 )
@@ -299,7 +299,7 @@ fun DtcScreen(
                                 },
                                 modifier = Modifier.tutorialTarget(R.id.btnToolsPrep),
                                 shape = RoundedCornerShape(12.dp),
-                                color = Color.Black,
+                                color = MaterialTheme.colorScheme.primaryContainer,
                                 border = BorderStroke(1.dp, ThemeRed)
                             ) {
                                 Row(
@@ -309,7 +309,7 @@ fun DtcScreen(
                                     Text(
                                         text = "🧰 Tools & Prep",
                                         style = MaterialTheme.typography.labelMedium,
-                                        color = Color.White,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
@@ -389,12 +389,12 @@ fun DtcScreen(
                                                     },
                                                     modifier = Modifier.size(38.dp),
                                                     shape = CircleShape,
-                                                    color = Color.Black,
+                                                    color = MaterialTheme.colorScheme.surfaceVariant,
                                                     border = BorderStroke(1.5.dp, ThemeRed),
                                                     shadowElevation = 4.dp
                                                 ) {
                                                     Box(contentAlignment = Alignment.Center) {
-                                                        Text("i", color = Color.White, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                                        Text("i", color = ThemeRed, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                                                     }
                                                 }
 
@@ -406,7 +406,7 @@ fun DtcScreen(
                                                     },
                                                     modifier = Modifier.size(38.dp),
                                                     shape = CircleShape,
-                                                    color = Color.Black,
+                                                    color = MaterialTheme.colorScheme.surfaceVariant,
                                                     border = BorderStroke(1.5.dp, ThemeRed),
                                                     shadowElevation = 4.dp
                                                 ) {
@@ -414,7 +414,7 @@ fun DtcScreen(
                                                         Icon(
                                                             painter = painterResource(id = R.drawable.ic_check_white),
                                                             contentDescription = "Checklist",
-                                                            tint = Color.White,
+                                                            tint = ThemeRed,
                                                             modifier = Modifier.size(18.dp)
                                                         )
                                                     }
@@ -579,14 +579,14 @@ fun DtcScreen(
                                                 .size(42.dp)
                                                 .tutorialTarget(R.id.btnInfoModern),
                                             shape = CircleShape,
-                                            color = Color.Black,
+                                            color = MaterialTheme.colorScheme.surfaceVariant,
                                             border = BorderStroke(1.5.dp, ThemeRed),
                                             shadowElevation = 6.dp
                                         ) {
                                             Box(contentAlignment = Alignment.Center) {
                                                 Text(
                                                     text = "i",
-                                                    color = Color.White,
+                                                    color = ThemeRed,
                                                     style = MaterialTheme.typography.titleMedium,
                                                     fontWeight = FontWeight.Bold
                                                 )
@@ -603,7 +603,7 @@ fun DtcScreen(
                                                 .size(42.dp)
                                                 .tutorialTarget(R.id.btnOverviewModern),
                                             shape = CircleShape,
-                                            color = Color.Black,
+                                            color = MaterialTheme.colorScheme.surfaceVariant,
                                             border = BorderStroke(1.5.dp, ThemeRed),
                                             shadowElevation = 6.dp
                                         ) {
@@ -611,7 +611,7 @@ fun DtcScreen(
                                                 Icon(
                                                     painter = painterResource(id = R.drawable.ic_check_white),
                                                     contentDescription = "Checklist",
-                                                    tint = Color.White,
+                                                    tint = ThemeRed,
                                                     modifier = Modifier.size(18.dp)
                                                 )
                                             }

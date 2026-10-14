@@ -140,7 +140,7 @@ fun GuidesScreen(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = "DTC Codes",
-                                        color = Color.White,
+                                        color = MaterialTheme.colorScheme.onSurface,
                                         fontSize = 19.sp,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -171,7 +171,7 @@ fun GuidesScreen(
                         Surface(
                             onClick = { isDtcExpanded = !isDtcExpanded },
                             shape = RoundedCornerShape(18.dp),
-                            color = Color.Black,
+                            color = MaterialTheme.colorScheme.primaryContainer,
                             border = BorderStroke(1.dp, ThemeRed),
                             modifier = Modifier.height(38.dp)
                         ) {
@@ -181,7 +181,7 @@ fun GuidesScreen(
                             ) {
                                 Text(
                                     text = if (isDtcExpanded) "📋 Hide Trouble Codes ▴" else "📋 Trouble Codes Overview ▾",
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -318,7 +318,7 @@ fun GuidesScreen(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = "Maintenance",
-                                        color = Color.White,
+                                        color = MaterialTheme.colorScheme.onSurface,
                                         fontSize = 19.sp,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -349,7 +349,7 @@ fun GuidesScreen(
                         Surface(
                             onClick = { isMaintExpanded = !isMaintExpanded },
                             shape = RoundedCornerShape(18.dp),
-                            color = Color.Black,
+                            color = MaterialTheme.colorScheme.primaryContainer,
                             border = BorderStroke(1.dp, ThemeRed),
                             modifier = Modifier.height(38.dp)
                         ) {
@@ -359,7 +359,7 @@ fun GuidesScreen(
                             ) {
                                 Text(
                                     text = if (isMaintExpanded) "🧰 Hide Toolkit & Procedures ▴" else "🧰 Toolkit & Procedures ▾",
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -456,12 +456,12 @@ fun GuidesScreen(
 private fun PeekChip(text: String, isHighlighted: Boolean) {
     Surface(
         shape = RoundedCornerShape(8.dp),
-        color = if (isHighlighted) Color.Black else MaterialTheme.colorScheme.surfaceVariant,
+        color = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
         border = BorderStroke(1.dp, if (isHighlighted) ThemeRed else MaterialTheme.colorScheme.outline)
     ) {
         Text(
             text = text,
-            color = if (isHighlighted) Color.White else MaterialTheme.colorScheme.onSurface,
+            color = if (isHighlighted) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -473,12 +473,12 @@ private fun PeekChip(text: String, isHighlighted: Boolean) {
 private fun FeatureChip(text: String, isPrimary: Boolean) {
     Surface(
         shape = RoundedCornerShape(8.dp),
-        color = if (isPrimary) Color.Black else MaterialTheme.colorScheme.surfaceVariant,
+        color = if (isPrimary) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
         border = BorderStroke(1.dp, if (isPrimary) ThemeRed else MaterialTheme.colorScheme.outline)
     ) {
         Text(
             text = text,
-            color = if (isPrimary) Color.White else MaterialTheme.colorScheme.onSurface,
+            color = if (isPrimary) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
             fontSize = 11.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)

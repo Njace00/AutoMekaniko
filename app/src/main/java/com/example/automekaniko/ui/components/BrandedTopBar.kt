@@ -87,7 +87,7 @@ fun BrandedTopBar(
                         .tutorialTarget(R.id.btnTutorial),
                     shape = CircleShape,
                     colors = CardDefaults.cardColors(
-                        containerColor = androidx.compose.ui.graphics.Color.Black
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
                     ),
                     border = BorderStroke(1.5.dp, ThemeRed),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -98,7 +98,7 @@ fun BrandedTopBar(
                     ) {
                         Text(
                             text = "?",
-                            color = androidx.compose.ui.graphics.Color.White,
+                            color = ThemeRed,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
