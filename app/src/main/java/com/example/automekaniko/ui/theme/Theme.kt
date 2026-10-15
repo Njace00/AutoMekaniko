@@ -5,7 +5,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+
+val LocalDarkTheme = staticCompositionLocalOf { false }
 
 private val LightColorScheme = lightColorScheme(
     primary = ThemeRed,
@@ -16,9 +20,9 @@ private val LightColorScheme = lightColorScheme(
     onSecondary = Color.White,
     background = BackgroundPrimary,
     onBackground = TextPrimary,
-    surface = SurfaceCard,
+    surface = Color.White,
     onSurface = TextPrimary,
-    surfaceVariant = Color(0xFFEAEFF5),
+    surfaceVariant = Color.White,
     onSurfaceVariant = TextSecondary,
     outline = Color(0xFFD0D7DE)
 )
@@ -46,8 +50,10 @@ fun AutoMekanikoTheme(
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        content = content
-    )
+    CompositionLocalProvider(LocalDarkTheme provides darkTheme) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            content = content
+        )
+    }
 }

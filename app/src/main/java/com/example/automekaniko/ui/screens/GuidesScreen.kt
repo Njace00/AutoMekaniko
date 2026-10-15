@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.automekaniko.R
 import com.example.automekaniko.tutorialTarget
+import com.example.automekaniko.ui.components.AppGlassFrame
 import com.example.automekaniko.ui.components.BottomNavBar
 import com.example.automekaniko.ui.components.BrandedTopBar
 import com.example.automekaniko.ui.components.GlassCard
@@ -62,7 +63,7 @@ fun GuidesScreen(
     var isDtcExpanded by remember { mutableStateOf(false) }
     var isMaintExpanded by remember { mutableStateOf(false) }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    AppGlassFrame(modifier = modifier.fillMaxSize()) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
@@ -76,7 +77,7 @@ fun GuidesScreen(
                     }
                 )
             },
-            containerColor = MaterialTheme.colorScheme.background
+            containerColor = Color.Transparent
         ) { innerPadding ->
 
             Column(

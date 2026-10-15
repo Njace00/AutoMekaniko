@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.automekaniko.R
+import com.example.automekaniko.ui.components.AppGlassFrame
 import com.example.automekaniko.ui.components.BottomNavBar
 import com.example.automekaniko.ui.components.BrandedTopBar
 import com.example.automekaniko.ui.components.NavTab
@@ -106,9 +107,10 @@ fun ObdScreen(
         SensorMeta(R.id.cardFuelRate, "Fuel Rate", "L/h", "g/h", 50f)
     )
 
-    Box(modifier = modifier.fillMaxSize()) {
+    AppGlassFrame(modifier = modifier.fillMaxSize()) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
+            containerColor = Color.Transparent,
             topBar = {
                 BrandedTopBar(onTutorialClick = null)
             },
@@ -173,8 +175,7 @@ fun ObdScreen(
                         }
                     )
                 }
-            },
-            containerColor = MaterialTheme.colorScheme.background
+            }
         ) { innerPadding ->
 
             Column(

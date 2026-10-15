@@ -56,6 +56,7 @@ import com.example.automekaniko.DtcGuide
 import com.example.automekaniko.R
 import com.example.automekaniko.VehicleProfile
 import com.example.automekaniko.tutorialTarget
+import com.example.automekaniko.ui.components.AppGlassFrame
 import com.example.automekaniko.ui.components.BottomNavBar
 import com.example.automekaniko.ui.components.BrandedTopBar
 import com.example.automekaniko.ui.components.GlassCard
@@ -100,7 +101,7 @@ fun DtcScreen(
     val currentSlide = selectedDtcGuide?.slides?.getOrNull(currentSlideIndex)
     val totalSlides = selectedDtcGuide?.slides?.size ?: 1
 
-    Box(modifier = modifier.fillMaxSize()) {
+    AppGlassFrame(modifier = modifier.fillMaxSize()) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
@@ -114,7 +115,7 @@ fun DtcScreen(
                     }
                 )
             },
-            containerColor = MaterialTheme.colorScheme.background
+            containerColor = Color.Transparent
         ) { innerPadding ->
 
             BoxWithConstraints(

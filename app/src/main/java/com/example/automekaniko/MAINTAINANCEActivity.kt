@@ -321,7 +321,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
 
     private fun isDarkTheme(context: Context): Boolean {
         val prefs = context.getSharedPreferences(SettingsActivity.PREFS_NAME, Context.MODE_PRIVATE)
-        return when (prefs.getInt(SettingsActivity.KEY_THEME, SettingsActivity.THEME_SYSTEM)) {
+        return when (prefs.getInt(SettingsActivity.KEY_THEME, SettingsActivity.THEME_LIGHT)) {
             SettingsActivity.THEME_LIGHT -> false
             SettingsActivity.THEME_DARK -> true
             else -> {

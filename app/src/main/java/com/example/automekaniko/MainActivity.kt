@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.mutableStateOf
 import com.example.automekaniko.ui.screens.HomeScreen
 import com.example.automekaniko.ui.theme.AutoMekanikoTheme
@@ -18,6 +19,16 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+
+        // Apply saved theme or default to Light Mode
+        val prefs = getSharedPreferences(SettingsActivity.PREFS_NAME, Context.MODE_PRIVATE)
+        val savedTheme = prefs.getInt(SettingsActivity.KEY_THEME, SettingsActivity.THEME_LIGHT)
+        val mode = when (savedTheme) {
+            SettingsActivity.THEME_DARK -> AppCompatDelegate.MODE_NIGHT_YES
+            SettingsActivity.THEME_SYSTEM -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            else -> AppCompatDelegate.MODE_NIGHT_NO
+        }
+        AppCompatDelegate.setDefaultNightMode(mode)
 
         // Load current active vehicle and theme preference
         activeVehicleState.value = VehicleManager.getActiveVehicle(this)
@@ -39,7 +50,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Auto-run tutorial on first launch
-        val prefs = getSharedPreferences(SettingsActivity.PREFS_NAME, Context.MODE_PRIVATE)
         val isCompleted = prefs.getBoolean(TutorialManager.PREFS_KEY_COMPLETED, false)
         if (!isCompleted && !TutorialManager.isTutorialActive) {
             window.decorView.post {
@@ -57,7 +67,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun isDarkTheme(context: Context): Boolean {
         val prefs = context.getSharedPreferences(SettingsActivity.PREFS_NAME, Context.MODE_PRIVATE)
-        return when (prefs.getInt(SettingsActivity.KEY_THEME, SettingsActivity.THEME_SYSTEM)) {
+        return when (prefs.getInt(SettingsActivity.KEY_THEME, SettingsActivity.THEME_LIGHT)) {
             SettingsActivity.THEME_LIGHT -> false
             SettingsActivity.THEME_DARK -> true
             else -> {

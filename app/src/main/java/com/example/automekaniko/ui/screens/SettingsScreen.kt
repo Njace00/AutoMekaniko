@@ -2,6 +2,8 @@ package com.example.automekaniko.ui.screens
 
 import android.content.Context
 import android.widget.Toast
+import com.example.automekaniko.ui.components.AppGlassFrame
+import com.example.automekaniko.ui.components.BrandedTopBar
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -81,7 +83,7 @@ fun SettingsScreen(
 
     // Persistent Settings State
     var activeVehicle by remember { mutableStateOf(VehicleManager.getActiveVehicle(context)) }
-    var selectedTheme by remember { mutableIntStateOf(prefs.getInt(SettingsActivity.KEY_THEME, SettingsActivity.THEME_SYSTEM)) }
+    var selectedTheme by remember { mutableIntStateOf(prefs.getInt(SettingsActivity.KEY_THEME, SettingsActivity.THEME_LIGHT)) }
 
     var obdAutoConnect by remember { mutableStateOf(prefs.getBoolean(SettingsActivity.KEY_OBD_AUTO_CONNECT, true)) }
     var redlineAlert by remember { mutableStateOf(prefs.getBoolean(SettingsActivity.KEY_REDLINE_ALERT, true)) }
@@ -98,49 +100,11 @@ fun SettingsScreen(
     var showClearDtcCacheDialog by remember { mutableStateOf(false) }
     var showRestoreDefaultsDialog by remember { mutableStateOf(false) }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    AppGlassFrame(modifier = modifier.fillMaxSize()) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.surface,
-                    tonalElevation = 0.dp
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .statusBarsPadding()
-                            .height(64.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        IconButton(
-                            onClick = onBackClick,
-                            modifier = Modifier
-                                .align(Alignment.CenterStart)
-                                .padding(start = 12.dp)
-                                .size(40.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_back_red),
-                                contentDescription = "Back",
-                                tint = ThemeRed,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-
-                        val annotatedTitle = buildAnnotatedString {
-                            withStyle(SpanStyle(color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold, fontSize = 22.sp)) {
-                                append("Auto")
-                            }
-                            withStyle(SpanStyle(color = ThemeRed, fontWeight = FontWeight.Bold, fontSize = 22.sp)) {
-                                append("Mekaniko")
-                            }
-                        }
-
-                        Text(text = annotatedTitle, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
+                BrandedTopBar(onBackClick = onBackClick)
             },
             bottomBar = {
                 BottomNavBar(
@@ -152,7 +116,7 @@ fun SettingsScreen(
                     }
                 )
             },
-            containerColor = MaterialTheme.colorScheme.background
+            containerColor = Color.Transparent
         ) { innerPadding ->
 
             Column(

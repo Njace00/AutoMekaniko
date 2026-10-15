@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import com.example.automekaniko.R
 import com.example.automekaniko.VehicleProfile
 import com.example.automekaniko.tutorialTarget
+import androidx.compose.ui.graphics.Color
+import com.example.automekaniko.ui.components.AppGlassFrame
 import com.example.automekaniko.ui.components.BottomNavBar
 import com.example.automekaniko.ui.components.BrandedTopBar
 import com.example.automekaniko.ui.components.GlassCard
@@ -63,7 +65,7 @@ fun HomeScreen(
     var showVehicleSelectorDialog by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
 
-    Box(modifier = modifier.fillMaxSize()) {
+    AppGlassFrame(modifier = modifier.fillMaxSize()) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
@@ -82,7 +84,7 @@ fun HomeScreen(
                     }
                 )
             },
-            containerColor = MaterialTheme.colorScheme.background
+            containerColor = Color.Transparent
         ) { innerPadding ->
 
             // Staggered Entrance Cascade Animations

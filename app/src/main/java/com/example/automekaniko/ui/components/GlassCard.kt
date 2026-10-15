@@ -34,7 +34,7 @@ fun GlassCard(
     elevation: Dp = 6.dp,
     borderColor: Color = ThemeRed,
     borderWidth: Dp = 1.5.dp,
-    containerColor: Color = MaterialTheme.colorScheme.surfaceVariant,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
     content: @Composable BoxScope.() -> Unit
 ) {
     var isPressed by remember { mutableStateOf(false) }

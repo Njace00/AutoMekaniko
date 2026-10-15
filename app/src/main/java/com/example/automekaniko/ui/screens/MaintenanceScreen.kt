@@ -56,6 +56,7 @@ import com.example.automekaniko.MaintenanceGuide
 import com.example.automekaniko.R
 import com.example.automekaniko.VehicleProfile
 import com.example.automekaniko.tutorialTarget
+import com.example.automekaniko.ui.components.AppGlassFrame
 import com.example.automekaniko.ui.components.BottomNavBar
 import com.example.automekaniko.ui.components.BrandedTopBar
 import com.example.automekaniko.ui.components.GlassCard
@@ -100,7 +101,7 @@ fun MaintenanceScreen(
     val currentSlide = selectedMaintenanceGuide?.slides?.getOrNull(currentSlideIndex)
     val totalSlides = selectedMaintenanceGuide?.slides?.size ?: 1
 
-    Box(modifier = modifier.fillMaxSize()) {
+    AppGlassFrame(modifier = modifier.fillMaxSize()) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
@@ -114,7 +115,7 @@ fun MaintenanceScreen(
                     }
                 )
             },
-            containerColor = MaterialTheme.colorScheme.background
+            containerColor = Color.Transparent
         ) { innerPadding ->
 
             BoxWithConstraints(

@@ -60,7 +60,7 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun isDarkTheme(context: Context): Boolean {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        return when (prefs.getInt(KEY_THEME, THEME_SYSTEM)) {
+        return when (prefs.getInt(KEY_THEME, THEME_LIGHT)) {
             THEME_LIGHT -> false
             THEME_DARK -> true
             else -> {

@@ -42,7 +42,7 @@ object AppNavigation {
 
     private fun applyAppTheme(activity: AppCompatActivity) {
         val prefs = activity.getSharedPreferences(SettingsActivity.PREFS_NAME, android.content.Context.MODE_PRIVATE)
-        val theme = prefs.getInt(SettingsActivity.KEY_THEME, SettingsActivity.THEME_SYSTEM)
+        val theme = prefs.getInt(SettingsActivity.KEY_THEME, SettingsActivity.THEME_LIGHT)
         val mode = when (theme) {
             SettingsActivity.THEME_LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
             SettingsActivity.THEME_DARK -> AppCompatDelegate.MODE_NIGHT_YES
