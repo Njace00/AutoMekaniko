@@ -178,3 +178,126 @@ fun StepProgressIndicator(
         }
     }
 }
+
+@Composable
+fun VerticalStepProgressIndicator(
+    currentStep: Int,
+    totalSteps: Int,
+    modifier: Modifier = Modifier,
+    onStepSelected: ((Int) -> Unit)? = null
+) {
+    if (totalSteps <= 0) return
+
+    val haptic = LocalHapticFeedback.current
+    val circleSize = if (totalSteps > 6) 24.dp else 28.dp
+    val lineHeight = if (totalSteps > 6) 5.dp else 8.dp
+    val iconSize = if (totalSteps > 6) 12.dp else 14.dp
+    val verticalPadding = if (totalSteps > 6) 8.dp else 10.dp
+
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(20.dp),
+        color = Color.Black.copy(alpha = 0.82f),
+        border = androidx.compose.foundation.BorderStroke(1.2.dp, ThemeRed.copy(alpha = 0.7f)),
+        shadowElevation = 8.dp
+    ) {
+        Column(
+            modifier = Modifier.padding(vertical = verticalPadding, horizontal = 7.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            // Compact Step Badge: "1 / 6"
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = ThemeRed.copy(alpha = 0.25f),
+                border = androidx.compose.foundation.BorderStroke(1.dp, ThemeRed)
+            ) {
+                Text(
+                    text = "${currentStep + 1}/$totalSteps",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                )
+            }
+
+            // Vertical Column of Step Circles with connecting progress lines
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                for (i in 0 until totalSteps) {
+                    val isCompleted = i < currentStep
+                    val isCurrent = i == currentStep
+
+                    val dotBgColor by animateColorAsState(
+                        targetValue = when {
+                            isCurrent -> ThemeRed
+                            isCompleted -> ThemeRed.copy(alpha = 0.85f)
+                            else -> Color.White.copy(alpha = 0.12f)
+                        },
+                        animationSpec = tween(durationMillis = 250),
+                        label = "VertDotBgColor"
+                    )
+
+                    val dotBorderColor by animateColorAsState(
+                        targetValue = when {
+                            isCurrent -> ThemeRed
+                            isCompleted -> ThemeRed
+                            else -> Color.White.copy(alpha = 0.35f)
+                        },
+                        animationSpec = tween(durationMillis = 250),
+                        label = "VertDotBorderColor"
+                    )
+
+                    // Vertical line segment connecting nodes
+                    if (i > 0) {
+                        val lineColor by animateColorAsState(
+                            targetValue = if (i <= currentStep) ThemeRed else Color.White.copy(alpha = 0.25f),
+                            animationSpec = tween(durationMillis = 250),
+                            label = "VertLineColor"
+                        )
+                        Box(
+                            modifier = Modifier
+                                .width(2.dp)
+                                .height(lineHeight)
+                                .background(lineColor)
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .size(circleSize)
+                            .clip(CircleShape)
+                            .background(dotBgColor)
+                            .border(1.2.dp, dotBorderColor, CircleShape)
+                            .clickable(enabled = onStepSelected != null) {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onStepSelected?.invoke(i)
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isCompleted) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_check_white),
+                                contentDescription = "Step ${i + 1} completed",
+                                tint = Color.White,
+                                modifier = Modifier.size(iconSize)
+                            )
+                        } else {
+                            Text(
+                                text = "${i + 1}",
+                                style = if (totalSteps > 6) MaterialTheme.typography.bodySmall else MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isCurrent) Color.White
+                                else Color.White.copy(alpha = 0.85f)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+

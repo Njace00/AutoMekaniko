@@ -126,6 +126,7 @@ class MAINTAINANCEActivity : AppCompatActivity() {
                     },
                     onNextStepClick = { onNextClicked() },
                     onPrevStepClick = { onPrevClicked() },
+                    onStepSelected = { slideIdx -> goToSlide(slideIdx) },
                     onBackClick = { finish() },
                     onHomeClick = { goHome() },
                     onSettingsClick = { goSettings() }

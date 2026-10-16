@@ -63,7 +63,7 @@ import com.example.automekaniko.ui.components.GlassCard
 import com.example.automekaniko.ui.components.InfoSection
 import com.example.automekaniko.ui.components.NavTab
 import com.example.automekaniko.ui.components.RepairChecklistDialog
-import com.example.automekaniko.ui.components.StepProgressIndicator
+import com.example.automekaniko.ui.components.VerticalStepProgressIndicator
 import com.example.automekaniko.ui.components.TechnicalInfoDialog
 import com.example.automekaniko.ui.components.ToolsPrepDialog
 import com.example.automekaniko.ui.components.TutorialOverlay
@@ -83,6 +83,7 @@ fun MaintenanceScreen(
     onStepCheckedChange: (Int, Boolean) -> Unit,
     onNextStepClick: () -> Unit,
     onPrevStepClick: () -> Unit,
+    onStepSelected: (Int) -> Unit = {},
     onBackClick: () -> Unit,
     onHomeClick: () -> Unit,
     onSettingsClick: () -> Unit,
@@ -318,16 +319,6 @@ fun MaintenanceScreen(
                         }
                     }
 
-                    // STEP PROGRESS INDICATOR
-                    if (selectedMaintenanceGuide != null) {
-                        StepProgressIndicator(
-                            currentStep = currentSlideIndex,
-                            totalSteps = totalSlides,
-                            stepTitle = currentSlide?.title ?: "Step ${currentSlideIndex + 1}",
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                    }
-
                     // STEP CONTENT & 3D VIEWPORT CONTAINER (Adapts to phone vertical vs tablet split)
                     if (isWideScreen && selectedMaintenanceGuide != null) {
                         // Tablet Side-by-Side Split View
@@ -346,11 +337,24 @@ fun MaintenanceScreen(
                                 colors = CardDefaults.cardColors(containerColor = Color.Black),
                                 border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.outline)
                             ) {
-                                AndroidView(
-                                    factory = { sceneViewInstance },
-                                    modifier = Modifier.fillMaxSize()
-                                )
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    AndroidView(
+                                        factory = { sceneViewInstance },
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+
+                                    VerticalStepProgressIndicator(
+                                        currentStep = currentSlideIndex,
+                                        totalSteps = totalSlides,
+                                        modifier = Modifier
+                                            .align(Alignment.CenterEnd)
+                                            .padding(end = 12.dp),
+                                        onStepSelected = onStepSelected
+                                    )
+
+                                }
                             }
+
 
                             // Right Column: Step Description, FABs, and Action Controls
                             GlassCard(
@@ -563,11 +567,12 @@ fun MaintenanceScreen(
                                         }
                                     }
 
-                                    // Floating Action Buttons (Top-Right)
+                                    // Floating Action Controls & Minimalistic Vertical Step Navigator (Top-Right)
                                     Column(
                                         modifier = Modifier
                                             .align(Alignment.TopEnd)
                                             .padding(12.dp),
+                                        horizontalAlignment = Alignment.End,
                                         verticalArrangement = Arrangement.spacedBy(10.dp)
                                     ) {
                                         // Info Button FAB
@@ -617,7 +622,16 @@ fun MaintenanceScreen(
                                                 )
                                             }
                                         }
+
+                                        // Minimalistic Vertical Step Navigator
+                                        VerticalStepProgressIndicator(
+                                            currentStep = currentSlideIndex,
+                                            totalSteps = totalSlides,
+                                            onStepSelected = onStepSelected
+                                        )
                                     }
+
+
 
                                     // Bottom Step Action Row (Prev & Next Step Buttons)
                                     Row(
