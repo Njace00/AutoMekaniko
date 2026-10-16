@@ -131,7 +131,7 @@ fun HomeScreen(
                 ) {
                     // App Logo / Hero
                     Image(
-                        painter = painterResource(id = R.mipmap.logo),
+                        painter = painterResource(id = R.drawable.logo),
                         contentDescription = "AutoMekaniko Logo",
                         modifier = Modifier
                             .size(if (isWideScreen) 120.dp else 105.dp)

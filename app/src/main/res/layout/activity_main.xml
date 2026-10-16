@@ -88,7 +88,7 @@
                 android:layout_marginBottom="12dp"
                 android:contentDescription="@string/app_name"
                 android:scaleType="fitCenter"
-                android:src="@mipmap/logo" />
+                android:src="@drawable/logo" />
 
             <TextView
                 android:layout_width="wrap_content"
